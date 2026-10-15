@@ -6,7 +6,10 @@ existing names load their saved lists. Names are case-sensitive and accept 1–1
 letters, numbers, underscores or hyphens. `health` is reserved.
 
 Add names, `r/` links or combined feed links. Names are lowercased, alphabetised
-and deduplicated. Remove or filter entries, then open or copy the combined feed
+and deduplicated. Select individual entries or all visible entries after filtering
+to remove, copy or move them to another named list. Destinations are merged without
+duplicates; moves update both lists atomically. Each entry has a **Similar** link
+to RedSim for related subreddits. Open or copy the combined feed
 at the top of the editor. Anyone who can reach the app and knows a list name can
 read and edit that list. No account or list directory is provided.
 

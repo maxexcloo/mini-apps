@@ -71,6 +71,33 @@
           aria-label="Filter Subreddits"
           placeholder="Filter"
         ></wa-input>
+        <div class="selection-heading">
+          <wa-checkbox id="select-visible">Select Visible</wa-checkbox>
+          <span id="selection-count" class="hint">0 Selected</span>
+          <wa-button id="clear-selection" appearance="plain" size="small"
+            >Clear</wa-button
+          >
+        </div>
+        <div id="bulk-actions" hidden>
+          <wa-input
+            id="destination"
+            label="Destination List"
+            autocomplete="off"
+            maxlength="128"
+            placeholder="List name"
+          ></wa-input>
+          <div class="bulk-buttons">
+            <wa-button id="copy-selected" size="small">Copy</wa-button>
+            <wa-button id="move-selected" size="small">Move</wa-button>
+            <wa-button
+              id="remove-selected"
+              size="small"
+              variant="danger"
+              appearance="outlined"
+              >Remove Selected</wa-button
+            >
+          </div>
+        </div>
         <p id="empty-list" class="hint">No subreddits yet.</p>
         <ul id="communities" aria-label="Subreddits"></ul>
         <p id="save-state" class="hint">Loading…</p>

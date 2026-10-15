@@ -131,10 +131,33 @@ li:hover {
   background: var(--wa-color-surface-lowered);
 }
 li a {
+  flex: 1;
   min-width: 0;
   color: var(--wa-color-text-link);
   text-decoration: none;
   overflow-wrap: anywhere;
+}
+.selection-heading,
+.bulk-buttons {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.selection-heading {
+  margin-top: 12px;
+}
+.selection-heading .hint {
+  margin: 0 0 0 auto;
+}
+#bulk-actions {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--wa-color-surface-lowered);
+  border-radius: 12px;
+}
+.bulk-buttons {
+  margin-top: 8px;
 }
 .hint {
   margin: 10px 0 0;

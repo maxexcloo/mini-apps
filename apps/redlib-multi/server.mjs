@@ -55,9 +55,10 @@ export function createApp({
   );
   const server = createServer(async (request, response) => {
     response.setHeader("Cache-Control", "no-store");
+    // Web Awesome fetches its bundled checkbox SVGs from data URLs.
     response.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "default-src 'self'; connect-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
     );
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("X-Content-Type-Options", "nosniff");
@@ -74,7 +75,9 @@ export function createApp({
       }
       if (path === "/api/config" && request.method === "GET")
         return json(200, { redlibUrl: origin.origin });
-      const match = /^\/api\/lists\/([a-zA-Z0-9_-]{1,128})$/.exec(path);
+      const match = /^\/api\/lists\/([a-zA-Z0-9_-]{1,128})(\/transfer)?$/.exec(
+        path,
+      );
       if (match) {
         const key = createHash("sha256").update(match[1]).digest("hex");
         const current = () => {
@@ -83,8 +86,9 @@ export function createApp({
             ? { revision: row.revision, subreddits: JSON.parse(row.subreddits) }
             : { revision: 0, subreddits: [] };
         };
-        if (request.method === "GET") return json(200, current());
-        if (request.method !== "PUT")
+        const transfer = Boolean(match[2]);
+        if (!transfer && request.method === "GET") return json(200, current());
+        if (request.method !== (transfer ? "POST" : "PUT"))
           return json(405, { error: "Method not allowed." });
         if (request.headers["sec-fetch-site"] === "cross-site")
           return json(403, { error: "Cross-site writes are not allowed." });
@@ -122,6 +126,70 @@ export function createApp({
         }
         if (names.length > 1000)
           return json(400, { error: "Use up to 1,000 subreddits." });
+        if (transfer) {
+          const destination =
+            typeof input.destination === "string"
+              ? input.destination.trim()
+              : "";
+          if (
+            !/^[a-zA-Z0-9_-]{1,128}$/.test(destination) ||
+            destination === "health" ||
+            destination === match[1]
+          )
+            return json(400, {
+              error: "Choose a different valid destination list name.",
+            });
+          if (!["copy", "move"].includes(input.action) || !names.length)
+            return json(400, { error: "Select subreddits to copy or move." });
+          database.exec("BEGIN IMMEDIATE");
+          try {
+            const source = current();
+            if (source.revision !== input.revision)
+              return json(409, {
+                ...source,
+                error:
+                  "This list changed elsewhere. The latest list is loaded; select entries and try again.",
+              });
+            if (names.some((name) => !source.subreddits.includes(name)))
+              return json(400, {
+                error: "Select entries that belong to this list.",
+              });
+            const destinationKey = createHash("sha256")
+              .update(destination)
+              .digest("hex");
+            const destinationRow = select.get(destinationKey);
+            const existing = destinationRow
+              ? JSON.parse(destinationRow.subreddits)
+              : [];
+            const combined = [...new Set([...existing, ...names])].sort();
+            if (combined.length > 1000)
+              return json(400, {
+                error: "The destination would exceed 1,000 subreddits.",
+              });
+            if (!destinationRow)
+              insert.run(destinationKey, JSON.stringify(combined));
+            else if (combined.length !== existing.length)
+              update.run(
+                JSON.stringify(combined),
+                destinationKey,
+                destinationRow.revision,
+              );
+            if (input.action === "move") {
+              const selected = new Set(names);
+              update.run(
+                JSON.stringify(
+                  source.subreddits.filter((name) => !selected.has(name)),
+                ),
+                key,
+                source.revision,
+              );
+            }
+            database.exec("COMMIT");
+            return json(200, current());
+          } finally {
+            if (database.isTransaction) database.exec("ROLLBACK");
+          }
+        }
         const result =
           input.revision === 0
             ? insert.run(key, JSON.stringify(names))
