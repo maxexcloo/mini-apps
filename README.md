@@ -22,7 +22,7 @@ node apps/reddit/server.mjs
 
 Open `http://127.0.0.1:3000`. Local data stays in the app's ignored `data/`
 directory. Deployed data stays on its existing volume. Never delete that volume
-when replacing the app. Optional development checks run with `mise run check`.
+when replacing the app. Run the data tests with `node --test`.
 
 ## Add An App
 
