@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import {
+  chmodSync,
+  cpSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { parseAllDocuments } from "yaml";
 
 const release = parseAllDocuments(readFileSync("deploy.yaml", "utf8"))
@@ -9,12 +18,23 @@ const release = parseAllDocuments(readFileSync("deploy.yaml", "utf8"))
   .find((resource) => resource.kind === "HelmRelease");
 const { repository, tag } =
   release.spec.values.controllers["actual-up"].containers["actual-up"].image;
+// Reproduce Kubernetes' projected-volume symlinks, not just a plain bind mount.
+const projected = mkdtempSync(join(tmpdir(), "actual-up-projected-"));
+chmodSync(projected, 0o755);
+cpSync(resolve("runtime"), join(projected, "..snapshot"), { recursive: true });
+symlinkSync("..snapshot", join(projected, "..data"));
+for (const file of readdirSync("runtime"))
+  symlinkSync(`..data/${file}`, join(projected, file));
+process.on("exit", () => rmSync(projected, { force: true, recursive: true }));
+
 const run = (...args) =>
   execFileSync(
     "docker",
     [
       "run",
       "--cap-drop=ALL",
+      "--env",
+      `NODE_OPTIONS=${release.spec.values.controllers["actual-up"].containers["actual-up"].env.NODE_OPTIONS}`,
       "--network=none",
       "--platform=linux/amd64",
       "--read-only",
@@ -23,7 +43,7 @@ const run = (...args) =>
       "--tmpfs",
       "/tmp",
       "--volume",
-      `${resolve("runtime")}:/app/dist:ro`,
+      `${projected}:/app/dist:ro`,
       `${repository}:${tag}`,
       ...args,
     ],

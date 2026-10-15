@@ -25,6 +25,8 @@ spec:
             env:
               ACTUAL_UP_CONFIG: /config/config.yaml
               ACTUAL_UP_PUBLIC_URL: https://app.invalid
+              # Keep module-relative asset paths stable on projected ConfigMap volumes.
+              NODE_OPTIONS: --preserve-symlinks --preserve-symlinks-main
               TZ: Australia/Sydney
             envFrom:
               - secretRef:
