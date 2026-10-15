@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { test } from "node:test";
 import { createApp } from "../server.mjs";
-import { multiredditUrl } from "../static/subreddits.mjs";
+import { multiredditUrl } from "../subreddits.mjs";
 
 test("opens an original database and merges its mixed-case identity into the lowercase list", async () => {
   const directory = mkdtempSync(join(tmpdir(), "redlib-compatibility-"));

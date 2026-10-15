@@ -76,19 +76,25 @@ spec:
         type: persistentVolumeClaim
         globalMounts:
           - path: /data
-      static:
-        name: redlib-multi-static
+      source:
+        name: reddit-source
         type: configMap
+        items:
+          - key: index.html
+            path: index.html
+          - key: server.mjs
+            path: server.mjs
+          - key: subreddits.mjs
+            path: subreddits.mjs
+          - key: third-party-licences.txt
+            path: vendor/third-party-licences.txt
+          - key: ui.css
+            path: vendor/ui.css
+          - key: ui.mjs
+            path: vendor/ui.mjs
         globalMounts:
-          - path: /app/static
+          - path: /app
             readOnly: true
-      server:
-        name: redlib-multi-server
-        type: configMap
-        globalMounts:
-          - path: /app/server.mjs
-            readOnly: true
-            subPath: server.mjs
     route:
       private:
         annotations:

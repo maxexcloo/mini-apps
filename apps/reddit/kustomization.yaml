@@ -3,18 +3,15 @@ kind: Kustomization
 resources:
   - deploy.yaml
 configMapGenerator:
-  - name: redlib-multi-static
+  - name: reddit-source
     namespace: redlib-multi
     files:
-      - static/index.html
-      - static/subreddits.mjs
-      - static/third-party-licences.txt
-      - static/ui.css
-      - static/ui.mjs
-  - name: redlib-multi-server
-    namespace: redlib-multi
-    files:
+      - index.html
       - server.mjs
+      - subreddits.mjs
+      - vendor/third-party-licences.txt
+      - vendor/ui.css
+      - vendor/ui.mjs
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled

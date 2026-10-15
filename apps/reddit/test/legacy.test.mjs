@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { multiredditUrl, normaliseSubreddits } from "../static/subreddits.mjs";
+import { multiredditUrl, normaliseSubreddits } from "../subreddits.mjs";
 import { createApp } from "../server.mjs";
 
 test("normalises names, links and multi links without retaining duplicates", () => {
@@ -91,9 +91,9 @@ test("saves isolated lists, rejects stale edits and survives restarts", async ()
     const page = await fetch(`${base}/mysecret`);
     assert.equal(page.status, 200);
     assert.equal(page.headers.get("referrer-policy"), "no-referrer");
-    assert.match(await page.text(), /Redlib Multi/);
+    assert.match(await page.text(), /Reddit Multi/);
     assert.equal((await fetch(`${base}/api/lists/secret/other`)).status, 404);
-    assert.equal((await fetch(`${base}/style.css`)).status, 200);
+    assert.equal((await fetch(`${base}/vendor/ui.css`)).status, 200);
     await stop();
     base = await start();
     assert.deepEqual(await (await fetch(`${base}/api/lists/mysecret`)).json(), {

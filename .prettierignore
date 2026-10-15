@@ -1,2 +1,2 @@
-apps/*/static/ui.css
-apps/*/static/ui.mjs
+apps/*/vendor/*.css
+apps/*/vendor/*.mjs
