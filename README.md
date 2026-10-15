@@ -11,6 +11,7 @@ together. Each app owns its Mise checks and local usage instructions. Cluster
 entry points select apps through Kustomize.
 
 ```sh
+mise run setup
 mise run check
 mise run smoke
 mise --cd apps/redlib-multi run start

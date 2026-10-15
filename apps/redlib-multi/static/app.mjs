@@ -1,5 +1,14 @@
 import { multiredditUrl, normaliseSubreddits } from "./subreddits.mjs";
 
+await Promise.all(
+  ["wa-button", "wa-input", "wa-card", "wa-badge"].map((name) =>
+    customElements.whenDefined(name),
+  ),
+);
+document.addEventListener("gesturestart", (event) => event.preventDefault(), {
+  passive: false,
+});
+
 const $ = (selector) => document.querySelector(selector);
 const id = location.pathname.slice(1);
 let subreddits = [];
@@ -19,10 +28,9 @@ function render() {
   $("#empty-feed").hidden = Boolean(url);
   $("#copy-feed").disabled = !url;
   $("#add-button").disabled = busy;
-  $("#count").textContent =
-    `${subreddits.length} ${subreddits.length === 1 ? "Community" : "Communities"}`;
+  $("#count").textContent = String(subreddits.length);
   const filtered = subreddits.filter((name) =>
-    name.includes($("#filter").value.trim().toLowerCase()),
+    name.includes(($("#filter").value || "").trim().toLowerCase()),
   );
   $("#empty-list").hidden = subreddits.length > 0;
   $("#communities").replaceChildren(
@@ -33,8 +41,11 @@ function render() {
       link.href = `${redlibUrl}/r/${name}`;
       link.target = "_blank";
       link.rel = "noreferrer";
-      const remove = document.createElement("button");
+      const remove = document.createElement("wa-button");
       remove.textContent = "Remove";
+      remove.appearance = "plain";
+      remove.size = "small";
+      remove.variant = "danger";
       remove.setAttribute("aria-label", `Remove r/${name}`);
       remove.disabled = busy;
       remove.addEventListener("click", () =>
@@ -74,12 +85,11 @@ async function save(next) {
     const result = await request("PUT", { revision, subreddits: next });
     subreddits = result.subreddits;
     revision = result.revision;
-    $("#save-state").textContent =
-      "All changes saved. Your editing link works across devices.";
+    $("#save-state").textContent = "Saved.";
     saved = true;
   } catch (error) {
     message(error.message);
-    $("#save-state").textContent = "Change not saved. Please try again.";
+    $("#save-state").textContent = "Not saved. Try again.";
   } finally {
     busy = false;
     render();
@@ -92,9 +102,7 @@ async function copy(text) {
     await navigator.clipboard.writeText(text);
     message("Link copied.");
   } catch {
-    message(
-      "Copy is unavailable. Select and copy the link from the address bar or feed above.",
-    );
+    message("Select and copy the link.");
   }
 }
 
@@ -120,12 +128,13 @@ $("#copy-feed").addEventListener("click", () =>
 $("#filter").addEventListener("input", render);
 $("#add-form").addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (busy) return;
   try {
-    const additions = normaliseSubreddits($("#subreddits").value);
+    const additions = normaliseSubreddits($("#subreddits").value || "");
     if (!additions.length) throw new Error("Enter at least one subreddit.");
     const next = [...new Set([...subreddits, ...additions])].sort();
     if (next.length === subreddits.length) {
-      message("Those communities are already in your list.");
+      message("Already in this list.");
       return;
     }
     if (await save(next)) $("#subreddits").value = "";
@@ -154,12 +163,11 @@ if (!id) {
     revision = result.revision;
     busy = false;
     $("#save-state").textContent = revision
-      ? "All changes saved. Your editing link works across devices."
-      : "Add your first community to save this list.";
+      ? "Saved."
+      : "Add a subreddit to save this list.";
   } catch (error) {
     message(error.message);
-    $("#save-state").textContent =
-      "Could not load this list. Reload to try again.";
+    $("#save-state").textContent = "Reload to try again.";
   }
   render();
 }

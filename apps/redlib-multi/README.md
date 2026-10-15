@@ -12,9 +12,11 @@ read and edit that list. No account or list directory is provided.
 
 ## Development
 
-Use Node.js 24.22 or newer. There are no third-party application dependencies.
+Use Node.js 24.22 or newer. The UI uses Web Awesome, matching AI Control; the
+server uses Node.js and SQLite without runtime dependencies.
 
 ```sh
+npm ci
 mise run check
 mise run start
 ```
@@ -30,6 +32,10 @@ combined feed links. `/health` is a capability-free database readiness probe.
 docker compose up --build --detach
 mise run smoke
 ```
+
+Checks rebuild the bundled UI assets. Commit the generated files with UI changes;
+CI verifies they match their sources. Third-party licences are served at
+`/third-party-licences.txt`.
 
 The container runs as UID/GID 1000 and stores data in `/data`. Compose publishes
 port 3000 on localhost and keeps the database in its named volume. Do not delete

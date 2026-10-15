@@ -28,3 +28,13 @@ for application in apps/*; do
   mise --cd "$application" run smoke
 done
 '''
+
+[tasks.setup]
+description = "Install App Dependencies"
+run = '''
+for application in apps/*; do
+  if [ -f "$application/package-lock.json" ]; then
+    npm --prefix "$application" ci
+  fi
+done
+'''

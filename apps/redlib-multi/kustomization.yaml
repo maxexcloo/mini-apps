@@ -8,10 +8,11 @@ configMapGenerator:
   - name: redlib-multi-static
     namespace: redlib-multi
     files:
-      - static/app.mjs
       - static/index.html
-      - static/style.css
       - static/subreddits.mjs
+      - static/third-party-licences.txt
+      - static/ui.css
+      - static/ui.mjs
   - name: redlib-multi-server
     namespace: redlib-multi
     files:

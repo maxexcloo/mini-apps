@@ -8,9 +8,16 @@
     "node": ">=24.22.0"
   },
   "scripts": {
-    "check": "node --check server.mjs && node --check static/app.mjs && node --check static/subreddits.mjs && node --test",
+    "build": "node build.mjs",
+    "check": "npm run build && node --check server.mjs && node --check static/app.mjs && node --check static/subreddits.mjs && node --test",
     "smoke": "node scripts/smoke.mjs",
     "start": "node server.mjs",
     "test": "node --test"
+  },
+  "dependencies": {
+    "@awesome.me/webawesome": "3.14.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
   }
 }

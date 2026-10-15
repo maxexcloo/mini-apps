@@ -13,6 +13,8 @@
 
 ## Delivery
 
+- Bundle Web Awesome locally. Commit generated UI assets and third-party licences
+  with their source changes; CI checks for build drift.
 - Use the shared `build-mini-app` workflow. This app owns its source and native
   workload manifests. Kubelab selects its cluster and provides shared integrations.
 - Use local persistent storage for SQLite, one replica and `Recreate`.

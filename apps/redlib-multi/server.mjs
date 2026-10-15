@@ -38,8 +38,12 @@ export function createApp({
   const assets = new Map(
     [
       ["/", ["index.html", "text/html; charset=utf-8"]],
-      ["/app.mjs", ["app.mjs", "text/javascript; charset=utf-8"]],
-      ["/style.css", ["style.css", "text/css; charset=utf-8"]],
+      ["/app.mjs", ["ui.mjs", "text/javascript; charset=utf-8"]],
+      ["/style.css", ["ui.css", "text/css; charset=utf-8"]],
+      [
+        "/third-party-licences.txt",
+        ["third-party-licences.txt", "text/plain; charset=utf-8"],
+      ],
       ["/subreddits.mjs", ["subreddits.mjs", "text/javascript; charset=utf-8"]],
     ].map(([path, [file, type]]) => [
       path,
