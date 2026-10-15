@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { relatedSubreddits } from "../static/recommendations.mjs";
+import { relatedSubreddits } from "../subreddits.mjs";
 
 test("ranks related communities, merges duplicate recommendations and excludes existing or invalid names", () => {
   const labels = ["Australia", "sydney", "perth", "melbourne", "bad/name"];

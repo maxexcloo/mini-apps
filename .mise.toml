@@ -1,36 +1,14 @@
 [tools]
 # kubectl = "latest"
 # node = "latest"
-# yq = "latest"
 prettier = "3.9.10"
 
 [tasks.check]
 description = "Check Apps & Deployment Configuration"
 run = '''
-for application in apps/*; do
-  [ -f "$application/.mise.toml" ] || continue
-  mise --cd "$application" run check
+node --test apps/*/test/*.test.mjs
+for target in apps/* clusters/* templates/*; do
+  kubectl kustomize "$target" > /dev/null
 done
-node --test scripts/*.test.mjs
-node scripts/check-hostnames.mjs apps/* clusters/* templates/*
 prettier --check .
-'''
-
-[tasks.smoke]
-description = "Smoke-Test App Containers"
-run = '''
-for application in apps/*; do
-  [ -f "$application/Dockerfile" ] || continue
-  mise --cd "$application" run smoke
-done
-'''
-
-[tasks.setup]
-description = "Install App Dependencies"
-run = '''
-for application in apps/*; do
-  if [ -f "$application/package-lock.json" ]; then
-    npm --prefix "$application" ci
-  fi
-done
 '''

@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
-import { normaliseSubreddits } from "./static/subreddits.mjs";
+import { normaliseSubreddits } from "./subreddits.mjs";
 
 export function subredditStatus(html, name) {
   const error = /<div id="error">\s*<h1>([^<]*)<\/h1>/.exec(html)?.[1]?.trim();
@@ -18,7 +18,8 @@ export function subredditStatus(html, name) {
 }
 
 export function createApp({
-  dataDirectory = process.env.DATA_DIRECTORY || "./data",
+  dataDirectory = process.env.DATA_DIRECTORY ||
+    fileURLToPath(new URL("./data", import.meta.url)),
   redlibUrl = process.env.REDLIB_URL || "https://reddit.excloo.com",
   checkUrl = process.env.REDLIB_CHECK_URL || redlibUrl,
   fetchStatus = fetch,
@@ -136,27 +137,34 @@ export function createApp({
   const assets = new Map(
     [
       ["/", ["index.html", "text/html; charset=utf-8"]],
-      ["/app.mjs", ["ui.mjs", "text/javascript; charset=utf-8"]],
-      ["/style.css", ["ui.css", "text/css; charset=utf-8"]],
+      ["/vendor/ui.mjs", ["vendor/ui.mjs", "text/javascript; charset=utf-8"]],
+      ["/vendor/ui.css", ["vendor/ui.css", "text/css; charset=utf-8"]],
       [
         "/third-party-licences.txt",
-        ["third-party-licences.txt", "text/plain; charset=utf-8"],
+        ["vendor/third-party-licences.txt", "text/plain; charset=utf-8"],
       ],
       ["/subreddits.mjs", ["subreddits.mjs", "text/javascript; charset=utf-8"]],
     ].map(([path, [file, type]]) => [
       path,
       {
-        content: readFileSync(new URL(`./static/${file}`, import.meta.url)),
+        content: readFileSync(new URL(file, import.meta.url)),
         type,
       },
     ]),
   );
+  const html = assets.get("/").content.toString();
+  const scriptHash = createHash("sha256")
+    .update(html.match(/<script type="module">([\s\S]*?)<\/script>/)[1])
+    .digest("base64");
+  const styleHash = createHash("sha256")
+    .update(html.match(/<style>([\s\S]*?)<\/style>/)[1])
+    .digest("base64");
   const server = createServer(async (request, response) => {
     response.setHeader("Cache-Control", "no-store");
     // Web Awesome fetches its bundled checkbox SVGs from data URLs.
     response.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; connect-src 'self' data: https://anvaka.github.io/redsim/data/; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      `default-src 'self'; script-src 'self' 'sha256-${scriptHash}'; style-src 'self' 'sha256-${styleHash}'; connect-src 'self' data: https://anvaka.github.io/redsim/data/; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
     );
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("X-Content-Type-Options", "nosniff");
