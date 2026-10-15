@@ -1,6 +1,6 @@
 // RedSim packs a negative source marker, then destination IDs and ranks.
-export function relatedSubreddits(labels, links, subreddits, limit = 8) {
-  const existing = new Set(subreddits);
+export function relatedSubreddits(labels, links, subreddits, limit = 20) {
+  const existing = new Set(subreddits.map((name) => name.trim().toLowerCase()));
   const sources = new Set();
   labels.forEach((label, index) => {
     if (existing.has(label.toLowerCase())) sources.add(index);

@@ -110,9 +110,19 @@ function renderSuggestions() {
         ? ""
         : "No related communities found.";
   $("#retry-suggestions").hidden = !recommendationsError;
-  $("#suggested-communities").replaceChildren(
-    ...suggestedNames.map((name) => {
-      const row = document.createElement("li");
+  const suggestions = $("#suggested-communities");
+  for (const row of [...suggestions.children]) {
+    if (!suggestedNames.includes(row.dataset.name)) row.remove();
+  }
+  suggestedNames.forEach((name, index) => {
+    let row = [...suggestions.children].find(
+      (row) => row.dataset.name === name,
+    );
+    if (row) {
+      row.querySelector("wa-button").disabled = busy;
+    } else {
+      row = document.createElement("li");
+      row.dataset.name = name;
       const link = document.createElement("a");
       link.href = `${redlibUrl}/r/${name}`;
       link.textContent = name;
@@ -124,12 +134,15 @@ function renderSuggestions() {
       add.size = "small";
       add.disabled = busy;
       add.addEventListener("click", () =>
-        save([...new Set([...subreddits, name])].sort()),
+        save([...new Set([...subreddits, name])].sort(), {
+          suggestionIndex: [...suggestions.children].indexOf(row),
+        }),
       );
       row.append(link, add);
-      return row;
-    }),
-  );
+    }
+    if (suggestions.children[index] !== row)
+      suggestions.insertBefore(row, suggestions.children[index] || null);
+  });
 }
 $("#retry-suggestions").addEventListener("click", loadRecommendations);
 let knownLists = [];
@@ -344,8 +357,12 @@ async function transfer(action) {
   }
 }
 
-async function save(next) {
+async function save(next, { suggestionIndex } = {}) {
   if (busy) return;
+  const suggestionsTop =
+    suggestionIndex === undefined
+      ? undefined
+      : $("#suggestions").getBoundingClientRect().top;
   busy = true;
   message("");
   $("#save-state").textContent = "Saving…";
@@ -364,6 +381,22 @@ async function save(next) {
   } finally {
     busy = false;
     render();
+    if (suggestionsTop !== undefined) {
+      await Promise.all(
+        [...$("#editor").querySelectorAll("wa-button, wa-checkbox")].map(
+          (control) => control.updateComplete,
+        ),
+      );
+      // The saved list grows above suggestions; keep the same place in the viewport.
+      const buttons = $("#suggested-communities").querySelectorAll("wa-button");
+      buttons[Math.min(suggestionIndex, buttons.length - 1)]?.focus({
+        preventScroll: true,
+      });
+      window.scrollBy({
+        top: $("#suggestions").getBoundingClientRect().top - suggestionsTop,
+        behavior: "instant",
+      });
+    }
   }
   return saved;
 }

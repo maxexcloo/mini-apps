@@ -17,7 +17,8 @@ to RedSim for related subreddits. Open or copy the combined feed
 at the top of the editor. Anyone who can reach the app and knows a list name can
 read and edit that list. No account or list directory is provided.
 
-**Suggested Subreddits** offers up to eight related communities with an **Add**
+**Suggested Subreddits** merges related communities from every entry in the list,
+excludes existing entries and ranks the top 20, with an **Add**
 action. The browser downloads RedSim's public dataset and calculates suggestions
 locally; list names and editing URLs are never sent. Suggestions exclude entries
 already in the list. Editing continues to work if the dataset is unavailable.
