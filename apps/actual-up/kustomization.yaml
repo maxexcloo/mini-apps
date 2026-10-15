@@ -57,3 +57,6 @@ replacements:
         options:
           delimiter: /
           index: 2
+# Preserve all resources while ownership returns to Kubelab.
+commonAnnotations:
+  kustomize.toolkit.fluxcd.io/prune: disabled
