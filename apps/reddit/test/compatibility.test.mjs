@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
+import { once } from "node:events";
 import { createHash } from "node:crypto";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { createServer } from "node:net";
+import { setTimeout } from "node:timers/promises";
+import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { test } from "node:test";
@@ -66,5 +71,47 @@ test("opens an original database and merges its mixed-case identity into the low
   } finally {
     await new Promise((resolve) => server.close(resolve));
     rmSync(directory, { force: true, recursive: true });
+  }
+});
+
+test("starts normally through a Kubernetes-style source symlink", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "reddit-source-"));
+  const entry = join(directory, "server.mjs");
+  symlinkSync(fileURLToPath(new URL("../server.mjs", import.meta.url)), entry);
+  const reservation = createServer();
+  await new Promise((resolve) => reservation.listen(0, "127.0.0.1", resolve));
+  const port = reservation.address().port;
+  await new Promise((resolve) => reservation.close(resolve));
+  const child = spawn(process.execPath, [entry], {
+    env: {
+      ...process.env,
+      DATA_DIRECTORY: join(directory, "data"),
+      HOST: "127.0.0.1",
+      PORT: String(port),
+    },
+    stdio: "ignore",
+  });
+  try {
+    let healthy = false;
+    for (let attempt = 0; attempt < 30 && child.exitCode === null; attempt++) {
+      try {
+        const response = await fetch(`http://127.0.0.1:${port}/health`, {
+          signal: AbortSignal.timeout(300),
+        });
+        healthy = response.ok;
+        if (healthy) break;
+      } catch {}
+      await setTimeout(100);
+    }
+    assert.ok(
+      healthy,
+      `Symlinked server did not start (exit ${child.exitCode}).`,
+    );
+  } finally {
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill();
+      await once(child, "exit");
+    }
+    rmSync(directory, { recursive: true, force: true });
   }
 });

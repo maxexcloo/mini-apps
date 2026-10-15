@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, realpathSync } from "node:fs";
 import { createServer } from "node:http";
 import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -409,7 +409,7 @@ export function createApp({
 
 if (
   process.argv[1] &&
-  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+  realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
   process.umask(0o077);
   const port = Number(process.env.PORT || 3000);
