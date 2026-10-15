@@ -97,8 +97,9 @@ spec:
           gethomepage.dev/group: Mini Apps
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-reddit
-          gethomepage.dev/name: Redlib Multi
+          gethomepage.dev/name: Reddit
         hostnames:
+          - reddit.mini.excloo.com
           - redlib.excloo.com
         labels:
           app.kubernetes.io/name: redlib-multi
@@ -118,6 +119,14 @@ apiVersion: automation.excloo.dev/v1alpha1
 kind: PrivateDNSRecord
 metadata:
   name: redlib-multi
+  namespace: redlib-multi
+spec:
+  hostname: app.invalid
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: reddit
   namespace: redlib-multi
 spec:
   hostname: app.invalid

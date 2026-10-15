@@ -29,7 +29,7 @@ replacements:
     targets:
       - select:
           kind: PrivateDNSRecord
-          name: redlib-multi
+          name: reddit
           namespace: redlib-multi
         fieldPaths:
           - spec.hostname
@@ -42,3 +42,15 @@ replacements:
         options:
           delimiter: /
           index: 2
+  - source:
+      kind: HelmRelease
+      name: redlib-multi
+      namespace: redlib-multi
+      fieldPath: spec.values.route.private.hostnames.1
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: redlib-multi
+          namespace: redlib-multi
+        fieldPaths:
+          - spec.hostname
