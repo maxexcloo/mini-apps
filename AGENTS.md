@@ -25,7 +25,7 @@
   Services with substantial dependency and operational requirements belong in
   their own repositories with normal container deployment in Kubelab.
 - App entry hostnames must be one lowercase DNS label under `mini.excloo.com`.
-  CI checks routes, private DNS, Homepage links and OIDC URLs after Kustomize.
+  The local hostname check covers routes, DNS, Homepage links and OIDC URLs.
   Redlib's existing `redlib.excloo.com` is the only compatibility exception.
   Keep upstream API/feed hostnames unchanged; they are not mini-app entry points.
 - Keep access, DNS, Homepage annotations, storage and secret references beside
@@ -46,9 +46,10 @@
 
 ## Delivery
 
-- `main` holds source; CI advances `deploy` only after checks and smoke tests pass.
-  Never force-push `deploy` or deploy unverified source from a developer machine.
-- Flux watches `deploy`; code changes must affect the pod configuration through
+- Open a PR for changes and describe relevant verification before merging.
+  Flux watches `main` and deploys merged changes directly. There is no GitHub
+  Actions workflow or separate deployment branch.
+- Code changes must affect the pod configuration through
   hashed ConfigMap names or a newly pinned immutable image.
 - Keep app resources native and use the configured `bjw-s/app-template` chart.
 - Run `mise run check` after changes, and `mise run smoke` after backend,

@@ -25,9 +25,11 @@ temporary volumes; they do not touch deployed app data.
 
 ## Publication
 
-Push reviewed changes to `main`. CI checks applications, renders cluster entry
-points and runs container smoke tests before advancing the `deploy` branch to the
-same commit. Flux watches that branch and automatically reconciles changes.
+Open a PR, review the change and merge into `main`. Flux watches `main` and
+reconciles merged changes automatically. There is no GitHub Actions pipeline,
+image build or separate deployment branch for ordinary mini apps. Local tools
+are available for development; the author handles relevant verification and
+records the result in the PR.
 
 Kubelab owns the Flux source, cluster selection and shared platform integrations.
 This repository owns the selected mini apps' native workloads, routes and app-scoped
@@ -41,7 +43,7 @@ Network exposure and application authorisation are separate choices: internal or
 external routing, with public, account-based or secret-link access as appropriate.
 Use existing DNS, certificates, Pocket ID and secrets integrations. Existing live
 route review requirements still apply. Inspect Flux status and verify the actual
-application after deployment; successful CI alone does not prove live health.
+application after deployment; a merged PR alone does not prove live health.
 
 ## Add An App
 
@@ -53,7 +55,7 @@ Mise task. Optional app-level `.mise.toml` files supply meaningful checks and sm
 tests when needed.
 
 Use `<name>.mini.excloo.com` for app hostnames, for example
-`notes.mini.excloo.com`. CI enforces a single lowercase DNS label on app routes,
+`notes.mini.excloo.com`. The local check enforces one lowercase DNS label on app routes,
 private DNS, Homepage links and OIDC URLs. Redlib's existing `redlib.excloo.com`
 remains a compatibility exception for saved links. This naming rule does not
 change whether an app is internal or external. Mini apps run on SYD. The shared
@@ -88,11 +90,10 @@ public route still requires review. Read secret values only inside consuming
 processes through the existing credential integration.
 
 Once cluster integration is installed, an AI connection with repository write or
-PR access can author app changes and use the existing pipeline. It does not need
-cluster credentials for routine deployments. The build skill supplies conventions;
-GitHub access alone does not give an AI that context. Branch protection and CI
-remain the deployment gates. Source and bundled assets here are public; stored app
-data and credentials remain private.
+PR access can author app changes and submit a PR. Merging publishes the change;
+no cluster credentials are needed for routine deployments. The build skill and
+repository instructions supply conventions. Source and bundled assets here are
+public; stored app data and credentials remain private.
 
 ## Licence
 

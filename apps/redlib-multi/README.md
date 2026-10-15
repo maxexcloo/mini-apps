@@ -60,7 +60,7 @@ mise run smoke
 ```
 
 Checks rebuild the bundled UI assets. Commit the generated files with UI changes;
-CI verifies they match their sources. Third-party licences are served at
+Build and review these assets with their source changes. Third-party licences are served at
 `/third-party-licences.txt`.
 
 The container runs as UID/GID 1000 and stores data in `/data`. Compose publishes
@@ -69,9 +69,8 @@ that volume when replacing the app. SQLite requires local persistent storage,
 one replica and `Recreate` deployment strategy; do not use NFS.
 
 The app lives in the shared `mini-apps` repository. Its native deployment mounts
-checked-in source into a pinned Node runtime. Successful main checks advance the
-`deploy` branch; Flux reconciles the code, configuration and private HTTPS route
-from that exact revision. The deployment reuses the existing data volume. Kubelab
+checked-in source into a pinned Node runtime. Merge a reviewed PR into `main`;
+Flux reconciles the code, configuration and private HTTPS route from that revision. The deployment reuses the existing data volume. Kubelab
 provides the cluster integration and derives `REDLIB_URL` from the Redlib route.
 
 ## Existing Lists & Recovery

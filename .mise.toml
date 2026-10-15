@@ -2,9 +2,7 @@
 # kubectl = "latest"
 # node = "latest"
 # yq = "latest"
-actionlint = "1.7.12"
 prettier = "3.9.10"
-shellcheck = "0.11.0"
 
 [tasks.check]
 description = "Check Apps & Deployment Configuration"
@@ -15,7 +13,6 @@ for application in apps/*; do
 done
 node --test scripts/*.test.mjs
 node scripts/check-hostnames.mjs apps/* clusters/* templates/*
-actionlint .github/workflows/*.yaml
 prettier --check .
 '''
 
