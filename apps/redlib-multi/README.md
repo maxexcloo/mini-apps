@@ -1,8 +1,9 @@
 # Redlib Multi
 
 A small app for managing combined subreddit feeds. Open the home page, choose a
-**List Name** and select **Open List**. The editor opens directly at `/listname`;
-existing names load their saved lists. Names are case-sensitive and accept 1–128
+**List Name** and select **Open List**. Text boxes enforce lowercase as you type
+or paste. The editor opens directly at `/listname`;
+existing names load their saved lists. Names are lowercased and accept 1–128
 letters, numbers, underscores or hyphens. `health` is reserved.
 The list picker remembers non-empty lists opened in this browser. Open a new name
 from the home page or directly at `/listname`; a list is saved when entries are
@@ -17,7 +18,7 @@ to RedSim for related subreddits. Open or copy the combined feed
 at the top of the editor. Anyone who can reach the app and knows a list name can
 read and edit that list. No account or list directory is provided.
 
-Use **Check All** to check every saved entry through Redlib, including entries
+Use **Check All** to check unknown and unchecked entries through Redlib, including entries
 hidden by the filter. Results distinguish **Available**, **Banned**, **Private**,
 **Restricted** and **Unknown**. **Unknown** means the status could not be confirmed;
 failed requests and rate limits never establish a ban. **Stop Check** stops the
@@ -73,9 +74,12 @@ provides the cluster integration and derives `REDLIB_URL` from the Redlib route.
 ## Existing Lists & Recovery
 
 Existing `/listname` and secret editing paths and the `/api/lists/<name>` API are
-preserved. The app opens the same `lists.sqlite` database with its existing table,
-SHA-256 list keys and revision numbers; no data conversion is needed. Concurrent
-stale edits are rejected and the latest list is loaded for retry.
+preserved. Legacy case variants merge into the lowercase list without duplicate
+entries when their names are supplied by saved browser history, old URLs or API
+requests. Merges are atomic and advance revisions to reject stale edits. The
+original database only stored hashed names: unidentified records remain intact
+until their old links are opened. The `lists.sqlite` filename and `lists` table
+remain in use; hashed aliases record migrated identities without a list directory.
 
 Back up with SQLite's online backup API, or stop the writer before copying the
 whole data directory, including any WAL/SHM files. Restore while the app is

@@ -2,9 +2,11 @@
 
 ## Compatibility
 
-- Keep existing named editor paths, case-sensitive list identifiers and the
-  `/api/lists/<name>` interface compatible.
-- Preserve `lists.sqlite`, its `lists` table, SHA-256 list keys and revisions.
+- Use lowercase list names and merge legacy case variants by union when names
+  are supplied through saved browser history or existing URLs. Preserve old links
+  and the `/api/lists/<name>` interface; never discard unidentified hashed records.
+- Preserve `lists.sqlite`, its `lists` table and SHA-256 keys. Keep hashed aliases
+  for migrated records and advance revisions to reject stale edits after merges.
 - Keep the Redlib feed origin configurable through `REDLIB_URL`; Kubelab derives
   its production value from the Redlib service's owning route.
 - Named lists are shared by anyone who can reach the app and knows the name.

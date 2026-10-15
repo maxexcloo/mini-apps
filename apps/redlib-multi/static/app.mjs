@@ -44,7 +44,8 @@ $("#theme").addEventListener("click", () => {
 });
 systemTheme.addEventListener("change", applyTheme);
 applyTheme();
-const id = location.pathname.slice(1);
+const id = location.pathname.slice(1).toLowerCase();
+const editorPath = (name) => (name === "health" ? "/HEALTH" : `/${name}`);
 let subreddits = [];
 let revision = 0;
 let busy = true;
@@ -78,7 +79,14 @@ function renderStatuses() {
         ? "The community's status could not be confirmed."
         : "Checked through Redlib.";
   }
-  $("#check-all").disabled = !checkController && (busy || !subreddits.length);
+  $("#check-all").disabled =
+    !checkController &&
+    (busy ||
+      !subreddits.some(
+        (name) =>
+          !subredditStatuses.has(name) ||
+          subredditStatuses.get(name) === "unknown",
+      ));
   $("#check-all").textContent = checkController ? "Stop Check" : "Check All";
 }
 
@@ -89,11 +97,14 @@ $("#check-all").addEventListener("click", async () => {
   }
   const controller = new AbortController();
   checkController = controller;
-  const names = [...subreddits];
+  const names = subreddits.filter(
+    (name) =>
+      !subredditStatuses.has(name) || subredditStatuses.get(name) === "unknown",
+  );
   let next = 0;
   let completed = 0;
   function progress(stopped = false) {
-    const banned = names.filter(
+    const banned = subreddits.filter(
       (name) => subredditStatuses.get(name) === "banned",
     ).length;
     $("#check-state").textContent =
@@ -231,9 +242,7 @@ try {
       ...new Set(
         saved.filter(
           (name) =>
-            typeof name === "string" &&
-            /^[a-zA-Z0-9_-]{1,128}$/.test(name) &&
-            name !== "health",
+            typeof name === "string" && /^[a-zA-Z0-9_-]{1,128}$/.test(name),
         ),
       ),
     ];
@@ -252,9 +261,9 @@ function rememberList(name, populated) {
 function renderLists() {
   for (const selector of ["#list-picker", "#destination-picker"]) {
     const picker = $(selector);
-    const names = knownLists.filter(
-      (name) => selector !== "#destination-picker" || name !== id,
-    );
+    const names = [...new Set(knownLists.map((name) => name.toLowerCase()))]
+      .sort()
+      .filter((name) => selector !== "#destination-picker" || name !== id);
     picker.hidden = !names.length;
     picker.replaceChildren(
       ...names.map((name) => {
@@ -267,22 +276,29 @@ function renderLists() {
   }
 }
 $("#list-picker").addEventListener("change", () => {
-  if ($("#list-picker").value) location.assign(`/${$("#list-picker").value}`);
+  if ($("#list-picker").value)
+    location.assign(editorPath($("#list-picker").value));
 });
 $("#destination-picker").addEventListener("change", () => {
   $("#destination").value = $("#destination-picker").value || "";
 });
+// Original spellings identify legacy hashed records before the browser history is folded.
+try {
+  if (knownLists.length) {
+    const response = await fetch("/api/normalise-lists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ names: knownLists }),
+    });
+    if (response.ok) {
+      knownLists = (await response.json()).names;
+      localStorage.setItem("lists", JSON.stringify(knownLists));
+    }
+  }
+} catch {
+  // Retain original spellings for a later migration attempt if a request fails.
+}
 renderLists();
-// Check only names this browser already knows; never enumerate other users' lists.
-await Promise.all(
-  knownLists.map(async (name) => {
-    try {
-      const response = await fetch(`/api/lists/${encodeURIComponent(name)}`);
-      if (response.ok && !(await response.json()).subreddits.length)
-        rememberList(name, false);
-    } catch {}
-  }),
-);
 
 function visibleSubreddits() {
   return subreddits.filter((name) =>
@@ -406,7 +422,8 @@ async function request(method, body, suffix = "") {
 
 async function transfer(action) {
   if (busy || !selected.size) return;
-  const destination = ($("#destination").value || "").trim();
+  const originalDestination = originalListName($("#destination"));
+  const destination = originalDestination.toLowerCase();
   $("#destination").value = destination;
   if (
     !/^[a-zA-Z0-9_-]{1,128}$/.test(destination) ||
@@ -424,7 +441,12 @@ async function transfer(action) {
   try {
     const result = await request(
       "POST",
-      { action, destination, revision, subreddits: [...selected] },
+      {
+        action,
+        destination: originalDestination,
+        revision,
+        subreddits: [...selected],
+      },
       "/transfer",
     );
     subreddits = result.subreddits;
@@ -495,22 +517,58 @@ async function copy(text) {
   }
 }
 
-$("#list-name").addEventListener("input", () => {
-  const input = $("#list-name");
-  input.value = (input.value || "").trim();
-  input.setCustomValidity("");
-});
-$("#open-list").addEventListener("submit", (event) => {
+function originalListName(input) {
+  const name = (input.value || "").trim();
+  const original = input.dataset.originalName;
+  return original?.toLowerCase() === name ? original : name;
+}
+for (const selector of [
+  "#list-name",
+  "#destination",
+  "#subreddits",
+  "#filter",
+]) {
+  const input = $(selector);
+  input.setAttribute("autocapitalize", "none");
+  input.addEventListener("input", async (event) => {
+    const original = input.value || "";
+    const isName = ["#list-name", "#destination"].includes(selector);
+    if (isName) input.dataset.originalName = original.trim();
+    const value = (isName ? original.trim() : original).toLowerCase();
+    input.setCustomValidity("");
+    if (value === original) return;
+    const native = event
+      .composedPath()
+      .find((element) => element instanceof HTMLInputElement);
+    const start = native?.selectionStart;
+    const end = native?.selectionEnd;
+    const removed = isName ? original.length - original.trimStart().length : 0;
+    input.value = value;
+    await input.updateComplete;
+    if (start !== null && start !== undefined)
+      native.setSelectionRange(
+        Math.max(0, start - removed),
+        Math.max(0, end - removed),
+      );
+  });
+}
+$("#open-list").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const name = ($("#list-name").value || "").trim();
-  if (name === "health") {
+  const name = originalListName($("#list-name"));
+  if (name.toLowerCase() === "health") {
     $("#list-name").setCustomValidity(
       "This name is reserved. Choose another list name.",
     );
     $("#list-name").reportValidity();
     return;
   }
-  location.assign(`/${name}`);
+  try {
+    const response = await fetch(`/api/lists/${encodeURIComponent(name)}`);
+    if (!response.ok) throw new Error("Unable to open this list. Try again.");
+    location.assign(`/${name.toLowerCase()}`);
+  } catch (error) {
+    message(error.message);
+  }
 });
 $("#copy-editor").addEventListener("click", () => copy(location.href));
 $("#copy-feed").addEventListener("click", () =>

@@ -8,7 +8,7 @@ import { test } from "node:test";
 import { createApp } from "../server.mjs";
 import { multiredditUrl } from "../static/subreddits.mjs";
 
-test("opens and edits a database created by the original app without changing list identity", async () => {
+test("opens an original database and merges its mixed-case identity into the lowercase list", async () => {
   const directory = mkdtempSync(join(tmpdir(), "redlib-compatibility-"));
   const database = new DatabaseSync(join(directory, "lists.sqlite"));
   database.exec(
@@ -33,7 +33,7 @@ test("opens and edits a database created by the original app without changing li
     const first = await (await fetch(`${base}/api/lists/${id}`)).json();
     assert.deepEqual(first, {
       subreddits: ["australia", "sydney"],
-      revision: 7,
+      revision: 8,
     });
     assert.equal((await fetch(`${base}/${id}`)).status, 200);
     assert.deepEqual(await (await fetch(`${base}/api/config`)).json(), {
@@ -45,17 +45,17 @@ test("opens and edits a database created by the original app without changing li
     );
     assert.deepEqual(
       await (await fetch(`${base}/api/lists/fixture-existing_list`)).json(),
-      { subreddits: [], revision: 0 },
+      { subreddits: ["australia", "sydney"], revision: 8 },
     );
     const update = await fetch(`${base}/api/lists/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subreddits: ["melbourne"], revision: 7 }),
+      body: JSON.stringify({ subreddits: ["melbourne"], revision: 8 }),
     });
     assert.equal(update.status, 200);
     assert.deepEqual(await update.json(), {
       subreddits: ["melbourne"],
-      revision: 8,
+      revision: 9,
     });
     const home = await (await fetch(base)).text();
     assert.match(home, /List Name/);

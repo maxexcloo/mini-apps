@@ -59,6 +59,9 @@ export function createApp({
     "CREATE TABLE IF NOT EXISTS deleted_lists (id TEXT PRIMARY KEY, revision INTEGER NOT NULL)",
   );
   database.exec(
+    "CREATE TABLE IF NOT EXISTS list_aliases (id TEXT PRIMARY KEY, canonical_id TEXT NOT NULL)",
+  );
+  database.exec(
     "BEGIN IMMEDIATE; INSERT OR REPLACE INTO deleted_lists SELECT id, revision FROM lists WHERE subreddits = '[]'; DELETE FROM lists WHERE subreddits = '[]'; COMMIT",
   );
   function readList(key) {
@@ -89,6 +92,46 @@ export function createApp({
         )
         .run(key, revision + 1);
     }
+  }
+  const listKey = (name) => createHash("sha256").update(name).digest("hex");
+  function normaliseLists(names) {
+    database.exec("BEGIN IMMEDIATE");
+    try {
+      for (const name of names) {
+        const oldKey = listKey(name);
+        const key = listKey(name.toLowerCase());
+        if (oldKey !== key) {
+          const old = readList(oldKey);
+          if (old.revision) {
+            const current = readList(key);
+            const merged = normaliseSubreddits(
+              [...current.subreddits, ...old.subreddits].join(" "),
+            );
+            writeList(key, merged, Math.max(current.revision, old.revision));
+            database.prepare("DELETE FROM lists WHERE id = ?").run(oldKey);
+            database
+              .prepare("DELETE FROM deleted_lists WHERE id = ?")
+              .run(oldKey);
+          }
+        }
+        database
+          .prepare(
+            "INSERT INTO list_aliases (id, canonical_id) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET canonical_id = excluded.canonical_id",
+          )
+          .run(oldKey, key);
+        database
+          .prepare(
+            "INSERT OR IGNORE INTO list_aliases (id, canonical_id) VALUES (?, ?)",
+          )
+          .run(key, key);
+      }
+      database.exec("COMMIT");
+    } finally {
+      if (database.isTransaction) database.exec("ROLLBACK");
+    }
+    return [...new Set(names.map((name) => name.toLowerCase()))]
+      .filter((name) => readList(listKey(name)).subreddits.length)
+      .sort();
   }
   const assets = new Map(
     [
@@ -130,6 +173,34 @@ export function createApp({
       }
       if (path === "/api/config" && request.method === "GET")
         return json(200, { redlibUrl: origin.origin });
+      if (path === "/api/normalise-lists" && request.method === "POST") {
+        if (request.headers["sec-fetch-site"] === "cross-site")
+          return json(403, { error: "Cross-site writes are not allowed." });
+        if (request.headers["content-type"] !== "application/json")
+          return json(415, { error: "Use application/json." });
+        let body = "";
+        for await (const chunk of request) {
+          body += chunk.toString("utf8");
+          if (body.length > 150000)
+            return json(413, { error: "Too many list names." });
+        }
+        let names;
+        try {
+          names = JSON.parse(body)?.names;
+        } catch {
+          return json(400, { error: "Invalid JSON." });
+        }
+        if (
+          !Array.isArray(names) ||
+          names.length > 1000 ||
+          names.some(
+            (name) =>
+              typeof name !== "string" || !/^[a-zA-Z0-9_-]{1,128}$/.test(name),
+          )
+        )
+          return json(400, { error: "Provide up to 1,000 valid list names." });
+        return json(200, { names: normaliseLists(names) });
+      }
       if (path === "/api/check" && request.method === "POST") {
         if (request.headers["sec-fetch-site"] === "cross-site")
           return json(403, { error: "Cross-site checks are not allowed." });
@@ -184,7 +255,9 @@ export function createApp({
         path,
       );
       if (match) {
-        const key = createHash("sha256").update(match[1]).digest("hex");
+        normaliseLists([match[1]]);
+        const name = match[1].toLowerCase();
+        const key = listKey(name);
         const current = () => readList(key);
         const transfer = Boolean(match[2]);
         if (!transfer && request.method === "GET") return json(200, current());
@@ -198,7 +271,8 @@ export function createApp({
         const chunks = [];
         for await (const chunk of request) {
           length += chunk.length;
-          if (length > 65536) return json(413, { error: "List is too large." });
+          if (length > Math.max(65536, current().subreddits.length * 24 + 1024))
+            return json(413, { error: "List is too large." });
           chunks.push(chunk);
         }
         let input;
@@ -212,7 +286,8 @@ export function createApp({
           !Number.isSafeInteger(input.revision) ||
           input.revision < 0 ||
           !Array.isArray(input.subreddits) ||
-          input.subreddits.length > 1000 ||
+          input.subreddits.length >
+            Math.max(1000, current().subreddits.length) ||
           input.subreddits.some((value) => typeof value !== "string")
         )
           return json(400, {
@@ -224,23 +299,25 @@ export function createApp({
         } catch (error) {
           return json(400, { error: error.message });
         }
-        if (names.length > 1000)
+        if (names.length > Math.max(1000, current().subreddits.length))
           return json(400, { error: "Use up to 1,000 subreddits." });
         if (transfer) {
-          const destination =
+          const originalDestination =
             typeof input.destination === "string"
               ? input.destination.trim()
               : "";
+          const destination = originalDestination.toLowerCase();
           if (
             !/^[a-zA-Z0-9_-]{1,128}$/.test(destination) ||
             destination === "health" ||
-            destination === match[1]
+            destination === name
           )
             return json(400, {
               error: "Choose a different valid destination list name.",
             });
           if (!["copy", "move"].includes(input.action) || !names.length)
             return json(400, { error: "Select subreddits to copy or move." });
+          normaliseLists([originalDestination]);
           database.exec("BEGIN IMMEDIATE");
           try {
             const source = current();
@@ -254,9 +331,7 @@ export function createApp({
               return json(400, {
                 error: "Select entries that belong to this list.",
               });
-            const destinationKey = createHash("sha256")
-              .update(destination)
-              .digest("hex");
+            const destinationKey = listKey(destination);
             const destinationList = readList(destinationKey);
             const existing = destinationList.subreddits;
             const combined = [...new Set([...existing, ...names])].sort();
@@ -299,6 +374,17 @@ export function createApp({
         return json(404, { error: "Unknown list path." });
       if (request.method !== "GET" && request.method !== "HEAD")
         return json(405, { error: "Method not allowed." });
+      if (/^\/[a-zA-Z0-9_-]{1,128}$/.test(path) && !assets.has(path)) {
+        normaliseLists([path.slice(1)]);
+        if (path !== path.toLowerCase() && path.toLowerCase() !== "/health") {
+          response.writeHead(308, {
+            Location:
+              path.toLowerCase() +
+              new URL(request.url, "http://localhost").search,
+          });
+          return response.end();
+        }
+      }
       const asset =
         assets.get(path) ||
         (/^\/[a-zA-Z0-9_-]{1,128}$/.test(path) ? assets.get("/") : null);
