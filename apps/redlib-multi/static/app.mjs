@@ -10,6 +10,33 @@ document.addEventListener("gesturestart", (event) => event.preventDefault(), {
 });
 
 const $ = (selector) => document.querySelector(selector);
+const systemTheme = matchMedia("(prefers-color-scheme: dark)");
+let preferredTheme;
+try {
+  preferredTheme = localStorage.getItem("theme");
+} catch {
+  // The system theme still works when browser storage is unavailable.
+}
+function applyTheme() {
+  const dark =
+    preferredTheme === "dark" || (!preferredTheme && systemTheme.matches);
+  document.documentElement.classList.toggle("wa-dark", dark);
+  document.documentElement.classList.toggle("wa-light", !dark);
+  $("#theme").textContent = dark ? "Light Mode" : "Dark Mode";
+}
+$("#theme").addEventListener("click", () => {
+  preferredTheme = document.documentElement.classList.contains("wa-dark")
+    ? "light"
+    : "dark";
+  try {
+    localStorage.setItem("theme", preferredTheme);
+  } catch {
+    // Keep the selection for this page when browser storage is unavailable.
+  }
+  applyTheme();
+});
+systemTheme.addEventListener("change", applyTheme);
+applyTheme();
 const id = location.pathname.slice(1);
 let subreddits = [];
 let revision = 0;
@@ -106,12 +133,14 @@ async function copy(text) {
   }
 }
 
-$("#list-name").addEventListener("input", () =>
-  $("#list-name").setCustomValidity(""),
-);
+$("#list-name").addEventListener("input", () => {
+  const input = $("#list-name");
+  input.value = (input.value || "").trim();
+  input.setCustomValidity("");
+});
 $("#open-list").addEventListener("submit", (event) => {
   event.preventDefault();
-  const name = $("#list-name").value;
+  const name = ($("#list-name").value || "").trim();
   if (name === "health") {
     $("#list-name").setCustomValidity(
       "This name is reserved. Choose another list name.",
