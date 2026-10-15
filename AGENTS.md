@@ -18,7 +18,7 @@
 
 - Copy `templates/static` for a browser-only app; keep the tool in `index.html`.
   Rename `mini-tool` consistently, use `<name>.mini.excloo.com` in `deploy.yaml`, and select
-  the directory from the destination cluster's Kustomization. Do not deploy the
+  the directory from `clusters/syd/kustomization.yaml`. Do not deploy the
   template as an example app.
 - For a simple backend, prefer a standard runtime and app-scoped SQLite storage.
   Keep source, dependency lockfiles and meaningful checks beside the app.
@@ -29,9 +29,13 @@
   Redlib's existing `redlib.excloo.com` is the only compatibility exception.
   Keep upstream API/feed hostnames unchanged; they are not mini-app entry points.
 - Keep access, DNS, Homepage annotations, storage and secret references beside
-  their owner in `deploy.yaml`. Internal apps use the private gateway and
-  `PrivateDNSRecord`; public apps follow Kubelab's public-tunnel conventions and
-  require explicit route approval. Authentication is a separate app decision.
+  their owner in `deploy.yaml`. Deploy mini apps to SYD. Internal apps use the
+  private gateway and the shared `*.mini.excloo.com` DNS record; do not add a
+  per-app `PrivateDNSRecord`. Public apps use SYD's `public-direct` gateway,
+  `websecuredirect` listener, namespace and route public-access labels, and
+  `external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"`. ExternalDNS
+  creates the explicit public DNS override from the route. Require explicit route
+  approval; authentication is a separate app decision.
 - Enable Homepage discovery in the `Mini Apps` group for every app. The dashboard
   discovers deployed apps automatically; do not maintain a second app list.
 - Set Homepage's public entry URL from the route hostname with native Kustomize

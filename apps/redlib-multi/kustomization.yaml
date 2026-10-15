@@ -28,12 +28,6 @@ replacements:
       fieldPath: spec.values.route.private.hostnames.0
     targets:
       - select:
-          kind: PrivateDNSRecord
-          name: redlib-multi
-          namespace: redlib-multi
-        fieldPaths:
-          - spec.hostname
-      - select:
           kind: HelmRelease
           name: redlib-multi
           namespace: redlib-multi
@@ -42,3 +36,15 @@ replacements:
         options:
           delimiter: /
           index: 2
+  - source:
+      kind: HelmRelease
+      name: redlib-multi
+      namespace: redlib-multi
+      fieldPath: spec.values.route.private.hostnames.1
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: redlib-multi
+          namespace: redlib-multi
+        fieldPaths:
+          - spec.hostname

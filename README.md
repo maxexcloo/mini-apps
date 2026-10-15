@@ -56,8 +56,26 @@ Use `<name>.mini.excloo.com` for app hostnames, for example
 `notes.mini.excloo.com`. CI enforces a single lowercase DNS label on app routes,
 private DNS, Homepage links and OIDC URLs. Redlib's existing `redlib.excloo.com`
 remains a compatibility exception for saved links. This naming rule does not
-change whether an app is internal or external. Verify certificate coverage before
-publication: `*.excloo.com` does not cover these nested names.
+change whether an app is internal or external. Mini apps run on SYD. The shared
+unproxied `*.mini.excloo.com` CNAME points to its private gateway, so private apps
+need no individual DNS record.
+
+| Access            | Gateway                                     | DNS                                                                             |
+| ----------------- | ------------------------------------------- | ------------------------------------------------------------------------------- |
+| Private (default) | `private`, listener `websecure`             | Shared wildcard → `private.syd.excloo.dev`                                      |
+| Public            | `public-direct`, listener `websecuredirect` | Explicit unproxied app record → `public.syd.excloo.dev`, managed by ExternalDNS |
+
+For public apps, set `gateway.excloo.dev/public-access: "true"` on both the
+namespace and route, and set route annotation
+`external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"`. Keep the app's
+`<name>.mini.excloo.com` hostname and Homepage metadata. The explicit public DNS
+record overrides the private wildcard for that app. Private apps keep their
+private-access namespace label and omit public-access route labels.
+
+Both gateways serve the same `*.mini.excloo.com` Let's Encrypt certificate.
+Public HTTPS connects directly to SYD and needs no Cloudflare edge certificate.
+Verify wildcard certificate readiness before publication; `*.excloo.com` alone
+does not cover these nested names. App authentication is independent of access.
 
 Homepage discovers deployed apps from their enabled route annotations and lists
 them in its **Mini Apps** group. The inventory refreshes every five minutes; no
