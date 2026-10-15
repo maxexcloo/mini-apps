@@ -80,12 +80,12 @@ spec:
         annotations:
           gethomepage.dev/description: Text Counter
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
+          gethomepage.dev/group: Mini Apps
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: mdi-text-box-outline
           gethomepage.dev/name: Text Counter
         hostnames:
-          - app.invalid
+          - mini-tool.mini.excloo.com
         labels:
           app.kubernetes.io/name: mini-tool
         parentRefs:

@@ -17,17 +17,23 @@
 ## New Apps
 
 - Copy `templates/static` for a browser-only app; keep the tool in `index.html`.
-  Rename `mini-tool` consistently, set the hostname in `deploy.yaml`, and select
+  Rename `mini-tool` consistently, use `<name>.mini.excloo.com` in `deploy.yaml`, and select
   the directory from the destination cluster's Kustomization. Do not deploy the
   template as an example app.
 - For a simple backend, prefer a standard runtime and app-scoped SQLite storage.
   Keep source, dependency lockfiles and meaningful checks beside the app.
   Services with substantial dependency and operational requirements belong in
   their own repositories with normal container deployment in Kubelab.
+- App entry hostnames must be one lowercase DNS label under `mini.excloo.com`.
+  CI checks routes, private DNS, Homepage links and OIDC URLs after Kustomize.
+  Redlib's existing `redlib.excloo.com` is the only compatibility exception.
+  Keep upstream API/feed hostnames unchanged; they are not mini-app entry points.
 - Keep access, DNS, Homepage annotations, storage and secret references beside
   their owner in `deploy.yaml`. Internal apps use the private gateway and
   `PrivateDNSRecord`; public apps follow Kubelab's public-tunnel conventions and
   require explicit route approval. Authentication is a separate app decision.
+- Enable Homepage discovery in the `Mini Apps` group for every app. The dashboard
+  discovers deployed apps automatically; do not maintain a second app list.
 - Set Homepage's public entry URL from the route hostname with native Kustomize
   replacements; never put a secret editing URL in annotations.
 - AI repository access is sufficient for routine code and manifest changes after

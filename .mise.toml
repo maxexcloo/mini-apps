@@ -1,6 +1,7 @@
 [tools]
 # kubectl = "latest"
 # node = "latest"
+# yq = "latest"
 actionlint = "1.7.12"
 prettier = "3.9.10"
 shellcheck = "0.11.0"
@@ -12,10 +13,8 @@ for application in apps/*; do
   [ -f "$application/.mise.toml" ] || continue
   mise --cd "$application" run check
 done
-for target in clusters/* templates/*; do
-  [ -d "$target" ] || continue
-  kubectl kustomize "$target" > /dev/null
-done
+node --test scripts/*.test.mjs
+node scripts/check-hostnames.mjs apps/* clusters/* templates/*
 actionlint .github/workflows/*.yaml
 prettier --check .
 '''

@@ -52,6 +52,17 @@ existing backend and its own dependencies. Static apps need no npm package or
 Mise task. Optional app-level `.mise.toml` files supply meaningful checks and smoke
 tests when needed.
 
+Use `<name>.mini.excloo.com` for app hostnames, for example
+`notes.mini.excloo.com`. CI enforces a single lowercase DNS label on app routes,
+private DNS, Homepage links and OIDC URLs. Redlib's existing `redlib.excloo.com`
+remains a compatibility exception for saved links. This naming rule does not
+change whether an app is internal or external. Verify certificate coverage before
+publication: `*.excloo.com` does not cover these nested names.
+
+Homepage discovers deployed apps from their enabled route annotations and lists
+them in its **Mini Apps** group. The inventory refreshes every five minutes; no
+separate list of app links needs maintaining.
+
 Keep the hostname, private/public gateway, Homepage annotations, persistent storage
 and secret references beside the app in `deploy.yaml`. Use native Kustomize
 replacements to derive URLs from the hostname. Default to private access; a new

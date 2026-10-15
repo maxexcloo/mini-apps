@@ -20,7 +20,7 @@ jobs:
       - name: Configure Global Tools
         run: |
           mkdir -p "$HOME/.config/mise"
-          printf '[tools]\nnode = "24.22.0"\nkubectl = "1.37.1"\n' > "$HOME/.config/mise/config.toml"
+          printf '[tools]\nnode = "24.22.0"\nkubectl = "1.37.1"\nyq = "4.54.1"\n' > "$HOME/.config/mise/config.toml"
       - name: Set Up Tools
         uses: jdx/mise-action@v5
         with:
