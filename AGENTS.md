@@ -22,5 +22,5 @@
 - Open a PR, review the change and merge into `main`; Flux deploys it directly.
   Source changes must update hashed ConfigMap references or an immutable image.
   Run relevant local checks when possible and verify the deployed behaviour.
-- `mise run check` runs the optional development checks. Keep meaningful tests,
-  particularly for stored data, without introducing app scaffolding or wrappers.
+- Keep meaningful data tests, run directly with `node --test`. Render affected
+  Kustomizations with `kubectl kustomize`; avoid task wrappers and build scaffolding.
