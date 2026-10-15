@@ -29,12 +29,42 @@ export function createApp({
   const select = database.prepare(
     "SELECT subreddits, revision FROM lists WHERE id = ?",
   );
-  const insert = database.prepare(
-    "INSERT OR IGNORE INTO lists (id, subreddits, revision) VALUES (?, ?, 1)",
+  // Keep only revision metadata for deleted lists, so stale editors cannot revive old data.
+  database.exec(
+    "CREATE TABLE IF NOT EXISTS deleted_lists (id TEXT PRIMARY KEY, revision INTEGER NOT NULL)",
   );
-  const update = database.prepare(
-    "UPDATE lists SET subreddits = ?, revision = revision + 1 WHERE id = ? AND revision = ?",
+  database.exec(
+    "BEGIN IMMEDIATE; INSERT OR REPLACE INTO deleted_lists SELECT id, revision FROM lists WHERE subreddits = '[]'; DELETE FROM lists WHERE subreddits = '[]'; COMMIT",
   );
+  function readList(key) {
+    const row = select.get(key);
+    return row
+      ? { revision: row.revision, subreddits: JSON.parse(row.subreddits) }
+      : {
+          revision:
+            database
+              .prepare("SELECT revision FROM deleted_lists WHERE id = ?")
+              .get(key)?.revision || 0,
+          subreddits: [],
+        };
+  }
+  function writeList(key, names, revision) {
+    if (names.length) {
+      database
+        .prepare(
+          "INSERT INTO lists (id, subreddits, revision) VALUES (?, ?, ?) ON CONFLICT(id) DO UPDATE SET subreddits = excluded.subreddits, revision = excluded.revision",
+        )
+        .run(key, JSON.stringify(names), revision + 1);
+      database.prepare("DELETE FROM deleted_lists WHERE id = ?").run(key);
+    } else {
+      database.prepare("DELETE FROM lists WHERE id = ?").run(key);
+      database
+        .prepare(
+          "INSERT INTO deleted_lists (id, revision) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET revision = excluded.revision",
+        )
+        .run(key, revision + 1);
+    }
+  }
   const assets = new Map(
     [
       ["/", ["index.html", "text/html; charset=utf-8"]],
@@ -58,7 +88,7 @@ export function createApp({
     // Web Awesome fetches its bundled checkbox SVGs from data URLs.
     response.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; connect-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "default-src 'self'; connect-src 'self' data: https://anvaka.github.io/redsim/data/; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
     );
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("X-Content-Type-Options", "nosniff");
@@ -80,12 +110,7 @@ export function createApp({
       );
       if (match) {
         const key = createHash("sha256").update(match[1]).digest("hex");
-        const current = () => {
-          const row = select.get(key);
-          return row
-            ? { revision: row.revision, subreddits: JSON.parse(row.subreddits) }
-            : { revision: 0, subreddits: [] };
-        };
+        const current = () => readList(key);
         const transfer = Boolean(match[2]);
         if (!transfer && request.method === "GET") return json(200, current());
         if (request.method !== (transfer ? "POST" : "PUT"))
@@ -157,30 +182,20 @@ export function createApp({
             const destinationKey = createHash("sha256")
               .update(destination)
               .digest("hex");
-            const destinationRow = select.get(destinationKey);
-            const existing = destinationRow
-              ? JSON.parse(destinationRow.subreddits)
-              : [];
+            const destinationList = readList(destinationKey);
+            const existing = destinationList.subreddits;
             const combined = [...new Set([...existing, ...names])].sort();
             if (combined.length > 1000)
               return json(400, {
                 error: "The destination would exceed 1,000 subreddits.",
               });
-            if (!destinationRow)
-              insert.run(destinationKey, JSON.stringify(combined));
-            else if (combined.length !== existing.length)
-              update.run(
-                JSON.stringify(combined),
-                destinationKey,
-                destinationRow.revision,
-              );
+            if (combined.length !== existing.length)
+              writeList(destinationKey, combined, destinationList.revision);
             if (input.action === "move") {
               const selected = new Set(names);
-              update.run(
-                JSON.stringify(
-                  source.subreddits.filter((name) => !selected.has(name)),
-                ),
+              writeList(
                 key,
+                source.subreddits.filter((name) => !selected.has(name)),
                 source.revision,
               );
             }
@@ -190,17 +205,20 @@ export function createApp({
             if (database.isTransaction) database.exec("ROLLBACK");
           }
         }
-        const result =
-          input.revision === 0
-            ? insert.run(key, JSON.stringify(names))
-            : update.run(JSON.stringify(names), key, input.revision);
-        if (!result.changes)
-          return json(409, {
-            ...current(),
-            error:
-              "This list changed elsewhere. The latest list is loaded; try your change again.",
-          });
-        return json(200, current());
+        database.exec("BEGIN IMMEDIATE");
+        try {
+          if (current().revision !== input.revision)
+            return json(409, {
+              ...current(),
+              error:
+                "This list changed elsewhere. The latest list is loaded; try your change again.",
+            });
+          writeList(key, names, input.revision);
+          database.exec("COMMIT");
+          return json(200, current());
+        } finally {
+          if (database.isTransaction) database.exec("ROLLBACK");
+        }
       }
       if (path.startsWith("/api/"))
         return json(404, { error: "Unknown list path." });

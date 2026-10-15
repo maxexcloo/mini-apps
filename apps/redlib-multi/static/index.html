@@ -19,6 +19,12 @@
       >
     </header>
     <main>
+      <wa-select
+        id="list-picker"
+        label="Open List"
+        placeholder="Choose a list"
+        hidden
+      ></wa-select>
       <wa-card id="welcome" hidden>
         <form id="open-list" class="input-row">
           <wa-input
@@ -79,6 +85,12 @@
           >
         </div>
         <div id="bulk-actions" hidden>
+          <wa-select
+            id="destination-picker"
+            label="Saved Destination"
+            placeholder="Choose or enter a new list"
+            hidden
+          ></wa-select>
           <wa-input
             id="destination"
             label="Destination List"
@@ -101,6 +113,27 @@
         <p id="empty-list" class="hint">No subreddits yet.</p>
         <ul id="communities" aria-label="Subreddits"></ul>
         <p id="save-state" class="hint">Loading…</p>
+        <section id="suggestions" hidden>
+          <h2>Suggested Subreddits</h2>
+          <p id="suggestions-state" class="hint"></p>
+          <ul id="suggested-communities" aria-label="Suggested Subreddits"></ul>
+          <wa-button
+            id="retry-suggestions"
+            appearance="plain"
+            size="small"
+            hidden
+            >Retry</wa-button
+          >
+          <p class="hint">
+            Related communities from
+            <a
+              href="https://anvaka.github.io/redsim/"
+              target="_blank"
+              rel="noreferrer"
+              >RedSim</a
+            >.
+          </p>
+        </section>
       </section>
       <p id="status" aria-live="polite" role="status"></p>
     </main>

@@ -1,9 +1,16 @@
 import { multiredditUrl, normaliseSubreddits } from "./subreddits.mjs";
+import { relatedSubreddits } from "./recommendations.mjs";
 
 await Promise.all(
-  ["wa-button", "wa-input", "wa-card", "wa-badge", "wa-checkbox"].map((name) =>
-    customElements.whenDefined(name),
-  ),
+  [
+    "wa-button",
+    "wa-input",
+    "wa-card",
+    "wa-badge",
+    "wa-checkbox",
+    "wa-select",
+    "wa-option",
+  ].map((name) => customElements.whenDefined(name)),
 );
 document.addEventListener("gesturestart", (event) => event.preventDefault(), {
   passive: false,
@@ -43,6 +50,148 @@ let revision = 0;
 let busy = true;
 let redlibUrl;
 const selected = new Set();
+let recommendations;
+let recommendationsLoading = false;
+let recommendationsError = false;
+let recommendationKey;
+let suggestedNames = [];
+
+async function loadRecommendations() {
+  recommendationsLoading = true;
+  recommendationsError = false;
+  renderSuggestions();
+  try {
+    const options = {
+      credentials: "omit",
+      referrerPolicy: "no-referrer",
+      signal: AbortSignal.timeout(20000),
+    };
+    const [labels, links] = await Promise.all(
+      ["labels.json", "links.bin"].map(async (file) => {
+        const response = await fetch(
+          `https://anvaka.github.io/redsim/data/${file}`,
+          options,
+        );
+        if (!response.ok) throw new Error("Suggestions unavailable.");
+        return file.endsWith("json") ? response.json() : response.arrayBuffer();
+      }),
+    );
+    recommendations = { labels, links: new Int32Array(links) };
+    recommendationKey = undefined;
+  } catch {
+    recommendationsError = true;
+  } finally {
+    recommendationsLoading = false;
+    renderSuggestions();
+  }
+}
+
+function renderSuggestions() {
+  $("#suggestions").hidden = !subreddits.length;
+  if (!subreddits.length) return;
+  if (!recommendations && !recommendationsLoading && !recommendationsError) {
+    loadRecommendations();
+    return;
+  }
+  const key = subreddits.join("+");
+  if (recommendations && key !== recommendationKey) {
+    suggestedNames = relatedSubreddits(
+      recommendations.labels,
+      recommendations.links,
+      subreddits,
+    );
+    recommendationKey = key;
+  }
+  $("#suggestions-state").textContent = recommendationsLoading
+    ? "Finding related communities…"
+    : recommendationsError
+      ? "Suggestions are unavailable. Your list still works."
+      : suggestedNames.length
+        ? ""
+        : "No related communities found.";
+  $("#retry-suggestions").hidden = !recommendationsError;
+  $("#suggested-communities").replaceChildren(
+    ...suggestedNames.map((name) => {
+      const row = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = `${redlibUrl}/r/${name}`;
+      link.textContent = name;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      const add = document.createElement("wa-button");
+      add.textContent = "Add";
+      add.append(hiddenLabel(` r/${name}`));
+      add.size = "small";
+      add.disabled = busy;
+      add.addEventListener("click", () =>
+        save([...new Set([...subreddits, name])].sort()),
+      );
+      row.append(link, add);
+      return row;
+    }),
+  );
+}
+$("#retry-suggestions").addEventListener("click", loadRecommendations);
+let knownLists = [];
+try {
+  const saved = JSON.parse(localStorage.getItem("lists") || "[]");
+  if (Array.isArray(saved))
+    knownLists = [
+      ...new Set(
+        saved.filter(
+          (name) =>
+            typeof name === "string" &&
+            /^[a-zA-Z0-9_-]{1,128}$/.test(name) &&
+            name !== "health",
+        ),
+      ),
+    ];
+} catch {
+  // Saved lists still work by URL when browser storage is unavailable.
+}
+function rememberList(name, populated) {
+  knownLists = knownLists.filter((value) => value !== name);
+  if (populated) knownLists.push(name);
+  knownLists.sort();
+  try {
+    localStorage.setItem("lists", JSON.stringify(knownLists));
+  } catch {}
+  renderLists();
+}
+function renderLists() {
+  for (const selector of ["#list-picker", "#destination-picker"]) {
+    const picker = $(selector);
+    const names = knownLists.filter(
+      (name) => selector !== "#destination-picker" || name !== id,
+    );
+    picker.hidden = !names.length;
+    picker.replaceChildren(
+      ...names.map((name) => {
+        const option = document.createElement("wa-option");
+        option.value = name;
+        option.textContent = name;
+        return option;
+      }),
+    );
+  }
+}
+$("#list-picker").addEventListener("change", () => {
+  if ($("#list-picker").value) location.assign(`/${$("#list-picker").value}`);
+});
+$("#destination-picker").addEventListener("change", () => {
+  $("#destination").value = $("#destination-picker").value || "";
+});
+renderLists();
+// Check only names this browser already knows; never enumerate other users' lists.
+await Promise.all(
+  knownLists.map(async (name) => {
+    try {
+      const response = await fetch(`/api/lists/${encodeURIComponent(name)}`);
+      if (response.ok && !(await response.json()).subreddits.length)
+        rememberList(name, false);
+    } catch {}
+  }),
+);
 
 function visibleSubreddits() {
   return subreddits.filter((name) =>
@@ -61,6 +210,7 @@ function renderSelection() {
   $("#clear-selection").disabled = busy || !selected.size;
   for (const control of [
     "destination",
+    "destination-picker",
     "copy-selected",
     "move-selected",
     "remove-selected",
@@ -132,6 +282,7 @@ function render() {
       return row;
     }),
   );
+  renderSuggestions();
 }
 
 async function request(method, body, suffix = "") {
@@ -181,6 +332,8 @@ async function transfer(action) {
     subreddits = result.subreddits;
     revision = result.revision;
     selected.clear();
+    rememberList(destination, true);
+    rememberList(id, subreddits.length > 0);
     $("#save-state").textContent = action === "move" ? "Moved." : "Copied.";
   } catch (error) {
     message(error.message);
@@ -203,6 +356,7 @@ async function save(next) {
     subreddits = result.subreddits;
     revision = result.revision;
     $("#save-state").textContent = "Saved.";
+    rememberList(id, subreddits.length > 0);
     saved = true;
   } catch (error) {
     message(error.message);
@@ -297,6 +451,7 @@ if (!id) {
     subreddits = result.subreddits;
     revision = result.revision;
     busy = false;
+    rememberList(id, subreddits.length > 0);
     $("#save-state").textContent = revision
       ? "Saved."
       : "Add a subreddit to save this list.";

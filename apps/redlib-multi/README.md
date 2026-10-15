@@ -4,6 +4,10 @@ A small app for managing combined subreddit feeds. Open the home page, choose a
 **List Name** and select **Open List**. The editor opens directly at `/listname`;
 existing names load their saved lists. Names are case-sensitive and accept 1–128
 letters, numbers, underscores or hyphens. `health` is reserved.
+The list picker remembers non-empty lists opened in this browser. Open a new name
+from the home page or directly at `/listname`; a list is saved when entries are
+added. Removing or moving its final entry deletes the saved list. Revision-only
+metadata prevents stale editors from restoring deleted entries.
 
 Add names, `r/` links or combined feed links. Names are lowercased, alphabetised
 and deduplicated. Select individual entries or all visible entries after filtering
@@ -12,6 +16,11 @@ duplicates; moves update both lists atomically. Each entry has a **Similar** lin
 to RedSim for related subreddits. Open or copy the combined feed
 at the top of the editor. Anyone who can reach the app and knows a list name can
 read and edit that list. No account or list directory is provided.
+
+**Suggested Subreddits** offers up to eight related communities with an **Add**
+action. The browser downloads RedSim's public dataset and calculates suggestions
+locally; list names and editing URLs are never sent. Suggestions exclude entries
+already in the list. Editing continues to work if the dataset is unavailable.
 
 ## Development
 

@@ -82,7 +82,7 @@ test("copies and moves selected entries atomically without overwriting either li
     // A failure after the destination write must roll back both sides of a move.
     const database = new DatabaseSync(join(directory, "lists.sqlite"));
     database.exec(
-      "CREATE TRIGGER reject_source_update BEFORE UPDATE ON lists WHEN OLD.subreddits = '[\"melbourne\"]' BEGIN SELECT RAISE(ABORT, 'test failure'); END",
+      "CREATE TRIGGER reject_source_update BEFORE DELETE ON lists WHEN OLD.subreddits = '[\"melbourne\"]' BEGIN SELECT RAISE(ABORT, 'test failure'); END",
     );
     const move = {
       action: "move",
@@ -108,6 +108,43 @@ test("copies and moves selected entries atomically without overwriting either li
     });
   } finally {
     await stop();
+    rmSync(directory, { force: true, recursive: true });
+  }
+});
+
+test("deletes empty lists while preserving stale-edit protection after recreation", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "redlib-empty-"));
+  const server = createApp({ dataDirectory: directory });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const url = `http://127.0.0.1:${server.address().port}/api/lists/example`;
+  const put = (revision, subreddits) =>
+    fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ revision, subreddits }),
+    });
+  const database = new DatabaseSync(join(directory, "lists.sqlite"));
+  try {
+    assert.equal((await put(0, ["sydney"])).status, 200);
+    assert.equal((await put(1, [])).status, 200);
+    assert.equal(
+      database.prepare("SELECT COUNT(*) AS count FROM lists").get().count,
+      0,
+    );
+    assert.deepEqual(await (await fetch(url)).json(), {
+      revision: 2,
+      subreddits: [],
+    });
+    assert.equal((await put(0, ["perth"])).status, 409);
+    assert.equal((await put(2, ["melbourne"])).status, 200);
+    assert.equal((await put(1, ["sydney"])).status, 409);
+    assert.deepEqual(await (await fetch(url)).json(), {
+      revision: 3,
+      subreddits: ["melbourne"],
+    });
+  } finally {
+    database.close();
+    await new Promise((resolve) => server.close(resolve));
     rmSync(directory, { force: true, recursive: true });
   }
 });

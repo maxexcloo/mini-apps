@@ -62,6 +62,21 @@ wa-input {
 wa-input::part(input) {
   font-size: 16px;
 }
+#list-picker {
+  margin-bottom: 16px;
+}
+#destination-picker {
+  margin-bottom: 8px;
+}
+#suggestions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--wa-color-surface-border);
+}
+#suggestions h2 {
+  margin: 0;
+  font-size: var(--wa-font-size-m);
+}
 .input-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
