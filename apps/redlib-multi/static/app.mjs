@@ -45,13 +45,50 @@ $("#theme").addEventListener("click", () => {
 systemTheme.addEventListener("change", applyTheme);
 applyTheme();
 const id = location.pathname.slice(1).toLowerCase();
-const editorPath = (name) => (name === "health" ? "/HEALTH" : `/${name}`);
 let subreddits = [];
 let revision = 0;
 let busy = true;
 let redlibUrl;
 const subredditStatuses = new Map();
 let checkController;
+let activeChecks = 0;
+const pendingChecks = new Map();
+const checkQueue = [];
+
+function checkSubreddit(name, signal) {
+  if (pendingChecks.has(name)) return pendingChecks.get(name);
+  const request = new Promise((resolve) => {
+    checkQueue.push(async () => {
+      if (signal?.aborted) return resolve("unknown");
+      let status = "unknown";
+      try {
+        const response = await fetch("/api/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subreddit: name }),
+          signal,
+        });
+        if (response.ok) status = (await response.json()).status;
+      } catch {}
+      if (!signal?.aborted) subredditStatuses.set(name, status);
+      resolve(status);
+    });
+  }).finally(() => pendingChecks.delete(name));
+  pendingChecks.set(name, request);
+  drainChecks();
+  return request;
+}
+function drainChecks() {
+  while (activeChecks < 2 && checkQueue.length) {
+    activeChecks++;
+    checkQueue
+      .shift()()
+      .finally(() => {
+        activeChecks--;
+        drainChecks();
+      });
+  }
+}
 
 function renderStatuses() {
   for (const row of $("#communities").children) {
@@ -115,21 +152,8 @@ $("#check-all").addEventListener("click", async () => {
   async function worker() {
     while (!controller.signal.aborted && next < names.length) {
       const name = names[next++];
-      try {
-        const response = await fetch("/api/check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subreddit: name }),
-          signal: controller.signal,
-        });
-        subredditStatuses.set(
-          name,
-          response.ok ? (await response.json()).status : "unknown",
-        );
-      } catch {
-        if (controller.signal.aborted) return;
-        subredditStatuses.set(name, "unknown");
-      }
+      await checkSubreddit(name, controller.signal);
+      if (controller.signal.aborted) return;
       completed++;
       progress();
     }
@@ -144,6 +168,43 @@ let recommendationsLoading = false;
 let recommendationsError = false;
 let recommendationKey;
 let suggestedNames = [];
+let suggestionsChecking = false;
+let suggestionChecksIncomplete = false;
+let suggestionController;
+
+async function checkSuggestions(names, key) {
+  suggestionController?.abort();
+  const controller = new AbortController();
+  suggestionController = controller;
+  suggestionsChecking = true;
+  suggestionChecksIncomplete = false;
+  const available = [];
+  for (
+    let index = 0;
+    index < names.length && available.length < 20;
+    index += 2
+  ) {
+    const batch = names.slice(index, index + 2);
+    const statuses = await Promise.all(
+      batch.map((name) =>
+        subredditStatuses.has(name)
+          ? subredditStatuses.get(name)
+          : checkSubreddit(name, controller.signal),
+      ),
+    );
+    if (controller.signal.aborted || key !== recommendationKey) return;
+    batch.forEach((name, offset) => {
+      if (statuses[offset] === "available") available.push(name);
+    });
+    if (statuses.includes("unknown")) suggestionChecksIncomplete = true;
+    // Pause on an upstream outage instead of probing the whole graph repeatedly.
+    if (statuses.every((status) => status === "unknown")) break;
+  }
+  suggestedNames = available.slice(0, 20);
+  suggestionsChecking = false;
+  renderSuggestions();
+  renderStatuses();
+}
 
 async function loadRecommendations() {
   recommendationsLoading = true;
@@ -177,29 +238,49 @@ async function loadRecommendations() {
 
 function renderSuggestions() {
   $("#suggestions").hidden = !subreddits.length;
-  if (!subreddits.length) return;
+  if (!subreddits.length) {
+    suggestionController?.abort();
+    recommendationKey = undefined;
+    return;
+  }
   if (!recommendations && !recommendationsLoading && !recommendationsError) {
     loadRecommendations();
     return;
   }
   const key = subreddits.join("+");
   if (recommendations && key !== recommendationKey) {
-    suggestedNames = relatedSubreddits(
-      recommendations.labels,
-      recommendations.links,
-      subreddits,
-    );
     recommendationKey = key;
+    suggestedNames = suggestedNames.filter(
+      (name) => !subreddits.includes(name),
+    );
+    checkSuggestions(
+      relatedSubreddits(
+        recommendations.labels,
+        recommendations.links,
+        subreddits,
+        Infinity,
+      ),
+      key,
+    );
   }
   $("#suggestions-state").textContent = recommendationsLoading
     ? "Finding related communities…"
-    : recommendationsError
-      ? "Suggestions are unavailable. Your list still works."
-      : suggestedNames.length
-        ? ""
-        : "No related communities found.";
-  $("#retry-suggestions").hidden = !recommendationsError;
+    : suggestionsChecking
+      ? "Checking related communities…"
+      : recommendationsError || suggestionChecksIncomplete
+        ? "Some suggestions could not be checked. Try again."
+        : suggestedNames.length
+          ? ""
+          : "No related communities found.";
+  $("#retry-suggestions").hidden = !(
+    recommendationsError || suggestionChecksIncomplete
+  );
   const suggestions = $("#suggested-communities");
+  // Reserve the previous height while checked replacements arrive, avoiding a
+  // temporary shorter page that clamps the viewport near the final rows.
+  suggestions.style.minHeight = suggestionsChecking
+    ? `${suggestions.getBoundingClientRect().height}px`
+    : "";
   for (const row of [...suggestions.children]) {
     if (!suggestedNames.includes(row.dataset.name)) row.remove();
   }
@@ -233,7 +314,14 @@ function renderSuggestions() {
       suggestions.insertBefore(row, suggestions.children[index] || null);
   });
 }
-$("#retry-suggestions").addEventListener("click", loadRecommendations);
+$("#retry-suggestions").addEventListener("click", () => {
+  for (const [name, status] of subredditStatuses) {
+    if (status === "unknown") subredditStatuses.delete(name);
+  }
+  recommendationKey = undefined;
+  if (recommendations) renderSuggestions();
+  else loadRecommendations();
+});
 let knownLists = [];
 try {
   const saved = JSON.parse(localStorage.getItem("lists") || "[]");
@@ -259,26 +347,20 @@ function rememberList(name, populated) {
   renderLists();
 }
 function renderLists() {
-  for (const selector of ["#list-picker", "#destination-picker"]) {
-    const picker = $(selector);
-    const names = [...new Set(knownLists.map((name) => name.toLowerCase()))]
-      .sort()
-      .filter((name) => selector !== "#destination-picker" || name !== id);
-    picker.hidden = !names.length;
-    picker.replaceChildren(
-      ...names.map((name) => {
-        const option = document.createElement("wa-option");
-        option.value = name;
-        option.textContent = name;
-        return option;
-      }),
-    );
-  }
+  const picker = $("#destination-picker");
+  const names = [...new Set(knownLists.map((name) => name.toLowerCase()))]
+    .sort()
+    .filter((name) => name !== id);
+  picker.hidden = !names.length;
+  picker.replaceChildren(
+    ...names.map((name) => {
+      const option = document.createElement("wa-option");
+      option.value = name;
+      option.textContent = name;
+      return option;
+    }),
+  );
 }
-$("#list-picker").addEventListener("change", () => {
-  if ($("#list-picker").value)
-    location.assign(editorPath($("#list-picker").value));
-});
 $("#destination-picker").addEventListener("change", () => {
   $("#destination").value = $("#destination-picker").value || "";
 });

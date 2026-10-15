@@ -5,7 +5,7 @@ A small app for managing combined subreddit feeds. Open the home page, choose a
 or paste. The editor opens directly at `/listname`;
 existing names load their saved lists. Names are lowercased and accept 1–128
 letters, numbers, underscores or hyphens. `health` is reserved.
-The list picker remembers non-empty lists opened in this browser. Open a new name
+The transfer destination picker remembers non-empty lists opened in this browser. Open a new name
 from the home page or directly at `/listname`; a list is saved when entries are
 added. Removing or moving its final entry deletes the saved list. Revision-only
 metadata prevents stale editors from restoring deleted entries.
@@ -26,8 +26,11 @@ current pass. Checks never edit or remove entries. Results are cached for up to
 15 minutes to limit upstream requests.
 
 **Suggested Subreddits** merges related communities from every entry in the list,
-excludes existing entries and ranks the top 20, with an **Add**
-action. The browser downloads RedSim's public dataset and calculates suggestions
+excludes existing entries and shows the top 20 confirmed available communities,
+with an **Add** action. Candidates are checked through Redlib before display;
+banned, private, restricted and unconfirmed communities are skipped, with the next
+ranked candidates filling their places. Suggestion and manual checks share a limit
+of two requests. If availability cannot be confirmed, retry later. The browser downloads RedSim's public dataset and calculates suggestions
 locally; list names and editing URLs are never sent. Suggestions exclude entries
 already in the list. Editing continues to work if the dataset is unavailable.
 

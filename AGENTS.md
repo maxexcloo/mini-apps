@@ -3,7 +3,8 @@
 ## Applications
 
 - Keep each app's source and native workload configuration in `apps/<name>`.
-  Cluster selection belongs in `clusters/<cluster>`. Avoid a custom app schema,
+  Keep app resources together in `deploy.yaml`; use a native
+  `kustomization.yaml` for composition and hashed asset ConfigMaps. Cluster selection belongs in `clusters/<cluster>`. Avoid a custom app schema,
   manifest generator or shared application runtime.
 - Choose the simplest suitable stack. Use static files when no backend is needed.
   Add a backend or service such as PocketBase only when its features justify it.
@@ -12,6 +13,25 @@
 - Derive service URLs from owning configuration. Kubelab supplies shared cluster
   integrations and externally owned settings through the Flux entry point.
 - Disable Flux substitution on ConfigMaps containing code or assets.
+
+## New Apps
+
+- Copy `templates/static` for a browser-only app; keep the tool in `index.html`.
+  Rename `mini-tool` consistently, set the hostname in `deploy.yaml`, and select
+  the directory from the destination cluster's Kustomization. Do not deploy the
+  template as an example app.
+- For a backend, keep its source, dependency lockfile, build and checks in the app
+  directory. Use hashed ConfigMaps with a matching pinned runtime when practical;
+  otherwise build and publish an immutable image before updating its pin.
+- Keep access, DNS, Homepage annotations, storage and secret references beside
+  their owner in `deploy.yaml`. Internal apps use the private gateway and
+  `PrivateDNSRecord`; public apps follow Kubelab's public-tunnel conventions and
+  require explicit route approval. Authentication is a separate app decision.
+- Set Homepage's public entry URL from the route hostname with native Kustomize
+  replacements; never put a secret editing URL in annotations.
+- AI repository access is sufficient for routine code and manifest changes after
+  cluster integration. Read this file and the app's own instructions first.
+  Credentials belong in the existing External Secrets integration, never source.
 
 ## Delivery
 

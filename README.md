@@ -7,8 +7,10 @@ skill; choose a simple implementation and keep each app's data and access isolat
 ## Development
 
 Applications live in `apps/<name>`, with source and native deployment configuration
-together. Each app owns its Mise checks and local usage instructions. Cluster
-entry points select apps through Kustomize.
+together. Each app keeps its native Kubernetes resources in `deploy.yaml`, using the shared
+`bjw-s/app-template` Helm chart. A small `kustomization.yaml` includes that file and
+any configuration or static assets. Each app owns its Mise checks and local usage
+instructions. Cluster entry points select app directories through Kustomize.
 
 ```sh
 mise run setup
@@ -38,6 +40,28 @@ external routing, with public, account-based or secret-link access as appropriat
 Use existing DNS, certificates, Pocket ID and secrets integrations. Existing live
 route review requirements still apply. Inspect Flux status and verify the actual
 application after deployment; successful CI alone does not prove live health.
+
+## Add An App
+
+Create `apps/<name>/` with its code, `deploy.yaml` and `kustomization.yaml`, then
+add that directory to the chosen `clusters/<cluster>/kustomization.yaml`. Use the
+[static starter](templates/static) for a single HTML file, or retain an
+existing backend and its own dependencies. Static apps need no npm package or
+Mise task. Optional app-level `.mise.toml` files supply meaningful checks and smoke
+tests when needed.
+
+Keep the hostname, private/public gateway, Homepage annotations, persistent storage
+and secret references beside the app in `deploy.yaml`. Use native Kustomize
+replacements to derive URLs from the hostname. Default to private access; a new
+public route still requires review. Read secret values only inside consuming
+processes through the existing credential integration.
+
+Once cluster integration is installed, an AI connection with repository write or
+PR access can author app changes and use the existing pipeline. It does not need
+cluster credentials for routine deployments. The build skill supplies conventions;
+GitHub access alone does not give an AI that context. Branch protection and CI
+remain the deployment gates. Source and bundled assets here are public; stored app
+data and credentials remain private.
 
 ## Licence
 

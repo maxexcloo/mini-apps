@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en-AU">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Text Counter</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font:
+        16px system-ui,
+        sans-serif;
+    }
+    body {
+      margin: 3rem auto;
+      max-width: 42rem;
+      padding: 0 1rem;
+    }
+    textarea {
+      box-sizing: border-box;
+      font: inherit;
+      min-height: 14rem;
+      padding: 1rem;
+      width: 100%;
+    }
+    output {
+      display: block;
+      margin-top: 1rem;
+    }
+  </style>
+  <h1>Text Counter</h1>
+  <label for="text">Text</label>
+  <textarea id="text" placeholder="Paste text here"></textarea>
+  <output id="count" for="text" aria-live="polite"
+    >0 Words · 0 Characters</output
+  >
+  <script>
+    const text = document.querySelector("#text");
+    text.addEventListener("input", () => {
+      const words = text.value.trim()
+        ? text.value.trim().split(/\s+/).length
+        : 0;
+      document.querySelector("#count").textContent =
+        `${words} Words · ${[...text.value].length} Characters`;
+    });
+  </script>
+</html>

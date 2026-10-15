@@ -62,9 +62,7 @@ wa-input {
 wa-input::part(input) {
   font-size: 16px;
 }
-#list-picker {
-  margin-bottom: 16px;
-}
+
 #destination-picker {
   margin-bottom: 8px;
 }

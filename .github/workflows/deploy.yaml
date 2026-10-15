@@ -30,7 +30,9 @@ jobs:
       - name: Check
         run: mise run check
       - name: Check Generated Assets
-        run: git diff --exit-code
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --exclude-standard --others)"
       - name: Smoke-Test
         run: mise run smoke
   deploy:

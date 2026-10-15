@@ -9,12 +9,12 @@ shellcheck = "0.11.0"
 description = "Check Apps & Deployment Configuration"
 run = '''
 for application in apps/*; do
-  [ -d "$application" ] || continue
+  [ -f "$application/.mise.toml" ] || continue
   mise --cd "$application" run check
 done
-for cluster in clusters/*; do
-  [ -d "$cluster" ] || continue
-  kubectl kustomize "$cluster" > /dev/null
+for target in clusters/* templates/*; do
+  [ -d "$target" ] || continue
+  kubectl kustomize "$target" > /dev/null
 done
 actionlint .github/workflows/*.yaml
 prettier --check .
