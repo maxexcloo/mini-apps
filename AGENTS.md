@@ -20,9 +20,10 @@
   Rename `mini-tool` consistently, set the hostname in `deploy.yaml`, and select
   the directory from the destination cluster's Kustomization. Do not deploy the
   template as an example app.
-- For a backend, keep its source, dependency lockfile, build and checks in the app
-  directory. Use hashed ConfigMaps with a matching pinned runtime when practical;
-  otherwise build and publish an immutable image before updating its pin.
+- For a simple backend, prefer a standard runtime and app-scoped SQLite storage.
+  Keep source, dependency lockfiles and meaningful checks beside the app.
+  Services with substantial dependency and operational requirements belong in
+  their own repositories with normal container deployment in Kubelab.
 - Keep access, DNS, Homepage annotations, storage and secret references beside
   their owner in `deploy.yaml`. Internal apps use the private gateway and
   `PrivateDNSRecord`; public apps follow Kubelab's public-tunnel conventions and

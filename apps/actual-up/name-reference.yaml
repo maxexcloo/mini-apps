@@ -1,7 +1,0 @@
-nameReference:
-  - kind: ConfigMap
-    fieldSpecs:
-      - kind: HelmRelease
-        path: spec/values/persistence/configuration/name
-      - kind: HelmRelease
-        path: spec/values/persistence/runtime/name

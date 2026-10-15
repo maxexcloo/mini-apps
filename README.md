@@ -32,8 +32,10 @@ same commit. Flux watches that branch and automatically reconciles changes.
 Kubelab owns the Flux source, cluster selection and shared platform integrations.
 This repository owns the selected mini apps' native workloads, routes and app-scoped
 integrations. Plain static or dependency-free apps can mount checked-in assets
-through hashed ConfigMaps into pinned upstream runtimes. Apps needing custom
-images keep their build beside their source and pin the published digest.
+through hashed ConfigMaps into pinned upstream runtimes. Keep this repository
+focused on small tools and simple backends, including apps with their own SQLite
+storage. More involved services keep their own repositories, images and Kubelab
+deployment; Actual Up is maintained separately.
 
 Network exposure and application authorisation are separate choices: internal or
 external routing, with public, account-based or secret-link access as appropriate.
