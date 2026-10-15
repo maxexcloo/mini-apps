@@ -123,14 +123,6 @@ metadata:
 spec:
   hostname: app.invalid
 ---
-apiVersion: automation.excloo.dev/v1alpha1
-kind: PrivateDNSRecord
-metadata:
-  name: reddit
-  namespace: redlib-multi
-spec:
-  hostname: app.invalid
----
 apiVersion: v1
 kind: Namespace
 metadata:

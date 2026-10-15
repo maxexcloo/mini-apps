@@ -28,12 +28,6 @@ replacements:
       fieldPath: spec.values.route.private.hostnames.0
     targets:
       - select:
-          kind: PrivateDNSRecord
-          name: reddit
-          namespace: redlib-multi
-        fieldPaths:
-          - spec.hostname
-      - select:
           kind: HelmRelease
           name: redlib-multi
           namespace: redlib-multi

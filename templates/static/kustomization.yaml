@@ -21,12 +21,6 @@ replacements:
       fieldPath: spec.values.route.private.hostnames.0
     targets:
       - select:
-          kind: PrivateDNSRecord
-          name: mini-tool
-          namespace: mini-tool
-        fieldPaths:
-          - spec.hostname
-      - select:
           kind: HelmRelease
           name: mini-tool
           namespace: mini-tool

@@ -56,8 +56,11 @@ Use `<name>.mini.excloo.com` for app hostnames, for example
 `notes.mini.excloo.com`. CI enforces a single lowercase DNS label on app routes,
 private DNS, Homepage links and OIDC URLs. Redlib's existing `redlib.excloo.com`
 remains a compatibility exception for saved links. This naming rule does not
-change whether an app is internal or external. Verify certificate coverage before
-publication: `*.excloo.com` does not cover these nested names.
+change whether an app is internal or external. Mini apps run on SYD. The shared
+unproxied `*.mini.excloo.com` CNAME points to its private gateway, so private apps
+need no individual DNS record. Public apps need an explicit DNS override. Verify
+certificate coverage before publication: `*.excloo.com` does not cover these
+nested names.
 
 Homepage discovers deployed apps from their enabled route annotations and lists
 them in its **Mini Apps** group. The inventory refreshes every five minutes; no
