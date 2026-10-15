@@ -2,13 +2,14 @@
 
 ## First Run
 
-1. Push `main` to publish a commit-tagged image, or tag the matching package
-   version (for example `v0.1.0`) to publish a versioned image. Pin the resulting
-   tag and digest in kubelab.
-2. Let kubelab provision the `Actual Up` 1Password item with app login and
-   encryption key.
-3. Unsuspend the prepared Helm release when ready to configure it. Mappings
-   start empty, so no accounts are imported until they are configured.
+1. Keep source and native deployment configuration in `apps/actual-up` of
+   `mini-apps`. Push changes through the shared checks and container smoke tests;
+   CI advances `deploy` and Flux selects `clusters/mbk`.
+2. Let External Secrets supply the app login and settings encryption key from the
+   existing `Actual Up` 1Password item. Keep real values out of source and CI.
+3. Retain the release name, namespace and `data` PVC. The app starts with empty
+   mappings on a new installation; the existing deployment retains its encrypted
+   settings and mappings.
 4. Open the private HTTPS app with the login from 1Password. Use **Connections** to enter Actual credentials, add Up keys and save mappings.
 5. Saving a mapping automatically backfills it. The app syncs recent
    changes every 15 minutes and backfills nightly. Set `schedule.enabled: false`
@@ -28,10 +29,12 @@ It holds at most 32 operations and retains the latest 20 completed results in
 memory. Exceptions are reported without their potentially sensitive contents.
 An account failure makes the run fail even if other accounts succeeded.
 
-History and queued jobs reset on restart. `/data` uses a persistent volume for
-browser settings and the Actual cache. Back up `settings.json`; only the Actual
-cache can be rebuilt. The chart creates a 1Gi claim by default, or accepts
-`persistence.existingClaim` and `persistence.storageClass`. Import identities make reconciliation repeatable.
+History and queued jobs reset on restart. The mini-app deployment preserves
+`/data/settings.json` on the existing persistent volume and keeps the rebuildable
+Actual cache in `/tmp/actual-cache`. Back up the encrypted settings file and retain
+its encryption key in 1Password. For independent installations, the included chart
+creates a 1Gi claim by default or accepts `persistence.existingClaim` and
+`persistence.storageClass`. Import identities make reconciliation repeatable.
 Startup and nightly full-history backfills recover gaps after an extended outage
 or interrupted run. Manual backfill remains available. Do not run a
 standalone CLI writer alongside the service, or deploy a second instance for the
