@@ -1,0 +1,2 @@
+# Bundled template literals contain significant trailing whitespace.
+apps/*/static/ui.mjs -whitespace
