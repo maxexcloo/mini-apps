@@ -6,9 +6,22 @@ import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 import { normaliseSubreddits } from "./static/subreddits.mjs";
 
+export function subredditStatus(html, name) {
+  const error = /<div id="error">\s*<h1>([^<]*)<\/h1>/.exec(html)?.[1]?.trim();
+  if (error === `r/${name} has been banned from Reddit`) return "banned";
+  if (error === `r/${name} is a private community`) return "private";
+  if (new RegExp(`<h1>r/${name} is (?:quarantined|gated)</h1>`).test(html))
+    return "restricted";
+  if (!error && html.includes(`<p id="sub_name">r/${name}</p>`))
+    return "available";
+  return "unknown";
+}
+
 export function createApp({
   dataDirectory = process.env.DATA_DIRECTORY || "./data",
   redlibUrl = process.env.REDLIB_URL || "https://reddit.excloo.com",
+  checkUrl = process.env.REDLIB_CHECK_URL || redlibUrl,
+  fetchStatus = fetch,
 } = {}) {
   const origin = new URL(redlibUrl);
   if (
@@ -20,6 +33,18 @@ export function createApp({
     origin.hash
   )
     throw new Error("REDLIB_URL must be an HTTP or HTTPS origin.");
+  const checkOrigin = new URL(checkUrl);
+  if (
+    !["http:", "https:"].includes(checkOrigin.protocol) ||
+    checkOrigin.username ||
+    checkOrigin.password ||
+    checkOrigin.pathname !== "/" ||
+    checkOrigin.search ||
+    checkOrigin.hash
+  )
+    throw new Error("REDLIB_CHECK_URL must be an HTTP or HTTPS origin.");
+  const statusCache = new Map();
+  let statusRequests = 0;
   mkdirSync(dataDirectory, { mode: 0o700, recursive: true });
   // Retain the original filename, schema and hashed keys for existing lists.
   const database = new DatabaseSync(resolve(dataDirectory, "lists.sqlite"));
@@ -105,6 +130,56 @@ export function createApp({
       }
       if (path === "/api/config" && request.method === "GET")
         return json(200, { redlibUrl: origin.origin });
+      if (path === "/api/check" && request.method === "POST") {
+        if (request.headers["sec-fetch-site"] === "cross-site")
+          return json(403, { error: "Cross-site checks are not allowed." });
+        if (request.headers["content-type"] !== "application/json")
+          return json(415, { error: "Use application/json." });
+        let body = "";
+        for await (const chunk of request) {
+          body += chunk.toString("utf8");
+          if (body.length > 1024)
+            return json(413, { error: "Check one subreddit at a time." });
+        }
+        let name;
+        try {
+          name = JSON.parse(body)?.subreddit;
+        } catch {
+          return json(400, { error: "Invalid JSON." });
+        }
+        if (typeof name !== "string" || !/^[a-z0-9_]{2,21}$/.test(name))
+          return json(400, { error: "Provide a valid subreddit name." });
+        const cached = statusCache.get(name);
+        if (cached && cached.expires > Date.now())
+          return json(200, { status: cached.status });
+        if (statusRequests >= 2)
+          return json(429, { error: "Checks are busy. Try again shortly." });
+        statusRequests++;
+        let status = "unknown";
+        try {
+          const upstream = await fetchStatus(
+            `${checkOrigin.origin}/r/${name}?limit=1`,
+            {
+              headers: { "User-Agent": "Redlib-Multi/0.2.0" },
+              redirect: "error",
+              signal: AbortSignal.timeout(10000),
+            },
+          );
+          if (upstream.status !== 429 && upstream.status < 500)
+            status = subredditStatus(await upstream.text(), name);
+        } catch {
+          // A timeout, network block or upstream failure cannot establish a ban.
+        } finally {
+          statusRequests--;
+        }
+        if (statusCache.size >= 1000)
+          statusCache.delete(statusCache.keys().next().value);
+        statusCache.set(name, {
+          status,
+          expires: Date.now() + (status === "unknown" ? 60000 : 900000),
+        });
+        return json(200, { status });
+      }
       const match = /^\/api\/lists\/([a-zA-Z0-9_-]{1,128})(\/transfer)?$/.exec(
         path,
       );

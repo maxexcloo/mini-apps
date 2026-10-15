@@ -17,6 +17,13 @@ to RedSim for related subreddits. Open or copy the combined feed
 at the top of the editor. Anyone who can reach the app and knows a list name can
 read and edit that list. No account or list directory is provided.
 
+Use **Check All** to check every saved entry through Redlib, including entries
+hidden by the filter. Results distinguish **Available**, **Banned**, **Private**,
+**Restricted** and **Unknown**. **Unknown** means the status could not be confirmed;
+failed requests and rate limits never establish a ban. **Stop Check** stops the
+current pass. Checks never edit or remove entries. Results are cached for up to
+15 minutes to limit upstream requests.
+
 **Suggested Subreddits** merges related communities from every entry in the list,
 excludes existing entries and ranks the top 20, with an **Add**
 action. The browser downloads RedSim's public dataset and calculates suggestions
@@ -37,7 +44,9 @@ mise run start
 Open `http://127.0.0.1:3000`. Settings are `DATA_DIRECTORY` (default `./data`),
 `HOST` (default `127.0.0.1`), `PORT` (default `3000`) and `REDLIB_URL` (default
 `https://reddit.excloo.com`). The Redlib origin configures both individual and
-combined feed links. `/health` is a capability-free database readiness probe.
+combined feed links. `REDLIB_CHECK_URL` defaults to that origin and can point to
+the same Redlib service's internal HTTP origin for status checks. `/health` is a
+capability-free database readiness probe.
 
 ## Containers
 

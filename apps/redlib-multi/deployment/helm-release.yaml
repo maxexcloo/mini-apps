@@ -29,6 +29,7 @@ spec:
               DATA_DIRECTORY: /data
               HOST: 0.0.0.0
               PORT: "3000"
+              REDLIB_CHECK_URL: ${REDLIB_CHECK_URL}
               REDLIB_URL: ${REDLIB_URL}
             image:
               pullPolicy: IfNotPresent

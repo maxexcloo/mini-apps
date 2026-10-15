@@ -49,6 +49,84 @@ let subreddits = [];
 let revision = 0;
 let busy = true;
 let redlibUrl;
+const subredditStatuses = new Map();
+let checkController;
+
+function renderStatuses() {
+  for (const row of $("#communities").children) {
+    const status = subredditStatuses.get(row.dataset.name);
+    const badge = row.querySelector("wa-badge");
+    badge.hidden = !status;
+    badge.textContent =
+      {
+        available: "Available",
+        banned: "Banned",
+        private: "Private",
+        restricted: "Restricted",
+        unknown: "Unknown",
+      }[status] || "";
+    badge.variant =
+      status === "banned"
+        ? "danger"
+        : status === "available"
+          ? "success"
+          : ["private", "restricted"].includes(status)
+            ? "warning"
+            : "neutral";
+    badge.title =
+      status === "unknown"
+        ? "The community's status could not be confirmed."
+        : "Checked through Redlib.";
+  }
+  $("#check-all").disabled = !checkController && (busy || !subreddits.length);
+  $("#check-all").textContent = checkController ? "Stop Check" : "Check All";
+}
+
+$("#check-all").addEventListener("click", async () => {
+  if (checkController) {
+    checkController.abort();
+    return;
+  }
+  const controller = new AbortController();
+  checkController = controller;
+  const names = [...subreddits];
+  let next = 0;
+  let completed = 0;
+  function progress(stopped = false) {
+    const banned = names.filter(
+      (name) => subredditStatuses.get(name) === "banned",
+    ).length;
+    $("#check-state").textContent =
+      `${stopped ? "Stopped" : completed === names.length ? "Checked" : "Checking"} ${completed}/${names.length} · ${banned} banned`;
+    renderStatuses();
+  }
+  progress();
+  async function worker() {
+    while (!controller.signal.aborted && next < names.length) {
+      const name = names[next++];
+      try {
+        const response = await fetch("/api/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subreddit: name }),
+          signal: controller.signal,
+        });
+        subredditStatuses.set(
+          name,
+          response.ok ? (await response.json()).status : "unknown",
+        );
+      } catch {
+        if (controller.signal.aborted) return;
+        subredditStatuses.set(name, "unknown");
+      }
+      completed++;
+      progress();
+    }
+  }
+  await Promise.all([worker(), worker()]);
+  checkController = undefined;
+  progress(controller.signal.aborted);
+});
 const selected = new Set();
 let recommendations;
 let recommendationsLoading = false;
@@ -259,6 +337,7 @@ function render() {
   $("#communities").replaceChildren(
     ...filtered.map((name) => {
       const row = document.createElement("li");
+      row.dataset.name = name;
       const checkbox = document.createElement("wa-checkbox");
       checkbox.checked = selected.has(name);
       checkbox.disabled = busy;
@@ -291,10 +370,16 @@ function render() {
       remove.addEventListener("click", () =>
         save(subreddits.filter((value) => value !== name)),
       );
-      row.append(checkbox, link, similar, remove);
+      const status = document.createElement("wa-badge");
+      status.hidden = true;
+      const community = document.createElement("div");
+      community.className = "community-name";
+      community.append(link, status);
+      row.append(checkbox, community, similar, remove);
       return row;
     }),
   );
+  renderStatuses();
   renderSuggestions();
 }
 

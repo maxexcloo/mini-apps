@@ -71,12 +71,16 @@
             >Add</wa-button
           >
         </form>
-        <wa-input
-          id="filter"
-          type="search"
-          aria-label="Filter Subreddits"
-          placeholder="Filter"
-        ></wa-input>
+        <div class="check-row">
+          <wa-input
+            id="filter"
+            type="search"
+            aria-label="Filter Subreddits"
+            placeholder="Filter"
+          ></wa-input>
+          <wa-button id="check-all" size="small">Check All</wa-button>
+        </div>
+        <p id="check-state" class="hint" aria-live="polite"></p>
         <div class="selection-heading">
           <wa-checkbox id="select-visible">Select Visible</wa-checkbox>
           <span id="selection-count" class="hint">0 Selected</span>

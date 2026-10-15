@@ -125,8 +125,15 @@ h1 {
   margin: 0;
   color: var(--wa-color-text-quiet);
 }
-#filter {
+.check-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
   margin-top: 16px;
+}
+#check-state:empty {
+  display: none;
 }
 ul {
   list-style: none;
@@ -141,6 +148,17 @@ li {
   padding: 8px 4px 8px 12px;
   border-radius: 8px;
   border-bottom: var(--wa-border-width-s) solid var(--wa-color-surface-border);
+}
+li wa-badge {
+  font-size: var(--wa-font-size-xs);
+}
+.community-name {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
 }
 li:hover {
   background: var(--wa-color-surface-lowered);
