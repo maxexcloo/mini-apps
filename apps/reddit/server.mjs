@@ -6,6 +6,32 @@ import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 import { normaliseSubreddits } from "./subreddits.mjs";
 
+class RequestError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+async function readJson(request, limit, tooLarge, action = "writes") {
+  if (request.headers["sec-fetch-site"] === "cross-site")
+    throw new RequestError(403, `Cross-site ${action} are not allowed.`);
+  if (request.headers["content-type"] !== "application/json")
+    throw new RequestError(415, "Use application/json.");
+  let length = 0;
+  const chunks = [];
+  for await (const chunk of request) {
+    length += chunk.length;
+    if (length > limit) throw new RequestError(413, tooLarge);
+    chunks.push(chunk);
+  }
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  } catch {
+    throw new RequestError(400, "Invalid JSON.");
+  }
+}
+
 export function subredditStatus(html, name) {
   const error = /<div id="error">\s*<h1>([^<]*)<\/h1>/.exec(html)?.[1]?.trim();
   if (error === `r/${name} has been banned from Reddit`) return "banned";
@@ -183,22 +209,8 @@ export function createApp({
       if (path === "/api/config" && request.method === "GET")
         return json(200, { redlibUrl: origin.origin });
       if (path === "/api/normalise-lists" && request.method === "POST") {
-        if (request.headers["sec-fetch-site"] === "cross-site")
-          return json(403, { error: "Cross-site writes are not allowed." });
-        if (request.headers["content-type"] !== "application/json")
-          return json(415, { error: "Use application/json." });
-        let body = "";
-        for await (const chunk of request) {
-          body += chunk.toString("utf8");
-          if (body.length > 150000)
-            return json(413, { error: "Too many list names." });
-        }
-        let names;
-        try {
-          names = JSON.parse(body)?.names;
-        } catch {
-          return json(400, { error: "Invalid JSON." });
-        }
+        const names = (await readJson(request, 150000, "Too many list names."))
+          ?.names;
         if (
           !Array.isArray(names) ||
           names.length > 1000 ||
@@ -211,22 +223,14 @@ export function createApp({
         return json(200, { names: normaliseLists(names) });
       }
       if (path === "/api/check" && request.method === "POST") {
-        if (request.headers["sec-fetch-site"] === "cross-site")
-          return json(403, { error: "Cross-site checks are not allowed." });
-        if (request.headers["content-type"] !== "application/json")
-          return json(415, { error: "Use application/json." });
-        let body = "";
-        for await (const chunk of request) {
-          body += chunk.toString("utf8");
-          if (body.length > 1024)
-            return json(413, { error: "Check one subreddit at a time." });
-        }
-        let name;
-        try {
-          name = JSON.parse(body)?.subreddit;
-        } catch {
-          return json(400, { error: "Invalid JSON." });
-        }
+        const name = (
+          await readJson(
+            request,
+            1024,
+            "Check one subreddit at a time.",
+            "checks",
+          )
+        )?.subreddit;
         if (typeof name !== "string" || !/^[a-z0-9_]{2,21}$/.test(name))
           return json(400, { error: "Provide a valid subreddit name." });
         const cached = statusCache.get(name);
@@ -272,24 +276,11 @@ export function createApp({
         if (!transfer && request.method === "GET") return json(200, current());
         if (request.method !== (transfer ? "POST" : "PUT"))
           return json(405, { error: "Method not allowed." });
-        if (request.headers["sec-fetch-site"] === "cross-site")
-          return json(403, { error: "Cross-site writes are not allowed." });
-        if (request.headers["content-type"] !== "application/json")
-          return json(415, { error: "Use application/json." });
-        let length = 0;
-        const chunks = [];
-        for await (const chunk of request) {
-          length += chunk.length;
-          if (length > Math.max(65536, current().subreddits.length * 24 + 1024))
-            return json(413, { error: "List is too large." });
-          chunks.push(chunk);
-        }
-        let input;
-        try {
-          input = JSON.parse(Buffer.concat(chunks).toString("utf8"));
-        } catch {
-          return json(400, { error: "Invalid JSON." });
-        }
+        const input = await readJson(
+          request,
+          Math.max(65536, current().subreddits.length * 24 + 1024),
+          "List is too large.",
+        );
         if (
           !input ||
           !Number.isSafeInteger(input.revision) ||
@@ -400,8 +391,13 @@ export function createApp({
       if (!asset) return json(404, { error: "Page not found." });
       response.writeHead(200, { "Content-Type": asset.type });
       response.end(request.method === "HEAD" ? undefined : asset.content);
-    } catch {
-      json(500, { error: "Unable to process this request." });
+    } catch (error) {
+      json(error instanceof RequestError ? error.status : 500, {
+        error:
+          error instanceof RequestError
+            ? error.message
+            : "Unable to process this request.",
+      });
     }
   });
   server.on("close", () => database.close());
