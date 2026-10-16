@@ -20,10 +20,11 @@ export function subredditStatus(html, name) {
 export function createApp({
   dataDirectory = process.env.DATA_DIRECTORY ||
     fileURLToPath(new URL("./data", import.meta.url)),
-  redlibUrl = process.env.REDLIB_URL || "https://reddit.excloo.com",
+  redlibUrl = process.env.REDLIB_URL,
   checkUrl = process.env.REDLIB_CHECK_URL || redlibUrl,
   fetchStatus = fetch,
 } = {}) {
+  if (!redlibUrl) throw new Error("REDLIB_URL is required.");
   const origin = new URL(redlibUrl);
   if (
     !["http:", "https:"].includes(origin.protocol) ||

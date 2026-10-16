@@ -22,7 +22,10 @@ test("atomically merges legacy case variants, retains unrecognised lists and rej
   seed("TRAVEL", ["melbourne", "sydney"], 3);
   seed("travel", ["perth", "australia"], 2);
   seed("Unseen", ["brisbane"], 4);
-  const server = createApp({ dataDirectory: directory });
+  const server = createApp({
+    dataDirectory: directory,
+    redlibUrl: "https://feed.example",
+  });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
   const get = async (name) => (await fetch(`${base}/api/lists/${name}`)).json();
@@ -115,7 +118,10 @@ test("merging more than 1,000 entries preserves them and still allows removals",
           Array.from({ length: 1000 }, (_, index) => `${prefix}_${index}`),
         ),
       );
-  const server = createApp({ dataDirectory: directory });
+  const server = createApp({
+    dataDirectory: directory,
+    redlibUrl: "https://feed.example",
+  });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const url = `http://127.0.0.1:${server.address().port}/api/lists/Large`;
   try {

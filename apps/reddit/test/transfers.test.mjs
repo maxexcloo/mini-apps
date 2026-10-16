@@ -11,7 +11,10 @@ test("copies and moves selected entries atomically without overwriting either li
   let server;
   let base;
   async function start() {
-    server = createApp({ dataDirectory: directory });
+    server = createApp({
+      dataDirectory: directory,
+      redlibUrl: "https://feed.example",
+    });
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
     base = `http://127.0.0.1:${server.address().port}/api/lists`;
   }
@@ -114,7 +117,10 @@ test("copies and moves selected entries atomically without overwriting either li
 
 test("deletes empty lists while preserving stale-edit protection after recreation", async () => {
   const directory = mkdtempSync(join(tmpdir(), "redlib-empty-"));
-  const server = createApp({ dataDirectory: directory });
+  const server = createApp({
+    dataDirectory: directory,
+    redlibUrl: "https://feed.example",
+  });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const url = `http://127.0.0.1:${server.address().port}/api/lists/example`;
   const put = (revision, subreddits) =>

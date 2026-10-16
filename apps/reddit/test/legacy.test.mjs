@@ -9,15 +9,19 @@ import { createApp } from "../server.mjs";
 test("normalises names, links and multi links without retaining duplicates", () => {
   assert.deepEqual(
     normaliseSubreddits(
-      "Sydney, australia r/SYDNEY\nhttps://reddit.excloo.com/r/Australia+Melbourne/",
+      "Sydney, australia r/SYDNEY\nhttps://feed.example/r/Australia+Melbourne/",
     ),
     ["australia", "melbourne", "sydney"],
   );
   assert.equal(
-    multiredditUrl(normaliseSubreddits("Sydney+Australia")),
-    "https://reddit.excloo.com/r/australia+sydney",
+    multiredditUrl(
+      normaliseSubreddits("Sydney+Australia"),
+      "https://feed.example",
+    ),
+    "https://feed.example/r/australia+sydney",
   );
   assert.equal(multiredditUrl([]), null);
+  assert.throws(() => multiredditUrl(["sydney"]), /Supply a Redlib URL/);
   assert.deepEqual(normaliseSubreddits(""), []);
   assert.throws(() => normaliseSubreddits("bad<script>"), /Invalid subreddit/);
   assert.throws(() => normaliseSubreddits("../secrets"), /Invalid subreddit/);
@@ -27,7 +31,10 @@ test("saves isolated lists, rejects stale edits and survives restarts", async ()
   const directory = mkdtempSync(join(tmpdir(), "redlib-multi-"));
   let server;
   async function start() {
-    server = createApp({ dataDirectory: directory });
+    server = createApp({
+      dataDirectory: directory,
+      redlibUrl: "https://feed.example",
+    });
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
     return `http://127.0.0.1:${server.address().port}`;
   }
