@@ -14,11 +14,10 @@ export function normaliseSubreddits(input) {
   return [...new Set(tokens)].sort();
 }
 
-export function multiredditUrl(
-  subreddits,
-  redlibUrl = "https://reddit.excloo.com",
-) {
-  return subreddits.length ? `${redlibUrl}/r/${subreddits.join("+")}` : null;
+export function multiredditUrl(subreddits, redlibUrl) {
+  if (!subreddits.length) return null;
+  if (!redlibUrl) throw new Error("Supply a Redlib URL.");
+  return `${redlibUrl}/r/${subreddits.join("+")}`;
 }
 
 // RedSim packs a negative source marker, then destination IDs and ranks.

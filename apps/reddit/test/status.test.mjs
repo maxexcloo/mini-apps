@@ -53,6 +53,7 @@ test("checks a fixed Redlib origin, caches results, limits concurrency and prese
   });
   const server = createApp({
     dataDirectory: directory,
+    redlibUrl: "https://feed.example",
     checkUrl: "http://redlib.example:8080",
     fetchStatus: async (url, options) => {
       calls++;

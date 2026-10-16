@@ -13,6 +13,10 @@ import { test } from "node:test";
 import { createApp } from "../server.mjs";
 import { multiredditUrl } from "../subreddits.mjs";
 
+test("requires a configured Redlib endpoint before opening storage", () => {
+  assert.throws(() => createApp({ redlibUrl: "" }), /REDLIB_URL is required/);
+});
+
 test("opens an original database and merges its mixed-case identity into the lowercase list", async () => {
   const directory = mkdtempSync(join(tmpdir(), "redlib-compatibility-"));
   const database = new DatabaseSync(join(directory, "lists.sqlite"));
@@ -88,6 +92,7 @@ test("starts normally through a Kubernetes-style source symlink", async () => {
       DATA_DIRECTORY: join(directory, "data"),
       HOST: "127.0.0.1",
       PORT: String(port),
+      REDLIB_URL: "https://feed.example",
     },
     stdio: "ignore",
   });
