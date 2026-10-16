@@ -17,31 +17,5 @@ generatorOptions:
     kustomize.toolkit.fluxcd.io/substitute: disabled
 configurations:
   - name-reference.yaml
-replacements:
-  - source:
-      kind: HelmRelease
-      name: redlib-multi
-      namespace: redlib-multi
-      fieldPath: spec.values.route.private.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-          name: redlib-multi
-          namespace: redlib-multi
-        fieldPaths:
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
-  - source:
-      kind: HelmRelease
-      name: redlib-multi
-      namespace: redlib-multi
-      fieldPath: spec.values.route.private.hostnames.1
-    targets:
-      - select:
-          kind: PrivateDNSRecord
-          name: redlib-multi
-          namespace: redlib-multi
-        fieldPaths:
-          - spec.hostname
+components:
+  - ../../components/routes
