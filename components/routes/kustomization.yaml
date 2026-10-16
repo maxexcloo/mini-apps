@@ -10,7 +10,6 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.route.private.hostnames.0
-          - spec.values.route.private.hostnames.1
         options:
           delimiter: .
           index: 0

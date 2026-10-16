@@ -106,7 +106,6 @@ spec:
           gethomepage.dev/name: Reddit
         hostnames:
           - app.mini.excloo.com
-          - app.cluster.excloo.dev
         labels:
           app.kubernetes.io/name: redlib-multi
         parentRefs:

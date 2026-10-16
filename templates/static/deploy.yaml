@@ -86,7 +86,6 @@ spec:
           gethomepage.dev/name: Text Counter
         hostnames:
           - app.mini.excloo.com
-          - app.cluster.excloo.dev
         labels:
           app.kubernetes.io/name: mini-tool
         parentRefs:
