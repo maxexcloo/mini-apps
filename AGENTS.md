@@ -1,6 +1,9 @@
 # Mini Apps
 
-- Keep each app in `apps/<name>`, matching its `<name>.mini.excloo.com` hostname.
+- Keep each app in `apps/<name>`. Set its Namespace's `app.excloo.dev/name` label
+  once; the shared routes component derives `<name>.mini.excloo.com` and the
+  private `<name>.<cluster>.excloo.dev` alias. Keep both route placeholders in
+  the template and select the cluster through its overlay.
   Deploy mini apps to SYD through `clusters/syd/kustomization.yaml`.
 - Prefer a single HTML page. Add a small backend only when needed. Keep native
   Kubernetes resources beside the app; avoid generators, build scripts and

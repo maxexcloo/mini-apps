@@ -85,7 +85,8 @@ spec:
           gethomepage.dev/icon: mdi-text-box-outline
           gethomepage.dev/name: Text Counter
         hostnames:
-          - mini-tool.mini.excloo.com
+          - app.mini.excloo.com
+          - app.cluster.excloo.dev
         labels:
           app.kubernetes.io/name: mini-tool
         parentRefs:
@@ -105,6 +106,7 @@ kind: Namespace
 metadata:
   name: mini-tool
   labels:
+    app.excloo.dev/name: mini-tool
     gateway.excloo.dev/private-access: "true"
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/enforce: restricted

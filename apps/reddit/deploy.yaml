@@ -105,8 +105,8 @@ spec:
           gethomepage.dev/icon: sh-reddit
           gethomepage.dev/name: Reddit
         hostnames:
-          - reddit.mini.excloo.com
-          - redlib.excloo.com
+          - app.mini.excloo.com
+          - app.cluster.excloo.dev
         labels:
           app.kubernetes.io/name: redlib-multi
         parentRefs:
@@ -121,14 +121,6 @@ spec:
             port: 3000
             protocol: HTTP
 ---
-apiVersion: automation.excloo.dev/v1alpha1
-kind: PrivateDNSRecord
-metadata:
-  name: redlib-multi
-  namespace: redlib-multi
-spec:
-  hostname: app.invalid
----
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -136,6 +128,7 @@ metadata:
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
+    app.excloo.dev/name: reddit
     app.kubernetes.io/name: redlib-multi
     gateway.excloo.dev/private-access: "true"
     pod-security.kubernetes.io/audit: restricted

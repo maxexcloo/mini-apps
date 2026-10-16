@@ -13,19 +13,5 @@ generatorOptions:
     kustomize.toolkit.fluxcd.io/substitute: disabled
 configurations:
   - name-reference.yaml
-replacements:
-  - source:
-      kind: HelmRelease
-      name: mini-tool
-      namespace: mini-tool
-      fieldPath: spec.values.route.private.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-          name: mini-tool
-          namespace: mini-tool
-        fieldPaths:
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
+components:
+  - ../../components/routes
