@@ -68,3 +68,41 @@ test("rejects invalid JSON requests consistently while retaining endpoint limits
     rmSync(directory, { force: true, recursive: true });
   }
 });
+
+test("allows the page's responsive stylesheet with a fresh, scoped nonce", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "reddit-page-csp-"));
+  const server = createApp({
+    dataDirectory: directory,
+    redlibUrl: "https://feed.example",
+  });
+  try {
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const nonces = [];
+    for (const path of ["/", "/example"]) {
+      const response = await fetch(base + path);
+      const html = await response.text();
+      const nonce = html.match(/<wa-page nonce="([A-Za-z0-9+/=]+)">/)?.[1];
+      assert.ok(nonce);
+      const policy = response.headers.get("Content-Security-Policy");
+      assert.ok(
+        policy
+          .split(";")
+          .find((part) => part.trim().startsWith("style-src "))
+          .includes(`'nonce-${nonce}'`),
+      );
+      assert.ok(
+        !policy
+          .split(";")
+          .find((part) => part.trim().startsWith("script-src "))
+          .includes("nonce-"),
+      );
+      assert.ok(!policy.includes("unsafe-inline"));
+      nonces.push(nonce);
+    }
+    assert.notEqual(nonces[0], nonces[1]);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    rmSync(directory, { force: true, recursive: true });
+  }
+});
