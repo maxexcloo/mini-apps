@@ -47,6 +47,43 @@ landing page. Its app listing refreshes automatically. A repository AI connectio
 can submit PRs without cluster credentials; read `AGENTS.md` before editing.
 Source is public; stored app data and credentials remain private.
 
+## Update Web Awesome
+
+The checked-in bundle needs no build step at runtime. To regenerate it, run the
+following from the repository root; dependencies and the entrypoint stay in a
+temporary directory. Add or remove component imports to match the page.
+
+```sh
+vendor_work=$(mktemp -d)
+npm install --no-package-lock --prefix "$vendor_work" @awesome.me/webawesome@3.14.0 esbuild@0.28.2
+cat > "$vendor_work/entry.mjs" <<'EOF'
+import "@awesome.me/webawesome/dist/styles/webawesome.css";
+import "@awesome.me/webawesome/dist/components/badge/badge.js";
+import "@awesome.me/webawesome/dist/components/button/button.js";
+import "@awesome.me/webawesome/dist/components/callout/callout.js";
+import "@awesome.me/webawesome/dist/components/card/card.js";
+import "@awesome.me/webawesome/dist/components/checkbox/checkbox.js";
+import "@awesome.me/webawesome/dist/components/divider/divider.js";
+import "@awesome.me/webawesome/dist/components/icon/icon.js";
+import "@awesome.me/webawesome/dist/components/input/input.js";
+import "@awesome.me/webawesome/dist/components/option/option.js";
+import "@awesome.me/webawesome/dist/components/page/page.js";
+import "@awesome.me/webawesome/dist/components/select/select.js";
+EOF
+"$vendor_work/node_modules/.bin/esbuild" "$vendor_work/entry.mjs" \
+  --banner:js="// Web Awesome 3.14.0. See third-party-licences.txt for licences." \
+  --bundle --format=esm --legal-comments=eof \
+  --metafile="$vendor_work/bundle.json" --minify \
+  --outfile=apps/reddit/vendor/ui.mjs --target=es2022
+```
+
+This regenerates `ui.mjs` and `ui.css`. Review the dependency inputs in
+`$vendor_work/bundle.json` and refresh `vendor/third-party-licences.txt` from the
+included packages' licence files when dependencies change. Keep package versions
+and the banner in sync. Run `node --test`, render `clusters/syd`, and check the
+page in a browser for component loading and Content Security Policy errors before
+merging. Remove the temporary directory when finished.
+
 ## Licence
 
 AGPL-3.0 — see [LICENSE](LICENSE).

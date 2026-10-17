@@ -391,7 +391,8 @@
       const checkQueue = [];
 
       function checkSubreddit(name, signal) {
-        if (pendingChecks.has(name)) return pendingChecks.get(name);
+        const pending = pendingChecks.get(name);
+        if (pending && !pending.signal?.aborted) return pending.request;
         const request = new Promise((resolve) => {
           checkQueue.push(async () => {
             if (signal?.aborted) return resolve("unknown");
@@ -408,8 +409,11 @@
             if (!signal?.aborted) subredditStatuses.set(name, status);
             resolve(status);
           });
-        }).finally(() => pendingChecks.delete(name));
-        pendingChecks.set(name, request);
+        }).finally(() => {
+          if (pendingChecks.get(name)?.request === request)
+            pendingChecks.delete(name);
+        });
+        pendingChecks.set(name, { request, signal });
         drainChecks();
         return request;
       }
@@ -861,9 +865,8 @@
 
       async function transfer(action) {
         if (busy || !selected.size) return;
-        const originalDestination = originalListName($("#destination"));
+        const originalDestination = ($("#destination").value || "").trim();
         const destination = originalDestination.toLowerCase();
-        $("#destination").value = destination;
         if (
           !/^[a-zA-Z0-9_-]{1,128}$/.test(destination) ||
           destination === "health" ||
@@ -961,11 +964,6 @@
         }
       }
 
-      function originalListName(input) {
-        const name = (input.value || "").trim();
-        const original = input.dataset.originalName;
-        return original?.toLowerCase() === name ? original : name;
-      }
       for (const selector of [
         "#list-name",
         "#destination",
@@ -977,8 +975,7 @@
         input.addEventListener("input", async (event) => {
           const original = input.value || "";
           const isName = ["#list-name", "#destination"].includes(selector);
-          if (isName) input.dataset.originalName = original.trim();
-          const value = (isName ? original.trim() : original).toLowerCase();
+          const value = isName ? original.trim() : original.toLowerCase();
           input.setCustomValidity("");
           if (value === original) return;
           const native = event
@@ -1000,7 +997,7 @@
       }
       $("#open-list").addEventListener("submit", async (event) => {
         event.preventDefault();
-        const name = originalListName($("#list-name"));
+        const name = ($("#list-name").value || "").trim();
         if (name.toLowerCase() === "health") {
           $("#list-name").setCustomValidity(
             "This name is reserved. Choose another list name.",

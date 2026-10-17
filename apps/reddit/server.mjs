@@ -87,9 +87,6 @@ export function createApp({
     "CREATE TABLE IF NOT EXISTS deleted_lists (id TEXT PRIMARY KEY, revision INTEGER NOT NULL)",
   );
   database.exec(
-    "CREATE TABLE IF NOT EXISTS list_aliases (id TEXT PRIMARY KEY, canonical_id TEXT NOT NULL)",
-  );
-  database.exec(
     "BEGIN IMMEDIATE; INSERT OR REPLACE INTO deleted_lists SELECT id, revision FROM lists WHERE subreddits = '[]'; DELETE FROM lists WHERE subreddits = '[]'; COMMIT",
   );
   function readList(key) {
@@ -123,12 +120,15 @@ export function createApp({
   }
   const listKey = (name) => createHash("sha256").update(name).digest("hex");
   function normaliseLists(names) {
-    database.exec("BEGIN IMMEDIATE");
-    try {
-      for (const name of names) {
-        const oldKey = listKey(name);
-        const key = listKey(name.toLowerCase());
-        if (oldKey !== key) {
+    const legacy = names.filter(
+      (name) => name !== name.toLowerCase() && readList(listKey(name)).revision,
+    );
+    if (legacy.length) {
+      database.exec("BEGIN IMMEDIATE");
+      try {
+        for (const name of legacy) {
+          const oldKey = listKey(name);
+          const key = listKey(name.toLowerCase());
           const old = readList(oldKey);
           if (old.revision) {
             const current = readList(key);
@@ -142,20 +142,10 @@ export function createApp({
               .run(oldKey);
           }
         }
-        database
-          .prepare(
-            "INSERT INTO list_aliases (id, canonical_id) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET canonical_id = excluded.canonical_id",
-          )
-          .run(oldKey, key);
-        database
-          .prepare(
-            "INSERT OR IGNORE INTO list_aliases (id, canonical_id) VALUES (?, ?)",
-          )
-          .run(key, key);
+        database.exec("COMMIT");
+      } finally {
+        if (database.isTransaction) database.exec("ROLLBACK");
       }
-      database.exec("COMMIT");
-    } finally {
-      if (database.isTransaction) database.exec("ROLLBACK");
     }
     return [...new Set(names.map((name) => name.toLowerCase()))]
       .filter((name) => readList(listKey(name)).subreddits.length)
