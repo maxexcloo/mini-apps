@@ -7,8 +7,14 @@
 - Prefer a single HTML page. Add a small backend only when needed. Keep native
   Kubernetes resources beside the app; avoid generators, build scripts and
   alternate packaging. Substantial services belong in their own repositories.
-- Use locally served Web Awesome components and their default appearance, matching
-  AI Control. Keep app CSS focused on layout and operational feedback.
+- Choose a backend and datastore for the app's behaviour; existing Node.js/SQLite
+  apps are examples, not a required stack. A backend such as PocketBase
+  can replace custom auth, data APIs and file handling when that reduces the
+  app's code and operational burden. Keep reusable recipes in the build skill.
+- Prefer locally served Web Awesome components and their default appearance,
+  matching AI Control. Allow native controls or another UI approach when requested
+  or when they materially simplify the app; keep CSS focused on layout and
+  operational feedback. The dependency-free static starter is an allowed exception.
 - Private apps use the private gateway and shared wildcard DNS. Public apps use
   SYD's `public-direct` gateway, `websecuredirect` listener, public-access namespace
   and route labels, and unproxied ExternalDNS records. Review live route changes.

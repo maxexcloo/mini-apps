@@ -8,6 +8,55 @@ import { test } from "node:test";
 import { createApp } from "../server.mjs";
 
 const key = (name) => createHash("sha256").update(name).digest("hex");
+
+test("ordinary list reads need no writer lock and preserve existing aliases", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "redlib-read-only-"));
+  const database = new DatabaseSync(join(directory, "lists.sqlite"));
+  database.exec(
+    "CREATE TABLE list_aliases (id TEXT PRIMARY KEY, canonical_id TEXT NOT NULL)",
+  );
+  database
+    .prepare("INSERT INTO list_aliases VALUES (?, ?)")
+    .run(key("Travel"), key("travel"));
+  const server = createApp({
+    dataDirectory: directory,
+    redlibUrl: "https://feed.example",
+  });
+  try {
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const base = `http://127.0.0.1:${server.address().port}`;
+    database.exec("BEGIN IMMEDIATE");
+    for (const [path, method] of [
+      ["/api/lists/travel", "GET"],
+      ["/api/lists/Unknown", "GET"],
+      ["/unsaved", "GET"],
+      ["/unsaved", "HEAD"],
+    ]) {
+      const response = await fetch(base + path, { method });
+      assert.equal(response.status, 200, path);
+      await response.arrayBuffer();
+    }
+    database.exec("COMMIT");
+    assert.deepEqual(
+      database
+        .prepare("SELECT * FROM list_aliases")
+        .all()
+        .map((row) => ({ ...row })),
+      [{ id: key("Travel"), canonical_id: key("travel") }],
+    );
+    for (const table of ["lists", "deleted_lists"])
+      assert.equal(
+        database.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count,
+        0,
+      );
+  } finally {
+    if (database.isTransaction) database.exec("ROLLBACK");
+    await new Promise((resolve) => server.close(resolve));
+    database.close();
+    rmSync(directory, { force: true, recursive: true });
+  }
+});
+
 test("atomically merges legacy case variants, retains unrecognised lists and rejects stale edits", async () => {
   const directory = mkdtempSync(join(tmpdir(), "redlib-names-"));
   const database = new DatabaseSync(join(directory, "lists.sqlite"));
