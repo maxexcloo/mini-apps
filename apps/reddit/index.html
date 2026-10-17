@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-AU">
+<html lang="en-AU" class="wa-theme-default wa-palette-default wa-light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,469 +7,318 @@
     <title>Reddit Multi</title>
     <link href="/vendor/ui.css" rel="stylesheet" />
     <style>
-      :root {
-        --app-content-width: 1120px;
-        --wa-font-size-scale: 0.875;
-      }
       [hidden] {
         display: none !important;
       }
+      html,
       body {
+        min-height: 100%;
         margin: 0;
+        padding: 0;
+      }
+      body {
         background: var(--wa-color-surface-lowered);
       }
-      body > header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: var(--wa-space-m);
-        padding: var(--wa-space-m)
-          max(var(--wa-space-m), calc((100vw - var(--app-content-width)) / 2));
-        background: var(--wa-color-surface-default);
+      wa-page::part(header) {
         border-bottom: var(--wa-border-width-s) solid
           var(--wa-color-surface-border);
       }
-      .app-title > a {
-        color: inherit;
+      .app-header,
+      main {
+        width: 100%;
+        max-width: 100ch;
+        margin-inline: auto;
+      }
+      .app-header {
+        padding: var(--wa-space-s) var(--wa-space-l);
+      }
+      .app-title {
+        color: var(--wa-color-text-normal);
         font-size: var(--wa-font-size-l);
         font-weight: var(--wa-font-weight-bold);
         text-decoration: none;
       }
       main {
-        max-width: var(--app-content-width);
-        margin: var(--wa-space-l) auto;
-        padding: 0 var(--wa-space-m) var(--wa-space-l);
+        padding: var(--wa-space-xl) var(--wa-space-l);
       }
-      .panel {
-        padding: var(--wa-space-m);
-        background: var(--wa-color-surface-default);
-        border: var(--wa-border-width-s) solid var(--wa-color-surface-border);
-        border-radius: var(--wa-border-radius-l);
+      h1,
+      h2,
+      p {
+        margin: 0;
       }
-      .hint {
-        color: var(--wa-color-text-quiet);
-        font-size: var(--wa-font-size-s);
-      }
-      .app-title {
-        display: flex;
-        align-items: center;
-        gap: var(--wa-space-xs);
-      }
-      .theme-toggle,
-      .theme-toggle:hover,
-      .theme-toggle:active {
-        background: transparent;
-        border: 0;
-        box-shadow: none;
-      }
-      .theme-toggle {
-        width: var(--wa-form-control-height);
-        padding: 0;
-      }
-      .theme-toggle svg {
-        width: 1.25em;
-        height: 1.25em;
-      }
-      .theme-icon-light,
-      .wa-dark .theme-icon-dark {
-        display: none;
-      }
-      .wa-dark .theme-icon-light {
-        display: block;
-      }
-
-      @media (max-width: 680px) {
-        body {
-          background: var(--wa-color-surface-default);
-        }
-        main {
-          margin-top: var(--wa-space-m);
-        }
-        .panel {
-          padding: var(--wa-space-xs) 0;
-          border: 0;
-          border-radius: 0;
-          background: transparent;
-        }
-        fieldset {
-          padding: 0;
-          border: 0;
-        }
-        details,
-        details[open] {
-          padding: 0;
-          border: 0;
-          border-radius: 0;
-          background: transparent;
-        }
-        details > summary,
-        details[open] > summary {
-          margin-inline: 0;
-          padding-inline: 0;
-          padding-block: var(--wa-space-xs);
-        }
-        wa-card,
-        wa-details::part(base) {
-          border: 0;
-          border-radius: 0;
-          background: transparent;
-          box-shadow: none;
-        }
-        wa-card::part(body) {
-          padding: 0;
-        }
-        wa-details::part(header),
-        wa-details::part(content) {
-          padding-inline: 0;
-        }
-      }
-
       h1 {
-        font-size: var(--wa-font-size-xl);
+        font-size: var(--wa-font-size-2xl);
+        overflow-wrap: anywhere;
       }
       h2 {
         font-size: var(--wa-font-size-l);
       }
-      h3 {
-        font-size: var(--wa-font-size-m);
+      .hint {
+        color: var(--wa-color-text-quiet);
+        font-size: var(--wa-font-size-s);
       }
-      h1,
-      h2,
-      h3 {
-        margin: 0;
+      .intro {
+        max-width: 60ch;
       }
-      .wa-stack,
-      .wa-grid,
-      .wa-split {
-        gap: var(--wa-space-s);
-      }
-      .wa-cluster {
-        gap: var(--wa-space-xs);
-      }
-      .section-intro {
-        display: grid;
-        gap: var(--wa-space-2xs);
-        min-width: 0;
-      }
-      .section-intro > p {
-        margin: 0;
-      }
-      .section-actions {
-        flex-wrap: nowrap;
-        flex-shrink: 0;
-      }
-
-      wa-card {
-        display: block;
-      }
-      wa-card::part(body),
-      wa-input {
-        min-width: 0;
-      }
-      #editor {
-        padding: var(--wa-space-m);
-        background: var(--wa-color-surface-default);
-        border: var(--wa-border-width-s) solid var(--wa-color-surface-border);
-        border-radius: var(--wa-border-radius-l);
-      }
-      #destination-picker {
-        margin-bottom: var(--wa-space-s);
-      }
-      #suggestions .section-label {
-        margin: 0;
-        font-size: var(--wa-font-size-m);
-        font-weight: var(--wa-form-control-label-font-weight);
-        line-height: var(--wa-line-height-normal);
-      }
-      #suggestions {
-        margin-top: var(--wa-space-l);
-        padding-top: var(--wa-space-m);
-        border-top: var(--wa-border-width-s) solid
-          var(--wa-color-surface-border);
+      #welcome {
+        max-width: 60ch;
+        margin-inline: auto;
       }
       .input-row {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: end;
-        gap: var(--wa-space-s);
+        --content-percentage: 65%;
       }
-      .heading,
-      .feed-row,
-      .selection-heading,
-      .bulk-buttons {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: var(--wa-space-s);
-      }
-      .heading {
-        margin-bottom: var(--wa-space-m);
-      }
-      h1 {
+      .input-row > wa-input,
+      .check-row > wa-input {
         min-width: 0;
-        margin: 0;
-        overflow-wrap: anywhere;
       }
-      #copy-editor {
-        margin-left: auto;
-      }
-      .feed {
-        margin-bottom: var(--wa-space-m);
-      }
-      .feed-row {
-        justify-content: space-between;
-      }
-      .feed a {
+      .feed-link {
         min-width: 0;
         flex: 1;
+      }
+      .feed-link a {
         overflow-wrap: anywhere;
       }
-      .feed p {
-        margin: 0;
-        color: var(--wa-color-text-quiet);
-      }
-      .check-row {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: var(--wa-space-s);
-        margin-top: var(--wa-space-m);
-      }
-      #check-state:empty,
-      #status:empty {
-        display: none;
-      }
-      ul {
+      .community-list {
         list-style: none;
-        margin: var(--wa-space-s) 0;
+        margin: 0;
         padding: 0;
       }
-      li {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: var(--wa-space-s);
-        padding: var(--wa-space-s) 0;
+      .community-list > li {
+        padding-block: var(--wa-space-s);
         border-bottom: var(--wa-border-width-s) solid
           var(--wa-color-surface-border);
       }
-      .community-name {
-        display: flex;
+      .community-list > li:last-child {
+        border-bottom: 0;
+      }
+      .community-content {
         flex: 1;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--wa-space-xs);
         min-width: 0;
       }
-      li a {
+      .community-name {
+        min-width: min(16ch, 100%);
         flex: 1;
-        min-width: 0;
+      }
+      .community-name a,
+      #suggested-communities a {
         overflow-wrap: anywhere;
       }
-      .selection-heading {
-        margin-top: var(--wa-space-s);
-        flex-wrap: nowrap;
-        gap: var(--wa-space-xs);
-        white-space: nowrap;
-      }
-      .selection-heading #selection-count {
-        font-size: var(--wa-font-size-s);
-      }
-      #bulk-actions {
-        margin-top: var(--wa-space-s);
-      }
-      .bulk-buttons {
-        margin-top: var(--wa-space-s);
-      }
-      .hint {
-        margin-top: var(--wa-space-s);
-      }
-      #status {
-        color: var(--wa-color-danger-text-normal);
-      }
-      @media (max-width: 440px) {
-        #copy-editor {
-          margin-left: 0;
-        }
-      }
-
-      @media (max-width: 680px) {
-        #editor {
-          padding: 0;
-          border: 0;
-          border-radius: 0;
-          background: transparent;
-        }
-      }
-
-      #communities li {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto auto;
-        gap: var(--wa-space-xs);
-        padding-block: var(--wa-space-xs);
-      }
-      #communities .community-name {
+      #suggested-communities a {
+        flex: 1;
         min-width: 0;
       }
-      #communities .community-name a {
-        max-width: 100%;
+      .row-actions {
+        flex-shrink: 0;
+      }
+      #bulk-actions {
+        padding: var(--wa-space-m);
+        background: var(--wa-color-surface-lowered);
+        border-radius: var(--wa-border-radius-m);
+      }
+      #check-state:empty,
+      #status:empty,
+      #suggestions-state:empty,
+      #copy-editor-state:empty,
+      #copy-feed-state:empty {
+        display: none;
       }
     </style>
   </head>
   <body>
-    <header>
-      <div class="app-title">
-        <a href="/">Reddit Multi</a
-        ><button
-          type="button"
-          class="wa-plain theme-toggle"
+    <wa-page>
+      <header slot="header" class="app-header wa-split wa-gap-m">
+        <a class="app-title" href="/">Reddit Multi</a>
+        <wa-button
+          appearance="plain"
           data-theme-toggle
           aria-label="Dark Mode"
           aria-pressed="false"
           title="Switch to Dark Mode"
         >
-          <svg
-            class="theme-icon-dark"
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M20.9 13.3A9 9 0 0 1 10.7 3.1 9 9 0 1 0 20.9 13.3Z" /></svg
-          ><svg
-            class="theme-icon-light"
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          >
-            <circle cx="12" cy="12" r="4" />
-            <path
-              d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
-            />
-          </svg>
-        </button>
-      </div>
-    </header>
-    <main>
-      <wa-card id="welcome" hidden>
-        <form id="open-list" class="input-row">
-          <wa-input
-            id="list-name"
-            name="list-name"
-            label="List Name"
-            autocomplete="off"
-            maxlength="128"
-            pattern="[a-zA-Z0-9_-]+"
-            required
-          ></wa-input>
-          <wa-button type="submit" variant="brand">Open List</wa-button>
-        </form>
-        <p class="hint">Open a saved list or start a new one.</p>
-      </wa-card>
-      <section id="editor" hidden>
-        <div class="heading">
-          <h1 id="list-title">Your List</h1>
-          <wa-badge id="count" variant="neutral">0</wa-badge>
-          <wa-button id="copy-editor" appearance="plain"
-            >Copy Editing Link</wa-button
-          ><span id="copy-editor-state" class="hint" role="status"></span>
-        </div>
-        <wa-card class="feed">
-          <div class="feed-row">
-            <a id="feed" target="_blank" rel="noreferrer" hidden></a>
-            <p id="empty-feed">Add subreddits to build your feed.</p>
-            <wa-button id="copy-feed" disabled>Copy Link</wa-button
-            ><span id="copy-feed-state" class="hint" role="status"></span>
+          Dark Mode
+        </wa-button>
+      </header>
+      <main class="wa-stack wa-gap-l">
+        <wa-card id="welcome" hidden>
+          <div class="wa-stack wa-gap-l">
+            <div class="wa-stack wa-gap-s intro">
+              <h1>Your Communities, One Feed</h1>
+              <p class="hint">
+                Open a saved list or start a new one. Add your favourite
+                subreddits and read them together.
+              </p>
+            </div>
+            <form
+              id="open-list"
+              class="input-row wa-flank:end wa-align-items-end wa-gap-s"
+            >
+              <wa-input
+                id="list-name"
+                name="list-name"
+                label="List Name"
+                autocomplete="off"
+                maxlength="128"
+                pattern="[a-zA-Z0-9_-]+"
+                required
+              ></wa-input>
+              <wa-button type="submit" variant="brand">Open List</wa-button>
+            </form>
           </div>
         </wa-card>
-        <form id="add-form" class="input-row">
-          <wa-input
-            id="subreddits"
-            name="subreddits"
-            label="Subreddits"
-            autocomplete="off"
-            placeholder="Names, r/ links or a multi link"
-            required
-          ></wa-input>
-          <wa-button id="add-button" type="submit" variant="brand"
-            >Add</wa-button
-          >
-        </form>
-        <div class="check-row">
-          <wa-input
-            id="filter"
-            type="search"
-            aria-label="Filter Subreddits"
-            placeholder="Filter"
-          ></wa-input>
-          <wa-button id="check-all">Check All</wa-button>
-        </div>
-        <p id="check-state" class="hint" aria-live="polite"></p>
-        <div class="selection-heading">
-          <wa-checkbox id="select-visible" size="s">Select Visible</wa-checkbox>
-          <span id="selection-count">0 Selected</span>
-          <wa-button id="clear-selection" appearance="plain" size="s"
-            >Clear</wa-button
-          >
-        </div>
-        <div id="bulk-actions" hidden>
-          <wa-select
-            id="destination-picker"
-            label="Saved Destination"
-            placeholder="Choose or enter a new list"
-            hidden
-          ></wa-select>
-          <wa-input
-            id="destination"
-            label="Destination List"
-            autocomplete="off"
-            maxlength="128"
-            placeholder="List name"
-          ></wa-input>
-          <div class="bulk-buttons">
-            <wa-button id="copy-selected">Copy</wa-button>
-            <wa-button id="move-selected">Move</wa-button>
-            <wa-button
-              id="remove-selected"
-              variant="danger"
-              appearance="outlined"
-              >Remove Selected</wa-button
-            >
+        <section id="editor" class="wa-stack wa-gap-l" hidden>
+          <div class="wa-split wa-gap-s">
+            <div class="wa-cluster wa-gap-s">
+              <h1 id="list-title">Your List</h1>
+              <wa-badge id="count" variant="neutral">0</wa-badge>
+            </div>
+            <div class="wa-cluster wa-gap-s">
+              <wa-button id="copy-editor" appearance="plain"
+                >Copy Editing Link</wa-button
+              >
+              <span id="copy-editor-state" class="hint" role="status"></span>
+            </div>
           </div>
-        </div>
-        <p id="empty-list" class="hint">No subreddits yet.</p>
-        <ul id="communities" aria-label="Subreddits"></ul>
-        <p id="save-state" class="hint" role="status">Loading…</p>
-
-        <section id="suggestions" hidden>
-          <h2 class="section-label">Suggested</h2>
-          <p id="suggestions-state" class="hint"></p>
-          <ul id="suggested-communities" aria-label="Suggested Subreddits"></ul>
-          <wa-button id="retry-suggestions" appearance="plain" hidden
-            >Retry</wa-button
-          >
-          <p class="hint">
-            Related communities from
-            <a
-              href="https://anvaka.github.io/redsim/"
-              target="_blank"
-              rel="noreferrer"
-              >RedSim</a
-            >.
-          </p>
+          <wa-card>
+            <div class="wa-stack wa-gap-s">
+              <div class="feed-link wa-stack wa-gap-s">
+                <h2>Combined Feed</h2>
+                <a id="feed" target="_blank" rel="noreferrer" hidden></a>
+                <p id="empty-feed" class="hint">
+                  Add subreddits to build your feed.
+                </p>
+              </div>
+              <div class="wa-cluster wa-gap-s">
+                <wa-button id="copy-feed" disabled>Copy Feed Link</wa-button>
+                <span id="copy-feed-state" class="hint" role="status"></span>
+              </div>
+            </div>
+          </wa-card>
+          <wa-card>
+            <div class="wa-stack wa-gap-l">
+              <form
+                id="add-form"
+                class="input-row wa-flank:end wa-align-items-end wa-gap-s"
+              >
+                <wa-input
+                  id="subreddits"
+                  name="subreddits"
+                  label="Add Subreddits"
+                  autocomplete="off"
+                  placeholder="Names, r/ links or a multi link"
+                  required
+                ></wa-input>
+                <wa-button id="add-button" type="submit" variant="brand"
+                  >Add</wa-button
+                >
+              </form>
+              <wa-divider></wa-divider>
+              <section
+                class="wa-stack wa-gap-s"
+                aria-labelledby="communities-title"
+              >
+                <div class="wa-split wa-gap-s">
+                  <h2 id="communities-title">Subreddits</h2>
+                  <p id="save-state" class="hint" role="status">Loading…</p>
+                </div>
+                <div class="check-row wa-flank:end wa-gap-s">
+                  <wa-input
+                    id="filter"
+                    type="search"
+                    aria-label="Filter Subreddits"
+                    placeholder="Filter subreddits"
+                  ></wa-input>
+                  <wa-button id="check-all">Check All</wa-button>
+                </div>
+                <p id="check-state" class="hint" aria-live="polite"></p>
+                <div class="wa-split wa-gap-s">
+                  <wa-checkbox id="select-visible" size="s"
+                    >Select Visible</wa-checkbox
+                  >
+                  <div class="wa-cluster wa-gap-s">
+                    <span id="selection-count" class="hint">0 Selected</span>
+                    <wa-button id="clear-selection" appearance="plain" size="s"
+                      >Clear</wa-button
+                    >
+                  </div>
+                </div>
+                <div id="bulk-actions" class="wa-stack wa-gap-s" hidden>
+                  <wa-select
+                    id="destination-picker"
+                    label="Saved Destination"
+                    placeholder="Choose or enter a new list"
+                    hidden
+                  ></wa-select>
+                  <wa-input
+                    id="destination"
+                    label="Destination List"
+                    autocomplete="off"
+                    maxlength="128"
+                    placeholder="List name"
+                  ></wa-input>
+                  <div class="wa-cluster wa-gap-s">
+                    <wa-button id="copy-selected">Copy</wa-button>
+                    <wa-button id="move-selected">Move</wa-button>
+                    <wa-button
+                      id="remove-selected"
+                      variant="danger"
+                      appearance="outlined"
+                      >Remove Selected</wa-button
+                    >
+                  </div>
+                </div>
+                <p id="empty-list" class="hint">
+                  No subreddits yet. Add some above to get started.
+                </p>
+                <p id="empty-filter" class="hint" hidden>
+                  No subreddits match your filter.
+                </p>
+                <ul
+                  id="communities"
+                  class="community-list"
+                  aria-label="Subreddits"
+                ></ul>
+              </section>
+            </div>
+          </wa-card>
+          <wa-card id="suggestions" hidden>
+            <section
+              class="wa-stack wa-gap-s"
+              aria-labelledby="suggestions-title"
+            >
+              <h2 id="suggestions-title">Suggested Communities</h2>
+              <p id="suggestions-state" class="hint"></p>
+              <ul
+                id="suggested-communities"
+                class="community-list"
+                aria-label="Suggested Subreddits"
+              ></ul>
+              <wa-button id="retry-suggestions" appearance="plain" hidden
+                >Retry</wa-button
+              >
+              <p class="hint">
+                Related communities from
+                <a
+                  href="https://anvaka.github.io/redsim/"
+                  target="_blank"
+                  rel="noreferrer"
+                  >RedSim</a
+                >.
+              </p>
+            </section>
+          </wa-card>
         </section>
-      </section>
-      <p id="status" aria-live="polite" role="status"></p>
-    </main>
+        <wa-callout
+          id="status"
+          variant="danger"
+          aria-live="polite"
+          role="status"
+        ></wa-callout>
+      </main>
+    </wa-page>
     <script type="module">
-      import "/vendor/ui.mjs";
+      // Preserve the browser-hidden nonce before custom elements upgrade.
+      globalThis.litNonce = document.querySelector("wa-page").nonce;
+      await import("/vendor/ui.mjs");
       const systemTheme = matchMedia("(prefers-color-scheme: dark)");
       let theme = "system";
       try {
@@ -485,6 +334,8 @@
         document.documentElement.classList.toggle("wa-light", !dark);
         document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
           button.setAttribute("aria-pressed", String(dark));
+          button.textContent = `${dark ? "Light" : "Dark"} Mode`;
+          button.setAttribute("aria-label", `${dark ? "Light" : "Dark"} Mode`);
           button.title = `Switch to ${dark ? "Light" : "Dark"} Mode${theme === "system" ? " · Following Browser" : ""}`;
         });
       }
@@ -513,9 +364,13 @@
 
       await Promise.all(
         [
+          "wa-page",
+          "wa-divider",
+          "wa-icon",
           "wa-button",
           "wa-input",
           "wa-card",
+          "wa-callout",
           "wa-badge",
           "wa-checkbox",
           "wa-select",
@@ -782,6 +637,7 @@
           } else {
             row = document.createElement("li");
             row.dataset.name = name;
+            row.className = "wa-cluster wa-gap-s wa-flex-nowrap";
             const link = document.createElement("a");
             link.href = `${redlibUrl}/r/${name}`;
             link.textContent = name;
@@ -924,10 +780,12 @@
         const filtered = visibleSubreddits();
         renderSelection();
         $("#empty-list").hidden = subreddits.length > 0;
+        $("#empty-filter").hidden = !subreddits.length || filtered.length > 0;
         $("#communities").replaceChildren(
           ...filtered.map((name) => {
             const row = document.createElement("li");
             row.dataset.name = name;
+            row.className = "wa-cluster wa-gap-s wa-flex-nowrap";
             const checkbox = document.createElement("wa-checkbox");
             checkbox.size = "s";
             checkbox.checked = selected.has(name);
@@ -964,9 +822,15 @@
             const status = document.createElement("wa-badge");
             status.hidden = true;
             const community = document.createElement("div");
-            community.className = "community-name";
+            community.className = "community-name wa-stack wa-gap-2xs";
             community.append(link, status);
-            row.append(checkbox, community, similar, remove);
+            const actions = document.createElement("div");
+            actions.className = "row-actions wa-cluster wa-gap-0";
+            actions.append(similar, remove);
+            const content = document.createElement("div");
+            content.className = "community-content wa-split wa-gap-s";
+            content.append(community, actions);
+            row.append(checkbox, content);
             return row;
           }),
         );
