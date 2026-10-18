@@ -32,13 +32,17 @@ async function readJson(request, limit, tooLarge, action = "writes") {
   }
 }
 
+// Redlib shows the canonical spelling, such as r/AskReddit for a lowercase request.
 export function subredditStatus(html, name) {
-  const error = /<div id="error">\s*<h1>([^<]*)<\/h1>/.exec(html)?.[1]?.trim();
-  if (error === `r/${name} has been banned from Reddit`) return "banned";
+  const error = /<div id="error">\s*<h1>([^<]*)<\/h1>/
+    .exec(html)?.[1]
+    ?.trim()
+    .toLowerCase();
+  if (error === `r/${name} has been banned from reddit`) return "banned";
   if (error === `r/${name} is a private community`) return "private";
-  if (new RegExp(`<h1>r/${name} is (?:quarantined|gated)</h1>`).test(html))
+  if (new RegExp(`<h1>r/${name} is (?:quarantined|gated)</h1>`, "i").test(html))
     return "restricted";
-  if (!error && html.includes(`<p id="sub_name">r/${name}</p>`))
+  if (!error && new RegExp(`<p id="sub_name">r/${name}</p>`, "i").test(html))
     return "available";
   return "unknown";
 }

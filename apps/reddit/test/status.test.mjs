@@ -35,6 +35,17 @@ test("recognises explicit Redlib statuses without inferring bans from generic er
     ),
     "available",
   );
+  assert.equal(
+    subredditStatus('<p id="sub_name">r/AskReddit</p>', "askreddit"),
+    "available",
+  );
+  assert.equal(
+    subredditStatus(
+      '<div id="error"><h1>r/Example has been banned from Reddit</h1></div>',
+      "example",
+    ),
+    "banned",
+  );
   for (const html of [
     "<h1>Blocked</h1>",
     '<div id="error"><h1>Reddit rate limit exceeded</h1></div>',
