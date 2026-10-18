@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../../apps/reddit
 patches:
+  # The target selects every HelmRelease; the patch's name is a placeholder.
   - target:
       kind: HelmRelease
     patch: |-
