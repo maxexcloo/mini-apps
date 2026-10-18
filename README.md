@@ -16,7 +16,7 @@ SQLite database; `subreddits.mjs` contains shared parsing and recommendation
 logic. Web Awesome 3.14.0 is served locally from `vendor/`, with third-party
 licences included. There is no npm install or frontend build step.
 
-To run it locally, use Node.js 24.22 or newer:
+To run it locally, use Node.js 26.12 or newer:
 
 ```sh
 REDLIB_URL=https://your-redlib.example node apps/reddit/server.mjs
