@@ -309,12 +309,7 @@
           </section>
         </wa-card>
       </section>
-      <wa-callout
-        id="status"
-        variant="danger"
-        aria-live="polite"
-        role="status"
-      ></wa-callout>
+      <wa-callout id="status" aria-live="polite" role="status"></wa-callout>
     </main>
     <script type="module">
       const systemTheme = matchMedia("(prefers-color-scheme: dark)");
@@ -756,7 +751,8 @@
           $(`#${control}`).disabled = busy;
       }
 
-      function message(text) {
+      function message(text, variant = "danger") {
+        $("#status").variant = variant;
         $("#status").textContent = text;
       }
 
@@ -1046,7 +1042,7 @@
             throw new Error("Enter at least one subreddit.");
           const next = [...new Set([...subreddits, ...additions])].sort();
           if (next.length === subreddits.length) {
-            message("Already in this list.");
+            message("Already in this list.", "neutral");
             return;
           }
           if (await save(next)) $("#subreddits").value = "";
