@@ -417,6 +417,7 @@
         drainChecks();
         return request;
       }
+      // One page-wide queue limits Redlib checks to two at a time.
       function drainChecks() {
         while (activeChecks < 2 && checkQueue.length) {
           activeChecks++;
@@ -480,7 +481,6 @@
             !subredditStatuses.has(name) ||
             subredditStatuses.get(name) === "unknown",
         );
-        let next = 0;
         let completed = 0;
         function progress(stopped = false) {
           const banned = subreddits.filter(
@@ -491,16 +491,14 @@
           renderStatuses();
         }
         progress();
-        async function worker() {
-          while (!controller.signal.aborted && next < names.length) {
-            const name = names[next++];
+        await Promise.all(
+          names.map(async (name) => {
             await checkSubreddit(name, controller.signal);
             if (controller.signal.aborted) return;
             completed++;
             progress();
-          }
-        }
-        await Promise.all([worker(), worker()]);
+          }),
+        );
         checkController = undefined;
         progress(controller.signal.aborted);
       });
