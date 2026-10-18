@@ -14,9 +14,11 @@ class RequestError extends Error {
 }
 
 async function readJson(request, limit, tooLarge, action = "writes") {
-  if (request.headers["sec-fetch-site"] === "cross-site")
+  const site = request.headers["sec-fetch-site"];
+  if (site && !["none", "same-origin"].includes(site))
     throw new RequestError(403, `Cross-site ${action} are not allowed.`);
-  if (request.headers["content-type"] !== "application/json")
+  const type = request.headers["content-type"]?.split(";")[0].trim();
+  if (type?.toLowerCase() !== "application/json")
     throw new RequestError(415, "Use application/json.");
   let length = 0;
   const chunks = [];
@@ -30,6 +32,20 @@ async function readJson(request, limit, tooLarge, action = "writes") {
   } catch {
     throw new RequestError(400, "Invalid JSON.");
   }
+}
+
+function parseOrigin(value, variable) {
+  const origin = new URL(value);
+  if (
+    !["http:", "https:"].includes(origin.protocol) ||
+    origin.username ||
+    origin.password ||
+    origin.pathname !== "/" ||
+    origin.search ||
+    origin.hash
+  )
+    throw new Error(`${variable} must be an HTTP or HTTPS origin.`);
+  return origin;
 }
 
 // Redlib shows the canonical spelling, such as r/AskReddit for a lowercase request.
@@ -55,26 +71,8 @@ export function createApp({
   fetchStatus = fetch,
 } = {}) {
   if (!redlibUrl) throw new Error("REDLIB_URL is required.");
-  const origin = new URL(redlibUrl);
-  if (
-    !["http:", "https:"].includes(origin.protocol) ||
-    origin.username ||
-    origin.password ||
-    origin.pathname !== "/" ||
-    origin.search ||
-    origin.hash
-  )
-    throw new Error("REDLIB_URL must be an HTTP or HTTPS origin.");
-  const checkOrigin = new URL(checkUrl);
-  if (
-    !["http:", "https:"].includes(checkOrigin.protocol) ||
-    checkOrigin.username ||
-    checkOrigin.password ||
-    checkOrigin.pathname !== "/" ||
-    checkOrigin.search ||
-    checkOrigin.hash
-  )
-    throw new Error("REDLIB_CHECK_URL must be an HTTP or HTTPS origin.");
+  const origin = parseOrigin(redlibUrl, "REDLIB_URL");
+  const checkOrigin = parseOrigin(checkUrl, "REDLIB_CHECK_URL");
   const statusCache = new Map();
   let statusRequests = 0;
   mkdirSync(dataDirectory, { mode: 0o700, recursive: true });
@@ -239,7 +237,7 @@ export function createApp({
           const upstream = await fetchStatus(
             `${checkOrigin.origin}/r/${name}?limit=1`,
             {
-              headers: { "User-Agent": "Redlib-Multi/0.2.0" },
+              headers: { "User-Agent": "Reddit-Multi" },
               redirect: "error",
               signal: AbortSignal.timeout(10000),
             },
@@ -263,8 +261,12 @@ export function createApp({
         path,
       );
       if (match) {
-        normaliseLists([match[1]]);
         const name = match[1].toLowerCase();
+        if (name === "health")
+          return json(400, {
+            error: "This name is reserved. Choose another list name.",
+          });
+        normaliseLists([match[1]]);
         const key = listKey(name);
         const current = () => readList(key);
         const transfer = Boolean(match[2]);
