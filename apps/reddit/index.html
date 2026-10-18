@@ -844,15 +844,17 @@
             ...(body ? { body: JSON.stringify(body) } : {}),
           },
         );
-        const result = await response.json();
-        if (!response.ok) {
-          if (response.status === 409) {
-            subreddits = result.subreddits;
-            revision = result.revision;
-            selected.clear();
-          }
-          throw new Error(result.error || "Unable to load your list.");
+        // A proxy or gateway error may return HTML instead of the API's JSON.
+        const result = await response.json().catch(() => ({}));
+        if (response.status === 409 && result.subreddits) {
+          subreddits = result.subreddits;
+          revision = result.revision;
+          selected.clear();
         }
+        if (!response.ok || !result.subreddits)
+          throw new Error(
+            result.error || "Unable to complete this request. Try again.",
+          );
         return result;
       }
 
