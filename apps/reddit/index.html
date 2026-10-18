@@ -317,7 +317,6 @@
       ></wa-callout>
     </main>
     <script type="module">
-      await import("/vendor/ui.mjs");
       const systemTheme = matchMedia("(prefers-color-scheme: dark)");
       let theme = "system";
       try {
@@ -354,6 +353,8 @@
         applyTheme();
       });
       applyTheme();
+      // Load components after the saved theme applies, avoiding a light flash.
+      await import("/vendor/ui.mjs");
 
       import {
         multiredditUrl,
