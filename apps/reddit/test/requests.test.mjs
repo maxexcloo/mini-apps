@@ -39,6 +39,12 @@ test("rejects invalid JSON requests consistently while retaining endpoint limits
           403,
           `Cross-site ${action} are not allowed.`,
         ],
+        [
+          "{}",
+          { "Sec-Fetch-Site": "same-site" },
+          403,
+          `Cross-site ${action} are not allowed.`,
+        ],
         ["{}", { "Content-Type": "text/plain" }, 415, "Use application/json."],
         ["{", {}, 400, "Invalid JSON."],
         [JSON.stringify("a".repeat(limit)), {}, 413, tooLarge],
@@ -63,13 +69,31 @@ test("rejects invalid JSON requests consistently while retaining endpoint limits
       revision: 0,
       subreddits: [],
     });
+    const saved = await fetch(base + "/api/lists/example", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ revision: 0, subreddits: ["example"] }),
+    });
+    assert.equal(saved.status, 200);
+    for (const [path, method] of [
+      ["/api/lists/health", "GET"],
+      ["/api/lists/Health", "PUT"],
+      ["/api/lists/health/transfer", "POST"],
+    ]) {
+      const response = await fetch(base + path, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        ...(method === "GET" ? {} : { body: "{}" }),
+      });
+      assert.equal(response.status, 400, path);
+    }
   } finally {
     await new Promise((resolve) => server.close(resolve));
     rmSync(directory, { force: true, recursive: true });
   }
 });
 
-test("allows the page's responsive stylesheet with a fresh, scoped nonce", async () => {
+test("serves the page under a hash-only Content Security Policy", async () => {
   const directory = mkdtempSync(join(tmpdir(), "reddit-page-csp-"));
   const server = createApp({
     dataDirectory: directory,
@@ -78,29 +102,18 @@ test("allows the page's responsive stylesheet with a fresh, scoped nonce", async
   try {
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
     const base = `http://127.0.0.1:${server.address().port}`;
-    const nonces = [];
     for (const path of ["/", "/example"]) {
       const response = await fetch(base + path);
-      const html = await response.text();
-      const nonce = html.match(/<wa-page nonce="([A-Za-z0-9+/=]+)">/)?.[1];
-      assert.ok(nonce);
+      assert.ok((await response.text()).includes("<header>"));
       const policy = response.headers.get("Content-Security-Policy");
-      assert.ok(
-        policy
-          .split(";")
-          .find((part) => part.trim().startsWith("style-src "))
-          .includes(`'nonce-${nonce}'`),
-      );
-      assert.ok(
-        !policy
-          .split(";")
-          .find((part) => part.trim().startsWith("script-src "))
-          .includes("nonce-"),
-      );
+      for (const directive of ["script-src ", "style-src "])
+        assert.match(
+          policy.split(";").find((part) => part.trim().startsWith(directive)),
+          /^ ?\S+ 'self' 'sha256-[A-Za-z0-9+/=]+'$/,
+        );
+      assert.ok(!policy.includes("nonce-"));
       assert.ok(!policy.includes("unsafe-inline"));
-      nonces.push(nonce);
     }
-    assert.notEqual(nonces[0], nonces[1]);
   } finally {
     await new Promise((resolve) => server.close(resolve));
     rmSync(directory, { force: true, recursive: true });

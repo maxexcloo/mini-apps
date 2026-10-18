@@ -8,6 +8,8 @@ Flux deploys the change to SYD. No GitHub Actions or deployment branch is needed
 
 [Reddit](apps/reddit) manages combined subreddit feeds. Each list has its own
 editing URL and persistent SQLite data. Existing private links remain supported.
+Editing URLs are secret links that appear in Kubelab's Traefik access logs; this
+is an accepted risk because the app is private.
 
 Edit `apps/reddit/index.html` for the interface. `server.mjs` handles its API and
 SQLite database; `subreddits.mjs` contains shared parsing and recommendation
@@ -67,7 +69,6 @@ import "@awesome.me/webawesome/dist/components/divider/divider.js";
 import "@awesome.me/webawesome/dist/components/icon/icon.js";
 import "@awesome.me/webawesome/dist/components/input/input.js";
 import "@awesome.me/webawesome/dist/components/option/option.js";
-import "@awesome.me/webawesome/dist/components/page/page.js";
 import "@awesome.me/webawesome/dist/components/select/select.js";
 EOF
 "$vendor_work/node_modules/.bin/esbuild" "$vendor_work/entry.mjs" \

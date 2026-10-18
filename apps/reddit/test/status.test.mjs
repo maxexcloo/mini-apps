@@ -35,6 +35,17 @@ test("recognises explicit Redlib statuses without inferring bans from generic er
     ),
     "available",
   );
+  assert.equal(
+    subredditStatus('<p id="sub_name">r/AskReddit</p>', "askreddit"),
+    "available",
+  );
+  assert.equal(
+    subredditStatus(
+      '<div id="error"><h1>r/Example has been banned from Reddit</h1></div>',
+      "example",
+    ),
+    "banned",
+  );
   for (const html of [
     "<h1>Blocked</h1>",
     '<div id="error"><h1>Reddit rate limit exceeded</h1></div>',
@@ -44,13 +55,9 @@ test("recognises explicit Redlib statuses without inferring bans from generic er
     assert.equal(subredditStatus(html, "example"), "unknown");
 });
 
-test("checks a fixed Redlib origin, caches results, limits concurrency and preserves lists", async () => {
+test("checks a fixed Redlib origin, caches results and preserves lists", async () => {
   const directory = mkdtempSync(join(tmpdir(), "redlib-status-"));
   let calls = 0;
-  let release;
-  const gate = new Promise((resolve) => {
-    release = resolve;
-  });
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
@@ -60,7 +67,6 @@ test("checks a fixed Redlib origin, caches results, limits concurrency and prese
       assert.equal(new URL(url).origin, "http://redlib.example:8080");
       assert.equal(options.redirect, "error");
       const name = new URL(url).pathname.slice(3);
-      if (name.startsWith("slow")) await gate;
       if (name === "offline") throw new Error("Network unavailable");
       if (name === "limited") return new Response("banned", { status: 429 });
       return new Response(
@@ -101,19 +107,11 @@ test("checks a fixed Redlib origin, caches results, limits concurrency and prese
     assert.deepEqual(await (await check("limited")).json(), {
       status: "unknown",
     });
-    const first = check("slowone");
-    const second = check("slowtwo");
-    while (calls < 5) await new Promise((resolve) => setImmediate(resolve));
-    assert.equal((await check("slowthree")).status, 429);
-    release();
-    assert.equal((await first).status, 200);
-    assert.equal((await second).status, 200);
     assert.deepEqual(await (await fetch(`${base}/api/lists/test`)).json(), {
       revision: 1,
       subreddits: ["example"],
     });
   } finally {
-    release();
     await new Promise((resolve) => server.close(resolve));
     rmSync(directory, { recursive: true, force: true });
   }

@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, realpathSync } from "node:fs";
 import { createServer } from "node:http";
 import { resolve } from "node:path";
@@ -14,9 +14,11 @@ class RequestError extends Error {
 }
 
 async function readJson(request, limit, tooLarge, action = "writes") {
-  if (request.headers["sec-fetch-site"] === "cross-site")
+  const site = request.headers["sec-fetch-site"];
+  if (site && !["none", "same-origin"].includes(site))
     throw new RequestError(403, `Cross-site ${action} are not allowed.`);
-  if (request.headers["content-type"] !== "application/json")
+  const type = request.headers["content-type"]?.split(";")[0].trim();
+  if (type?.toLowerCase() !== "application/json")
     throw new RequestError(415, "Use application/json.");
   let length = 0;
   const chunks = [];
@@ -32,13 +34,31 @@ async function readJson(request, limit, tooLarge, action = "writes") {
   }
 }
 
+function parseOrigin(value, variable) {
+  const origin = new URL(value);
+  if (
+    !["http:", "https:"].includes(origin.protocol) ||
+    origin.username ||
+    origin.password ||
+    origin.pathname !== "/" ||
+    origin.search ||
+    origin.hash
+  )
+    throw new Error(`${variable} must be an HTTP or HTTPS origin.`);
+  return origin;
+}
+
+// Redlib shows the canonical spelling, such as r/AskReddit for a lowercase request.
 export function subredditStatus(html, name) {
-  const error = /<div id="error">\s*<h1>([^<]*)<\/h1>/.exec(html)?.[1]?.trim();
-  if (error === `r/${name} has been banned from Reddit`) return "banned";
+  const error = /<div id="error">\s*<h1>([^<]*)<\/h1>/
+    .exec(html)?.[1]
+    ?.trim()
+    .toLowerCase();
+  if (error === `r/${name} has been banned from reddit`) return "banned";
   if (error === `r/${name} is a private community`) return "private";
-  if (new RegExp(`<h1>r/${name} is (?:quarantined|gated)</h1>`).test(html))
+  if (new RegExp(`<h1>r/${name} is (?:quarantined|gated)</h1>`, "i").test(html))
     return "restricted";
-  if (!error && html.includes(`<p id="sub_name">r/${name}</p>`))
+  if (!error && new RegExp(`<p id="sub_name">r/${name}</p>`, "i").test(html))
     return "available";
   return "unknown";
 }
@@ -51,28 +71,9 @@ export function createApp({
   fetchStatus = fetch,
 } = {}) {
   if (!redlibUrl) throw new Error("REDLIB_URL is required.");
-  const origin = new URL(redlibUrl);
-  if (
-    !["http:", "https:"].includes(origin.protocol) ||
-    origin.username ||
-    origin.password ||
-    origin.pathname !== "/" ||
-    origin.search ||
-    origin.hash
-  )
-    throw new Error("REDLIB_URL must be an HTTP or HTTPS origin.");
-  const checkOrigin = new URL(checkUrl);
-  if (
-    !["http:", "https:"].includes(checkOrigin.protocol) ||
-    checkOrigin.username ||
-    checkOrigin.password ||
-    checkOrigin.pathname !== "/" ||
-    checkOrigin.search ||
-    checkOrigin.hash
-  )
-    throw new Error("REDLIB_CHECK_URL must be an HTTP or HTTPS origin.");
+  const origin = parseOrigin(redlibUrl, "REDLIB_URL");
+  const checkOrigin = parseOrigin(checkUrl, "REDLIB_CHECK_URL");
   const statusCache = new Map();
-  let statusRequests = 0;
   mkdirSync(dataDirectory, { mode: 0o700, recursive: true });
   // Retain the original filename, schema and hashed keys for existing lists.
   const database = new DatabaseSync(resolve(dataDirectory, "lists.sqlite"));
@@ -177,12 +178,11 @@ export function createApp({
     .update(html.match(/<style>([\s\S]*?)<\/style>/)[1])
     .digest("base64");
   const server = createServer(async (request, response) => {
-    const styleNonce = randomBytes(18).toString("base64");
     response.setHeader("Cache-Control", "no-store");
     // Web Awesome fetches its bundled checkbox SVGs from data URLs.
     response.setHeader(
       "Content-Security-Policy",
-      `default-src 'self'; script-src 'self' 'sha256-${scriptHash}'; style-src 'self' 'sha256-${styleHash}' 'nonce-${styleNonce}'; connect-src 'self' data: https://anvaka.github.io/redsim/data/; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
+      `default-src 'self'; script-src 'self' 'sha256-${scriptHash}'; style-src 'self' 'sha256-${styleHash}'; connect-src 'self' data: https://anvaka.github.io/redsim/data/; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
     );
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("X-Content-Type-Options", "nosniff");
@@ -227,15 +227,12 @@ export function createApp({
         const cached = statusCache.get(name);
         if (cached && cached.expires > Date.now())
           return json(200, { status: cached.status });
-        if (statusRequests >= 2)
-          return json(429, { error: "Checks are busy. Try again shortly." });
-        statusRequests++;
         let status = "unknown";
         try {
           const upstream = await fetchStatus(
             `${checkOrigin.origin}/r/${name}?limit=1`,
             {
-              headers: { "User-Agent": "Redlib-Multi/0.2.0" },
+              headers: { "User-Agent": "Reddit-Multi" },
               redirect: "error",
               signal: AbortSignal.timeout(10000),
             },
@@ -244,8 +241,6 @@ export function createApp({
             status = subredditStatus(await upstream.text(), name);
         } catch {
           // A timeout, network block or upstream failure cannot establish a ban.
-        } finally {
-          statusRequests--;
         }
         if (statusCache.size >= 1000)
           statusCache.delete(statusCache.keys().next().value);
@@ -259,8 +254,12 @@ export function createApp({
         path,
       );
       if (match) {
-        normaliseLists([match[1]]);
         const name = match[1].toLowerCase();
+        if (name === "health")
+          return json(400, {
+            error: "This name is reserved. Choose another list name.",
+          });
+        normaliseLists([match[1]]);
         const key = listKey(name);
         const current = () => readList(key);
         const transfer = Boolean(match[2]);
@@ -381,12 +380,7 @@ export function createApp({
         (/^\/[a-zA-Z0-9_-]{1,128}$/.test(path) ? assets.get("/") : null);
       if (!asset) return json(404, { error: "Page not found." });
       response.writeHead(200, { "Content-Type": asset.type });
-      // wa-page injects its responsive stylesheet into its shadow root.
-      const content =
-        asset === assets.get("/")
-          ? html.replace("<wa-page>", `<wa-page nonce="${styleNonce}">`)
-          : asset.content;
-      response.end(request.method === "HEAD" ? undefined : content);
+      response.end(request.method === "HEAD" ? undefined : asset.content);
     } catch (error) {
       json(error instanceof RequestError ? error.status : 500, {
         error:
