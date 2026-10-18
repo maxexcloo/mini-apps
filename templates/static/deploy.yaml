@@ -30,12 +30,12 @@ spec:
             probes:
               liveness:
                 enabled: true
-                path: /_health
+                path: /health
                 port: 8080
                 type: HTTP
               readiness:
                 enabled: true
-                path: /_health
+                path: /health
                 port: 8080
                 type: HTTP
             resources:
