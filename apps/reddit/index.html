@@ -19,7 +19,8 @@
       body {
         background: var(--wa-color-surface-lowered);
       }
-      wa-page::part(header) {
+      body > header {
+        background: var(--wa-color-surface-default);
         border-bottom: var(--wa-border-width-s) solid
           var(--wa-color-surface-border);
       }
@@ -125,8 +126,8 @@
     </style>
   </head>
   <body>
-    <wa-page>
-      <header slot="header" class="app-header wa-split wa-gap-m">
+    <header>
+      <div class="app-header wa-split wa-gap-m">
         <a class="app-title" href="/">Reddit Multi</a>
         <wa-button
           appearance="plain"
@@ -137,187 +138,185 @@
         >
           Dark Mode
         </wa-button>
-      </header>
-      <main class="wa-stack wa-gap-l">
-        <wa-card id="welcome" hidden>
-          <div class="wa-stack wa-gap-l">
-            <div class="wa-stack wa-gap-s intro">
-              <h1>Your Communities, One Feed</h1>
-              <p class="hint">
-                Open a saved list or start a new one. Add your favourite
-                subreddits and read them together.
+      </div>
+    </header>
+    <main class="wa-stack wa-gap-l">
+      <wa-card id="welcome" hidden>
+        <div class="wa-stack wa-gap-l">
+          <div class="wa-stack wa-gap-s intro">
+            <h1>Your Communities, One Feed</h1>
+            <p class="hint">
+              Open a saved list or start a new one. Add your favourite
+              subreddits and read them together.
+            </p>
+          </div>
+          <form
+            id="open-list"
+            class="input-row wa-flank:end wa-align-items-end wa-gap-s"
+          >
+            <wa-input
+              id="list-name"
+              name="list-name"
+              label="List Name"
+              autocomplete="off"
+              maxlength="128"
+              pattern="[a-zA-Z0-9_-]+"
+              required
+            ></wa-input>
+            <wa-button type="submit" variant="brand">Open List</wa-button>
+          </form>
+        </div>
+      </wa-card>
+      <section id="editor" class="wa-stack wa-gap-l" hidden>
+        <div class="wa-split wa-gap-s">
+          <div class="wa-cluster wa-gap-s">
+            <h1 id="list-title">Your List</h1>
+            <wa-badge id="count" variant="neutral">0</wa-badge>
+          </div>
+          <div class="wa-cluster wa-gap-s">
+            <wa-button id="copy-editor" appearance="plain"
+              >Copy Editing Link</wa-button
+            >
+            <span id="copy-editor-state" class="hint" role="status"></span>
+          </div>
+        </div>
+        <wa-card>
+          <div class="wa-stack wa-gap-s">
+            <div class="feed-link wa-stack wa-gap-s">
+              <h2>Combined Feed</h2>
+              <a id="feed" target="_blank" rel="noreferrer" hidden></a>
+              <p id="empty-feed" class="hint">
+                Add subreddits to build your feed.
               </p>
             </div>
+            <div class="wa-cluster wa-gap-s">
+              <wa-button id="copy-feed" disabled>Copy Feed Link</wa-button>
+              <span id="copy-feed-state" class="hint" role="status"></span>
+            </div>
+          </div>
+        </wa-card>
+        <wa-card>
+          <div class="wa-stack wa-gap-l">
             <form
-              id="open-list"
+              id="add-form"
               class="input-row wa-flank:end wa-align-items-end wa-gap-s"
             >
               <wa-input
-                id="list-name"
-                name="list-name"
-                label="List Name"
+                id="subreddits"
+                name="subreddits"
+                label="Add Subreddits"
                 autocomplete="off"
-                maxlength="128"
-                pattern="[a-zA-Z0-9_-]+"
+                placeholder="Names, r/ links or a multi link"
                 required
               ></wa-input>
-              <wa-button type="submit" variant="brand">Open List</wa-button>
+              <wa-button id="add-button" type="submit" variant="brand"
+                >Add</wa-button
+              >
             </form>
-          </div>
-        </wa-card>
-        <section id="editor" class="wa-stack wa-gap-l" hidden>
-          <div class="wa-split wa-gap-s">
-            <div class="wa-cluster wa-gap-s">
-              <h1 id="list-title">Your List</h1>
-              <wa-badge id="count" variant="neutral">0</wa-badge>
-            </div>
-            <div class="wa-cluster wa-gap-s">
-              <wa-button id="copy-editor" appearance="plain"
-                >Copy Editing Link</wa-button
-              >
-              <span id="copy-editor-state" class="hint" role="status"></span>
-            </div>
-          </div>
-          <wa-card>
-            <div class="wa-stack wa-gap-s">
-              <div class="feed-link wa-stack wa-gap-s">
-                <h2>Combined Feed</h2>
-                <a id="feed" target="_blank" rel="noreferrer" hidden></a>
-                <p id="empty-feed" class="hint">
-                  Add subreddits to build your feed.
-                </p>
-              </div>
-              <div class="wa-cluster wa-gap-s">
-                <wa-button id="copy-feed" disabled>Copy Feed Link</wa-button>
-                <span id="copy-feed-state" class="hint" role="status"></span>
-              </div>
-            </div>
-          </wa-card>
-          <wa-card>
-            <div class="wa-stack wa-gap-l">
-              <form
-                id="add-form"
-                class="input-row wa-flank:end wa-align-items-end wa-gap-s"
-              >
-                <wa-input
-                  id="subreddits"
-                  name="subreddits"
-                  label="Add Subreddits"
-                  autocomplete="off"
-                  placeholder="Names, r/ links or a multi link"
-                  required
-                ></wa-input>
-                <wa-button id="add-button" type="submit" variant="brand"
-                  >Add</wa-button
-                >
-              </form>
-              <wa-divider></wa-divider>
-              <section
-                class="wa-stack wa-gap-s"
-                aria-labelledby="communities-title"
-              >
-                <div class="wa-split wa-gap-s">
-                  <h2 id="communities-title">Subreddits</h2>
-                  <p id="save-state" class="hint" role="status">Loading…</p>
-                </div>
-                <div class="check-row wa-flank:end wa-gap-s">
-                  <wa-input
-                    id="filter"
-                    type="search"
-                    aria-label="Filter Subreddits"
-                    placeholder="Filter subreddits"
-                  ></wa-input>
-                  <wa-button id="check-all">Check All</wa-button>
-                </div>
-                <p id="check-state" class="hint" aria-live="polite"></p>
-                <div class="wa-split wa-gap-s">
-                  <wa-checkbox id="select-visible" size="s"
-                    >Select Visible</wa-checkbox
-                  >
-                  <div class="wa-cluster wa-gap-s">
-                    <span id="selection-count" class="hint">0 Selected</span>
-                    <wa-button id="clear-selection" appearance="plain" size="s"
-                      >Clear</wa-button
-                    >
-                  </div>
-                </div>
-                <div id="bulk-actions" class="wa-stack wa-gap-s" hidden>
-                  <wa-select
-                    id="destination-picker"
-                    label="Saved Destination"
-                    placeholder="Choose or enter a new list"
-                    hidden
-                  ></wa-select>
-                  <wa-input
-                    id="destination"
-                    label="Destination List"
-                    autocomplete="off"
-                    maxlength="128"
-                    placeholder="List name"
-                  ></wa-input>
-                  <div class="wa-cluster wa-gap-s">
-                    <wa-button id="copy-selected">Copy</wa-button>
-                    <wa-button id="move-selected">Move</wa-button>
-                    <wa-button
-                      id="remove-selected"
-                      variant="danger"
-                      appearance="outlined"
-                      >Remove Selected</wa-button
-                    >
-                  </div>
-                </div>
-                <p id="empty-list" class="hint">
-                  No subreddits yet. Add some above to get started.
-                </p>
-                <p id="empty-filter" class="hint" hidden>
-                  No subreddits match your filter.
-                </p>
-                <ul
-                  id="communities"
-                  class="community-list"
-                  aria-label="Subreddits"
-                ></ul>
-              </section>
-            </div>
-          </wa-card>
-          <wa-card id="suggestions" hidden>
+            <wa-divider></wa-divider>
             <section
               class="wa-stack wa-gap-s"
-              aria-labelledby="suggestions-title"
+              aria-labelledby="communities-title"
             >
-              <h2 id="suggestions-title">Suggested Communities</h2>
-              <p id="suggestions-state" class="hint"></p>
-              <ul
-                id="suggested-communities"
-                class="community-list"
-                aria-label="Suggested Subreddits"
-              ></ul>
-              <wa-button id="retry-suggestions" appearance="plain" hidden
-                >Retry</wa-button
-              >
-              <p class="hint">
-                Related communities from
-                <a
-                  href="https://anvaka.github.io/redsim/"
-                  target="_blank"
-                  rel="noreferrer"
-                  >RedSim</a
-                >.
+              <div class="wa-split wa-gap-s">
+                <h2 id="communities-title">Subreddits</h2>
+                <p id="save-state" class="hint" role="status">Loading…</p>
+              </div>
+              <div class="check-row wa-flank:end wa-gap-s">
+                <wa-input
+                  id="filter"
+                  type="search"
+                  aria-label="Filter Subreddits"
+                  placeholder="Filter subreddits"
+                ></wa-input>
+                <wa-button id="check-all">Check All</wa-button>
+              </div>
+              <p id="check-state" class="hint" aria-live="polite"></p>
+              <div class="wa-split wa-gap-s">
+                <wa-checkbox id="select-visible" size="s"
+                  >Select Visible</wa-checkbox
+                >
+                <div class="wa-cluster wa-gap-s">
+                  <span id="selection-count" class="hint">0 Selected</span>
+                  <wa-button id="clear-selection" appearance="plain" size="s"
+                    >Clear</wa-button
+                  >
+                </div>
+              </div>
+              <div id="bulk-actions" class="wa-stack wa-gap-s" hidden>
+                <wa-select
+                  id="destination-picker"
+                  label="Saved Destination"
+                  placeholder="Choose or enter a new list"
+                  hidden
+                ></wa-select>
+                <wa-input
+                  id="destination"
+                  label="Destination List"
+                  autocomplete="off"
+                  maxlength="128"
+                  placeholder="List name"
+                ></wa-input>
+                <div class="wa-cluster wa-gap-s">
+                  <wa-button id="copy-selected">Copy</wa-button>
+                  <wa-button id="move-selected">Move</wa-button>
+                  <wa-button
+                    id="remove-selected"
+                    variant="danger"
+                    appearance="outlined"
+                    >Remove Selected</wa-button
+                  >
+                </div>
+              </div>
+              <p id="empty-list" class="hint">
+                No subreddits yet. Add some above to get started.
               </p>
+              <p id="empty-filter" class="hint" hidden>
+                No subreddits match your filter.
+              </p>
+              <ul
+                id="communities"
+                class="community-list"
+                aria-label="Subreddits"
+              ></ul>
             </section>
-          </wa-card>
-        </section>
-        <wa-callout
-          id="status"
-          variant="danger"
-          aria-live="polite"
-          role="status"
-        ></wa-callout>
-      </main>
-    </wa-page>
+          </div>
+        </wa-card>
+        <wa-card id="suggestions" hidden>
+          <section
+            class="wa-stack wa-gap-s"
+            aria-labelledby="suggestions-title"
+          >
+            <h2 id="suggestions-title">Suggested Communities</h2>
+            <p id="suggestions-state" class="hint"></p>
+            <ul
+              id="suggested-communities"
+              class="community-list"
+              aria-label="Suggested Subreddits"
+            ></ul>
+            <wa-button id="retry-suggestions" appearance="plain" hidden
+              >Retry</wa-button
+            >
+            <p class="hint">
+              Related communities from
+              <a
+                href="https://anvaka.github.io/redsim/"
+                target="_blank"
+                rel="noreferrer"
+                >RedSim</a
+              >.
+            </p>
+          </section>
+        </wa-card>
+      </section>
+      <wa-callout
+        id="status"
+        variant="danger"
+        aria-live="polite"
+        role="status"
+      ></wa-callout>
+    </main>
     <script type="module">
-      // Preserve the browser-hidden nonce before custom elements upgrade.
-      globalThis.litNonce = document.querySelector("wa-page").nonce;
       await import("/vendor/ui.mjs");
       const systemTheme = matchMedia("(prefers-color-scheme: dark)");
       let theme = "system";
@@ -364,7 +363,6 @@
 
       await Promise.all(
         [
-          "wa-page",
           "wa-divider",
           "wa-icon",
           "wa-button",

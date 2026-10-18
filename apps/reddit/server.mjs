@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, realpathSync } from "node:fs";
 import { createServer } from "node:http";
 import { resolve } from "node:path";
@@ -178,12 +178,11 @@ export function createApp({
     .update(html.match(/<style>([\s\S]*?)<\/style>/)[1])
     .digest("base64");
   const server = createServer(async (request, response) => {
-    const styleNonce = randomBytes(18).toString("base64");
     response.setHeader("Cache-Control", "no-store");
     // Web Awesome fetches its bundled checkbox SVGs from data URLs.
     response.setHeader(
       "Content-Security-Policy",
-      `default-src 'self'; script-src 'self' 'sha256-${scriptHash}'; style-src 'self' 'sha256-${styleHash}' 'nonce-${styleNonce}'; connect-src 'self' data: https://anvaka.github.io/redsim/data/; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
+      `default-src 'self'; script-src 'self' 'sha256-${scriptHash}'; style-src 'self' 'sha256-${styleHash}'; connect-src 'self' data: https://anvaka.github.io/redsim/data/; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
     );
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("X-Content-Type-Options", "nosniff");
@@ -381,12 +380,7 @@ export function createApp({
         (/^\/[a-zA-Z0-9_-]{1,128}$/.test(path) ? assets.get("/") : null);
       if (!asset) return json(404, { error: "Page not found." });
       response.writeHead(200, { "Content-Type": asset.type });
-      // wa-page injects its responsive stylesheet into its shadow root.
-      const content =
-        asset === assets.get("/")
-          ? html.replace("<wa-page>", `<wa-page nonce="${styleNonce}">`)
-          : asset.content;
-      response.end(request.method === "HEAD" ? undefined : content);
+      response.end(request.method === "HEAD" ? undefined : asset.content);
     } catch (error) {
       json(error instanceof RequestError ? error.status : 500, {
         error:
