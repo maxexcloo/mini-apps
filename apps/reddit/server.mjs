@@ -74,7 +74,6 @@ export function createApp({
   const origin = parseOrigin(redlibUrl, "REDLIB_URL");
   const checkOrigin = parseOrigin(checkUrl, "REDLIB_CHECK_URL");
   const statusCache = new Map();
-  let statusRequests = 0;
   mkdirSync(dataDirectory, { mode: 0o700, recursive: true });
   // Retain the original filename, schema and hashed keys for existing lists.
   const database = new DatabaseSync(resolve(dataDirectory, "lists.sqlite"));
@@ -229,9 +228,6 @@ export function createApp({
         const cached = statusCache.get(name);
         if (cached && cached.expires > Date.now())
           return json(200, { status: cached.status });
-        if (statusRequests >= 2)
-          return json(429, { error: "Checks are busy. Try again shortly." });
-        statusRequests++;
         let status = "unknown";
         try {
           const upstream = await fetchStatus(
@@ -246,8 +242,6 @@ export function createApp({
             status = subredditStatus(await upstream.text(), name);
         } catch {
           // A timeout, network block or upstream failure cannot establish a ban.
-        } finally {
-          statusRequests--;
         }
         if (statusCache.size >= 1000)
           statusCache.delete(statusCache.keys().next().value);
