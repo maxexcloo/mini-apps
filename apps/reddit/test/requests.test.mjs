@@ -39,6 +39,12 @@ test("rejects invalid JSON requests consistently while retaining endpoint limits
           403,
           `Cross-site ${action} are not allowed.`,
         ],
+        [
+          "{}",
+          { "Sec-Fetch-Site": "same-site" },
+          403,
+          `Cross-site ${action} are not allowed.`,
+        ],
         ["{}", { "Content-Type": "text/plain" }, 415, "Use application/json."],
         ["{", {}, 400, "Invalid JSON."],
         [JSON.stringify("a".repeat(limit)), {}, 413, tooLarge],
@@ -63,6 +69,24 @@ test("rejects invalid JSON requests consistently while retaining endpoint limits
       revision: 0,
       subreddits: [],
     });
+    const saved = await fetch(base + "/api/lists/example", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ revision: 0, subreddits: ["example"] }),
+    });
+    assert.equal(saved.status, 200);
+    for (const [path, method] of [
+      ["/api/lists/health", "GET"],
+      ["/api/lists/Health", "PUT"],
+      ["/api/lists/health/transfer", "POST"],
+    ]) {
+      const response = await fetch(base + path, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        ...(method === "GET" ? {} : { body: "{}" }),
+      });
+      assert.equal(response.status, 400, path);
+    }
   } finally {
     await new Promise((resolve) => server.close(resolve));
     rmSync(directory, { force: true, recursive: true });
