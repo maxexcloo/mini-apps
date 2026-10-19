@@ -10,7 +10,9 @@
 - Name the Namespace after the retained deployment name and include
   `components/app`; it sets the shared app-template chart and derives the other
   resources' namespaces, the HelmRelease name, release name and `nameOverride`,
-  and the NetworkPolicy name and pod selector. Generators run after components,
+  and the NetworkPolicy name and pod selector. It also supplies the `minilab`
+  ServiceAccount and its RoleBinding to ClusterRole `minilab-release`, and runs
+  every HelmRelease as that account. Generators run after components,
   so each `configMapGenerator` keeps its own `namespace`. Write `app` as the
   placeholder HelmRelease and NetworkPolicy name.
 - Set the Namespace's `app.excloo.dev/name` label once and include
@@ -18,7 +20,9 @@
   derives `<name>.${MINILAB_DOMAIN}` (`mini.excloo.com`). Mini apps use only this hostname; cluster app
   aliases belong to Kubelab. Select apps in `clusters/syd/kustomization.yaml`;
   Kubelab reconciles only `clusters/syd`.
-- Kubelab's `minilab` Flux Kustomization places every HelmRelease on
+- Kubelab's `minilab` Flux Kustomization confines Minilab to namespaces it
+  creates, with restricted Pod Security, and to the resource kinds and release
+  permissions it grants. It places every HelmRelease on
   `node.excloo.dev/network: external` nodes. A `local-path` PV is bound to the node that created it, so keep apps with
   storage on that external node and back up before changing placement.
 - Choose a backend and datastore for the app's behaviour; existing Node.js/SQLite
@@ -39,7 +43,9 @@
   list names.
   Probe a capability-free `/health` endpoint.
 - Keep storage, secrets and network access isolated. Credentials stay server-side
-  through ExternalSecrets that reference 1Password items by title. Flux postBuild
+  through ExternalSecrets that use the `onepassword` ClusterSecretStore and
+  reference 1Password items titled `Minilab: <App>`, matching the route's
+  Homepage name. Flux postBuild
   substitution applies to ConfigMaps, so disable it on code ConfigMaps to keep
   JavaScript template literals such as `${name}` intact.
 - Kubelab's `apps/overlays/syd/minilab.yaml` sets the `minilab`
