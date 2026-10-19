@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { once } from "node:events";
 import { createHash } from "node:crypto";
 import { mkdtempSync, rmSync, symlinkSync } from "node:fs";
@@ -15,6 +15,30 @@ import { multiredditUrl } from "../subreddits.mjs";
 
 test("requires a configured Redlib endpoint before opening storage", () => {
   assert.throws(() => createApp({ redlibUrl: "" }), /REDLIB_URL is required/);
+});
+
+test("rejects an empty setting, such as a missing Flux variable, instead of using its default", () => {
+  const directory = mkdtempSync(join(tmpdir(), "redlib-multi-settings-"));
+  try {
+    const result = spawnSync(
+      process.execPath,
+      [fileURLToPath(new URL("../server.mjs", import.meta.url))],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          DATA_DIRECTORY: join(directory, "data"),
+          REDLIB_CHECK_URL: "",
+          REDLIB_URL: "https://feed.example",
+        },
+        timeout: 10000,
+      },
+    );
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /REDLIB_CHECK_URL must not be empty/);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test("opens an original database and merges its mixed-case identity into the lowercase list", async () => {

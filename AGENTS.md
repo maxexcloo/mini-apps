@@ -45,7 +45,9 @@
 - Kubelab's `apps/overlays/syd/mini-apps.yaml` sets the `mini-apps`
   Kustomization's shared substitution variables: `REDLIB_URL` (Redlib's public
   origin, replaced from its route in the overlay's `kustomization.yaml`) and
-  `REDLIB_CHECK_URL` (its in-cluster service). Add shared variables there.
+  `REDLIB_CHECK_URL` (its in-cluster service). Add shared variables there. Flux
+  leaves a missing variable empty, so apps must reject empty settings rather
+  than fall back to local defaults.
 - Preserve deployed namespaces, release names, PVCs and old URLs during source
   cleanups. SQLite apps use one replica with `Recreate` and keep live data off
   NFS. Take a consistent backup before changing storage or data ownership.
