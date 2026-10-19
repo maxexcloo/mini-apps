@@ -21,12 +21,14 @@ or frontend build step.
 To run it locally, use Node.js 26.12 or newer:
 
 ```sh
-REDLIB_URL=https://your-redlib.example node apps/redlib-multi/server.mjs
+DATA_DIRECTORY=apps/redlib-multi/data HOST=127.0.0.1 PORT=3000 \
+  REDLIB_CHECK_URL=https://your-redlib.example REDLIB_URL=https://your-redlib.example \
+  node apps/redlib-multi/server.mjs
 ```
 
-Set `REDLIB_URL` to your Redlib origin, including its scheme and any port.
-`REDLIB_CHECK_URL`, `DATA_DIRECTORY`, `HOST` and `PORT` are optional locally;
-an empty value is rejected.
+Every setting is required; a missing or empty value stops startup. Set
+`REDLIB_URL` to your Redlib origin, including its scheme and any port, and
+`REDLIB_CHECK_URL` to the origin the server uses for status checks.
 Open `http://127.0.0.1:3000`. Local data stays in the app's ignored `data/`
 directory. Deployed data stays on its existing volume. Never delete that volume
 when replacing the app. Run the data tests with `node --test`.

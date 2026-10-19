@@ -17,6 +17,7 @@ test("ordinary list reads need no writer lock and preserve existing aliases", as
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
+    checkUrl: "http://redlib.example:8080",
   });
   try {
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -67,6 +68,7 @@ test("atomically merges legacy case variants, retains unrecognised lists and rej
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
+    checkUrl: "http://redlib.example:8080",
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -151,6 +153,7 @@ test("merging more than 1,000 entries preserves them and still allows removals",
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
+    checkUrl: "http://redlib.example:8080",
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const url = `http://127.0.0.1:${server.address().port}/api/lists/Large`;

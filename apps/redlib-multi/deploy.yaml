@@ -14,9 +14,9 @@ spec:
               - node
               - /app/server.mjs
             env:
-              DATA_DIRECTORY: /data
+              DATA_DIRECTORY: /placeholder
               HOST: 0.0.0.0
-              PORT: "3000"
+              PORT: "0"
               REDLIB_CHECK_URL: ${REDLIB_CHECK_URL}
               REDLIB_URL: ${REDLIB_URL}
             image:
@@ -27,12 +27,12 @@ spec:
               liveness:
                 enabled: true
                 path: /health
-                port: 3000
+                port: 0
                 type: HTTP
               readiness:
                 enabled: true
                 path: /health
-                port: 3000
+                port: 0
                 type: HTTP
             resources:
               limits:
@@ -159,7 +159,7 @@ spec:
             matchLabels:
               app.kubernetes.io/name: traefik
       ports:
-        - port: 3000
+        - port: 0
           protocol: TCP
   podSelector:
     matchLabels:

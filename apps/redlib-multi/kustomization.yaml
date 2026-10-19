@@ -20,3 +20,28 @@ configurations:
 components:
   - ../../components/app
   - ../../components/routes
+# The service port and data mount define the server's settings, probes and
+# NetworkPolicy port; deploy.yaml holds typed placeholders for those targets.
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.service.redlib-multi.ports.http.port
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.redlib-multi.containers.app.env.PORT
+          - spec.values.controllers.redlib-multi.containers.app.probes.liveness.port
+          - spec.values.controllers.redlib-multi.containers.app.probes.readiness.port
+      - select:
+          kind: NetworkPolicy
+        fieldPaths:
+          - spec.ingress.0.ports.0.port
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.persistence.data.globalMounts.0.path
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.redlib-multi.containers.app.env.DATA_DIRECTORY

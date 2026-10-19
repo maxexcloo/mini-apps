@@ -10,6 +10,7 @@ test("rejects invalid JSON requests consistently while retaining endpoint limits
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
+    checkUrl: "http://redlib.example:8080",
   });
   try {
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -76,6 +77,7 @@ test("serves the page under a hash-only Content Security Policy", async () => {
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
+    checkUrl: "http://redlib.example:8080",
   });
   try {
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));

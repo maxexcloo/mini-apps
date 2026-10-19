@@ -14,28 +14,39 @@ import { createApp } from "../server.mjs";
 import { multiredditUrl } from "../subreddits.mjs";
 
 test("requires a configured Redlib endpoint before opening storage", () => {
-  assert.throws(() => createApp({ redlibUrl: "" }), /REDLIB_URL is required/);
+  assert.throws(
+    () =>
+      createApp({
+        checkUrl: "http://redlib.example:8080",
+        dataDirectory: join(tmpdir(), "redlib-multi-unopened"),
+        redlibUrl: "",
+      }),
+    /REDLIB_URL is required/,
+  );
 });
 
-test("rejects an empty setting, such as a missing Flux variable, instead of using its default", () => {
+test("fails startup when any setting is missing or empty", () => {
   const directory = mkdtempSync(join(tmpdir(), "redlib-multi-settings-"));
+  const settings = {
+    DATA_DIRECTORY: join(directory, "data"),
+    HOST: "127.0.0.1",
+    PORT: "0",
+    REDLIB_CHECK_URL: "http://redlib.example:8080",
+    REDLIB_URL: "https://feed.example",
+  };
   try {
-    const result = spawnSync(
-      process.execPath,
-      [fileURLToPath(new URL("../server.mjs", import.meta.url))],
-      {
-        encoding: "utf8",
-        env: {
-          ...process.env,
-          DATA_DIRECTORY: join(directory, "data"),
-          REDLIB_CHECK_URL: "",
-          REDLIB_URL: "https://feed.example",
-        },
-        timeout: 10000,
-      },
-    );
-    assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /REDLIB_CHECK_URL must not be empty/);
+    for (const name of Object.keys(settings))
+      for (const value of [undefined, ""]) {
+        const env = { ...process.env, ...settings, [name]: value };
+        if (value === undefined) delete env[name];
+        const result = spawnSync(
+          process.execPath,
+          [fileURLToPath(new URL("../server.mjs", import.meta.url))],
+          { encoding: "utf8", env, timeout: 10000 },
+        );
+        assert.notEqual(result.status, 0, name);
+        assert.match(result.stderr, new RegExp(`${name} is required`));
+      }
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
@@ -55,6 +66,7 @@ test("opens an original database and merges its mixed-case identity into the low
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
+    checkUrl: "http://redlib.example:8080",
   });
   try {
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -112,6 +124,7 @@ test("starts normally through a Kubernetes-style source symlink", async () => {
       DATA_DIRECTORY: join(directory, "data"),
       HOST: "127.0.0.1",
       PORT: String(port),
+      REDLIB_CHECK_URL: "http://redlib.example:8080",
       REDLIB_URL: "https://feed.example",
     },
     stdio: "ignore",

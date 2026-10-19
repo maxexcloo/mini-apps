@@ -29,6 +29,7 @@ test("saves isolated lists, rejects stale edits and survives restarts", async ()
     server = createApp({
       dataDirectory: directory,
       redlibUrl: "https://feed.example",
+      checkUrl: "http://redlib.example:8080",
     });
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
     return `http://127.0.0.1:${server.address().port}`;

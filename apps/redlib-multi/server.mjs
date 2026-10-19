@@ -59,21 +59,25 @@ export function subredditStatus(html, name) {
   return "unknown";
 }
 
-// Unset settings are optional for local runs; an empty value, such as a missing Flux
-// substitution variable, is a configuration error.
+// Every setting is required; Flux leaves a missing substitution variable empty.
 function setting(name) {
   const value = process.env[name];
-  if (value === "") throw new Error(`${name} must not be empty.`);
+  if (!value) throw new Error(`${name} is required.`);
   return value;
 }
 
 export function createApp({
-  dataDirectory = setting("DATA_DIRECTORY") ?? fileURLToPath(new URL("./data", import.meta.url)),
+  dataDirectory = setting("DATA_DIRECTORY"),
   redlibUrl = setting("REDLIB_URL"),
-  checkUrl = setting("REDLIB_CHECK_URL") ?? redlibUrl,
+  checkUrl = setting("REDLIB_CHECK_URL"),
   fetchStatus = fetch,
 } = {}) {
-  if (!redlibUrl) throw new Error("REDLIB_URL is required.");
+  for (const [name, value] of Object.entries({
+    DATA_DIRECTORY: dataDirectory,
+    REDLIB_CHECK_URL: checkUrl,
+    REDLIB_URL: redlibUrl,
+  }))
+    if (!value) throw new Error(`${name} is required.`);
   const origin = parseOrigin(redlibUrl, "REDLIB_URL");
   const checkOrigin = parseOrigin(checkUrl, "REDLIB_CHECK_URL");
   const statusCache = new Map();
@@ -367,8 +371,10 @@ export function createApp({
 
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   process.umask(0o077);
-  const port = Number(setting("PORT") ?? 3000);
-  const host = setting("HOST") ?? "127.0.0.1";
+  const port = Number(setting("PORT"));
+  if (!Number.isInteger(port) || port < 0 || port > 65535)
+    throw new Error("PORT must be a port number.");
+  const host = setting("HOST");
   const server = createApp();
   server.listen(port, host);
   for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => server.close());

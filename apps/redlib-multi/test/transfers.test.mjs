@@ -14,6 +14,7 @@ test("copies and moves selected entries atomically without overwriting either li
     server = createApp({
       dataDirectory: directory,
       redlibUrl: "https://feed.example",
+      checkUrl: "http://redlib.example:8080",
     });
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
     base = `http://127.0.0.1:${server.address().port}/api/lists`;
@@ -119,6 +120,7 @@ test("deletes empty lists while preserving stale-edit protection after recreatio
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
+    checkUrl: "http://redlib.example:8080",
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const url = `http://127.0.0.1:${server.address().port}/api/lists/example`;
