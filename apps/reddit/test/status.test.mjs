@@ -14,20 +14,11 @@ test("recognises explicit Redlib statuses without inferring bans from generic er
     "banned",
   );
   assert.equal(
-    subredditStatus(
-      '<div id="error"><h1>r/example is a private community</h1></div>',
-      "example",
-    ),
+    subredditStatus('<div id="error"><h1>r/example is a private community</h1></div>', "example"),
     "private",
   );
-  assert.equal(
-    subredditStatus("<h1>r/example is quarantined</h1>", "example"),
-    "restricted",
-  );
-  assert.equal(
-    subredditStatus("<h1>r/example is gated</h1>", "example"),
-    "restricted",
-  );
+  assert.equal(subredditStatus("<h1>r/example is quarantined</h1>", "example"), "restricted");
+  assert.equal(subredditStatus("<h1>r/example is gated</h1>", "example"), "restricted");
   assert.equal(
     subredditStatus(
       '<p id="sub_name">r/example</p><p>r/example has been banned from Reddit</p>',
@@ -35,10 +26,7 @@ test("recognises explicit Redlib statuses without inferring bans from generic er
     ),
     "available",
   );
-  assert.equal(
-    subredditStatus('<p id="sub_name">r/AskReddit</p>', "askreddit"),
-    "available",
-  );
+  assert.equal(subredditStatus('<p id="sub_name">r/AskReddit</p>', "askreddit"), "available");
   assert.equal(
     subredditStatus(
       '<div id="error"><h1>r/Example has been banned from Reddit</h1></div>',
@@ -69,9 +57,7 @@ test("checks a fixed Redlib origin, caches results and preserves lists", async (
       const name = new URL(url).pathname.slice(3);
       if (name === "offline") throw new Error("Network unavailable");
       if (name === "limited") return new Response("banned", { status: 429 });
-      return new Response(
-        `<div id="error"><h1>r/${name} has been banned from Reddit</h1></div>`,
-      );
+      return new Response(`<div id="error"><h1>r/${name} has been banned from Reddit</h1></div>`);
     },
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -96,10 +82,7 @@ test("checks a fixed Redlib origin, caches results and preserves lists", async (
       status: "banned",
     });
     assert.equal(calls, 1);
-    assert.equal(
-      (await check("example", { "Sec-Fetch-Site": "cross-site" })).status,
-      403,
-    );
+    assert.equal((await check("example", { "Sec-Fetch-Site": "cross-site" })).status, 403);
     assert.equal((await check("../example")).status, 400);
     assert.deepEqual(await (await check("offline")).json(), {
       status: "unknown",

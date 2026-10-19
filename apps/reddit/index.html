@@ -21,8 +21,7 @@
       }
       body > header {
         background: var(--wa-color-surface-default);
-        border-bottom: var(--wa-border-width-s) solid
-          var(--wa-color-surface-border);
+        border-bottom: var(--wa-border-width-s) solid var(--wa-color-surface-border);
       }
       .app-header,
       main {
@@ -86,8 +85,7 @@
       }
       .community-list > li {
         padding-block: var(--wa-space-s);
-        border-bottom: var(--wa-border-width-s) solid
-          var(--wa-color-surface-border);
+        border-bottom: var(--wa-border-width-s) solid var(--wa-color-surface-border);
       }
       .community-list > li:last-child {
         border-bottom: 0;
@@ -146,14 +144,11 @@
           <div class="wa-stack wa-gap-s intro">
             <h1>Your Communities, One Feed</h1>
             <p class="hint">
-              Open a saved list or start a new one. Add your favourite
-              subreddits and read them together.
+              Open a saved list or start a new one. Add your favourite subreddits and read them
+              together.
             </p>
           </div>
-          <form
-            id="open-list"
-            class="input-row wa-flank:end wa-align-items-end wa-gap-s"
-          >
+          <form id="open-list" class="input-row wa-flank:end wa-align-items-end wa-gap-s">
             <wa-input
               id="list-name"
               name="list-name"
@@ -174,9 +169,7 @@
             <wa-badge id="count" variant="neutral">0</wa-badge>
           </div>
           <div class="wa-cluster wa-gap-s">
-            <wa-button id="copy-editor" appearance="plain"
-              >Copy Editing Link</wa-button
-            >
+            <wa-button id="copy-editor" appearance="plain">Copy Editing Link</wa-button>
             <span id="copy-editor-state" class="hint" role="status"></span>
           </div>
         </div>
@@ -185,9 +178,7 @@
             <div class="feed-link wa-stack wa-gap-s">
               <h2>Combined Feed</h2>
               <a id="feed" target="_blank" rel="noreferrer" hidden></a>
-              <p id="empty-feed" class="hint">
-                Add subreddits to build your feed.
-              </p>
+              <p id="empty-feed" class="hint">Add subreddits to build your feed.</p>
             </div>
             <div class="wa-cluster wa-gap-s">
               <wa-button id="copy-feed" disabled>Copy Feed Link</wa-button>
@@ -197,10 +188,7 @@
         </wa-card>
         <wa-card>
           <div class="wa-stack wa-gap-l">
-            <form
-              id="add-form"
-              class="input-row wa-flank:end wa-align-items-end wa-gap-s"
-            >
+            <form id="add-form" class="input-row wa-flank:end wa-align-items-end wa-gap-s">
               <wa-input
                 id="subreddits"
                 name="subreddits"
@@ -209,15 +197,10 @@
                 placeholder="Names, r/ links or a multi link"
                 required
               ></wa-input>
-              <wa-button id="add-button" type="submit" variant="brand"
-                >Add</wa-button
-              >
+              <wa-button id="add-button" type="submit" variant="brand">Add</wa-button>
             </form>
             <wa-divider></wa-divider>
-            <section
-              class="wa-stack wa-gap-s"
-              aria-labelledby="communities-title"
-            >
+            <section class="wa-stack wa-gap-s" aria-labelledby="communities-title">
               <div class="wa-split wa-gap-s">
                 <h2 id="communities-title">Subreddits</h2>
                 <p id="save-state" class="hint" role="status">Loading…</p>
@@ -233,14 +216,10 @@
               </div>
               <p id="check-state" class="hint" aria-live="polite"></p>
               <div class="wa-split wa-gap-s">
-                <wa-checkbox id="select-visible" size="s"
-                  >Select Visible</wa-checkbox
-                >
+                <wa-checkbox id="select-visible" size="s">Select Visible</wa-checkbox>
                 <div class="wa-cluster wa-gap-s">
                   <span id="selection-count" class="hint">0 Selected</span>
-                  <wa-button id="clear-selection" appearance="plain" size="s"
-                    >Clear</wa-button
-                  >
+                  <wa-button id="clear-selection" appearance="plain" size="s">Clear</wa-button>
                 </div>
               </div>
               <div id="bulk-actions" class="wa-stack wa-gap-s" hidden>
@@ -260,33 +239,19 @@
                 <div class="wa-cluster wa-gap-s">
                   <wa-button id="copy-selected">Copy</wa-button>
                   <wa-button id="move-selected">Move</wa-button>
-                  <wa-button
-                    id="remove-selected"
-                    variant="danger"
-                    appearance="outlined"
+                  <wa-button id="remove-selected" variant="danger" appearance="outlined"
                     >Remove Selected</wa-button
                   >
                 </div>
               </div>
-              <p id="empty-list" class="hint">
-                No subreddits yet. Add some above to get started.
-              </p>
-              <p id="empty-filter" class="hint" hidden>
-                No subreddits match your filter.
-              </p>
-              <ul
-                id="communities"
-                class="community-list"
-                aria-label="Subreddits"
-              ></ul>
+              <p id="empty-list" class="hint">No subreddits yet. Add some above to get started.</p>
+              <p id="empty-filter" class="hint" hidden>No subreddits match your filter.</p>
+              <ul id="communities" class="community-list" aria-label="Subreddits"></ul>
             </section>
           </div>
         </wa-card>
         <wa-card id="suggestions" hidden>
-          <section
-            class="wa-stack wa-gap-s"
-            aria-labelledby="suggestions-title"
-          >
+          <section class="wa-stack wa-gap-s" aria-labelledby="suggestions-title">
             <h2 id="suggestions-title">Suggested Communities</h2>
             <p id="suggestions-state" class="hint"></p>
             <ul
@@ -294,16 +259,10 @@
               class="community-list"
               aria-label="Suggested Subreddits"
             ></ul>
-            <wa-button id="retry-suggestions" appearance="plain" hidden
-              >Retry</wa-button
-            >
+            <wa-button id="retry-suggestions" appearance="plain" hidden>Retry</wa-button>
             <p class="hint">
               Related communities from
-              <a
-                href="https://anvaka.github.io/redsim/"
-                target="_blank"
-                rel="noreferrer"
-                >RedSim</a
+              <a href="https://anvaka.github.io/redsim/" target="_blank" rel="noreferrer">RedSim</a
               >.
             </p>
           </section>
@@ -321,8 +280,7 @@
         // Follow the browser when storage is unavailable.
       }
       function applyTheme() {
-        const dark =
-          theme === "dark" || (theme === "system" && systemTheme.matches);
+        const dark = theme === "dark" || (theme === "system" && systemTheme.matches);
         document.documentElement.classList.toggle("wa-dark", dark);
         document.documentElement.classList.toggle("wa-light", !dark);
         document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
@@ -337,8 +295,7 @@
         if (!event.target.closest("[data-theme-toggle]")) return;
         const dark = !document.documentElement.classList.contains("wa-dark");
         // Toggling back to the browser's preference restores automatic changes.
-        theme =
-          dark === systemTheme.matches ? "system" : dark ? "dark" : "light";
+        theme = dark === systemTheme.matches ? "system" : dark ? "dark" : "light";
         try {
           if (theme === "system") localStorage.removeItem("theme");
           else localStorage.setItem("theme", theme);
@@ -351,11 +308,7 @@
       // Load components after the saved theme applies, avoiding a light flash.
       await import("/vendor/ui.mjs");
 
-      import {
-        multiredditUrl,
-        normaliseSubreddits,
-        relatedSubreddits,
-      } from "/subreddits.mjs";
+      import { multiredditUrl, normaliseSubreddits, relatedSubreddits } from "/subreddits.mjs";
 
       await Promise.all(
         [
@@ -404,8 +357,7 @@
             resolve(status);
           });
         }).finally(() => {
-          if (pendingChecks.get(name)?.request === request)
-            pendingChecks.delete(name);
+          if (pendingChecks.get(name)?.request === request) pendingChecks.delete(name);
         });
         pendingChecks.set(name, { request, signal });
         drainChecks();
@@ -454,13 +406,9 @@
           !checkController &&
           (busy ||
             !subreddits.some(
-              (name) =>
-                !subredditStatuses.has(name) ||
-                subredditStatuses.get(name) === "unknown",
+              (name) => !subredditStatuses.has(name) || subredditStatuses.get(name) === "unknown",
             ));
-        $("#check-all").textContent = checkController
-          ? "Stop Check"
-          : "Check All";
+        $("#check-all").textContent = checkController ? "Stop Check" : "Check All";
       }
 
       $("#check-all").addEventListener("click", async () => {
@@ -471,9 +419,7 @@
         const controller = new AbortController();
         checkController = controller;
         const names = subreddits.filter(
-          (name) =>
-            !subredditStatuses.has(name) ||
-            subredditStatuses.get(name) === "unknown",
+          (name) => !subredditStatuses.has(name) || subredditStatuses.get(name) === "unknown",
         );
         let completed = 0;
         function progress(stopped = false) {
@@ -513,11 +459,7 @@
         suggestionsChecking = true;
         suggestionChecksIncomplete = false;
         const available = [];
-        for (
-          let index = 0;
-          index < names.length && available.length < 20;
-          index += 2
-        ) {
+        for (let index = 0; index < names.length && available.length < 20; index += 2) {
           const batch = names.slice(index, index + 2);
           const statuses = await Promise.all(
             batch.map((name) =>
@@ -552,14 +494,9 @@
           };
           const [labels, links] = await Promise.all(
             ["labels.json", "links.bin"].map(async (file) => {
-              const response = await fetch(
-                `https://anvaka.github.io/redsim/data/${file}`,
-                options,
-              );
+              const response = await fetch(`https://anvaka.github.io/redsim/data/${file}`, options);
               if (!response.ok) throw new Error("Suggestions unavailable.");
-              return file.endsWith("json")
-                ? response.json()
-                : response.arrayBuffer();
+              return file.endsWith("json") ? response.json() : response.arrayBuffer();
             }),
           );
           recommendations = { labels, links: new Int32Array(links) };
@@ -579,27 +516,16 @@
           recommendationKey = undefined;
           return;
         }
-        if (
-          !recommendations &&
-          !recommendationsLoading &&
-          !recommendationsError
-        ) {
+        if (!recommendations && !recommendationsLoading && !recommendationsError) {
           loadRecommendations();
           return;
         }
         const key = subreddits.join("+");
         if (recommendations && key !== recommendationKey) {
           recommendationKey = key;
-          suggestedNames = suggestedNames.filter(
-            (name) => !subreddits.includes(name),
-          );
+          suggestedNames = suggestedNames.filter((name) => !subreddits.includes(name));
           checkSuggestions(
-            relatedSubreddits(
-              recommendations.labels,
-              recommendations.links,
-              subreddits,
-              Infinity,
-            ),
+            relatedSubreddits(recommendations.labels, recommendations.links, subreddits, Infinity),
             key,
           );
         }
@@ -612,9 +538,7 @@
               : suggestedNames.length
                 ? ""
                 : "No related communities found.";
-        $("#retry-suggestions").hidden = !(
-          recommendationsError || suggestionChecksIncomplete
-        );
+        $("#retry-suggestions").hidden = !(recommendationsError || suggestionChecksIncomplete);
         const suggestions = $("#suggested-communities");
         // Reserve the previous height while checked replacements arrive, avoiding a
         // temporary shorter page that clamps the viewport near the final rows.
@@ -625,9 +549,7 @@
           if (!suggestedNames.includes(row.dataset.name)) row.remove();
         }
         suggestedNames.forEach((name, index) => {
-          let row = [...suggestions.children].find(
-            (row) => row.dataset.name === name,
-          );
+          let row = [...suggestions.children].find((row) => row.dataset.name === name);
           if (row) {
             row.querySelector("wa-button").disabled = busy;
           } else {
@@ -670,9 +592,7 @@
           knownLists = [
             ...new Set(
               saved.filter(
-                (name) =>
-                  typeof name === "string" &&
-                  /^[a-zA-Z0-9_-]{1,128}$/.test(name),
+                (name) => typeof name === "string" && /^[a-zA-Z0-9_-]{1,128}$/.test(name),
               ),
             ),
           ];
@@ -733,10 +653,8 @@
       function renderSelection() {
         const visible = visibleSubreddits();
         const count = visible.filter((name) => selected.has(name)).length;
-        $("#select-visible").checked =
-          visible.length > 0 && count === visible.length;
-        $("#select-visible").indeterminate =
-          count > 0 && count < visible.length;
+        $("#select-visible").checked = visible.length > 0 && count === visible.length;
+        $("#select-visible").indeterminate = count > 0 && count < visible.length;
         $("#select-visible").disabled = busy || !visible.length;
         $("#selection-count").textContent = `${selected.size} Selected`;
         $("#bulk-actions").hidden = !selected.size;
@@ -772,8 +690,7 @@
         $("#copy-feed").disabled = !url;
         $("#add-button").disabled = busy;
         $("#count").textContent = String(subreddits.length);
-        for (const name of selected)
-          if (!subreddits.includes(name)) selected.delete(name);
+        for (const name of selected) if (!subreddits.includes(name)) selected.delete(name);
         const filtered = visibleSubreddits();
         renderSelection();
         $("#empty-list").hidden = subreddits.length > 0;
@@ -836,14 +753,11 @@
       }
 
       async function request(method, body, suffix = "") {
-        const response = await fetch(
-          `/api/lists/${encodeURIComponent(id)}${suffix}`,
-          {
-            method,
-            headers: { "Content-Type": "application/json" },
-            ...(body ? { body: JSON.stringify(body) } : {}),
-          },
-        );
+        const response = await fetch(`/api/lists/${encodeURIComponent(id)}${suffix}`, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          ...(body ? { body: JSON.stringify(body) } : {}),
+        });
         // A proxy or gateway error may return HTML instead of the API's JSON.
         const result = await response.json().catch(() => ({}));
         if (response.status === 409 && result.subreddits) {
@@ -852,9 +766,7 @@
           selected.clear();
         }
         if (!response.ok || !result.subreddits)
-          throw new Error(
-            result.error || "Unable to complete this request. Try again.",
-          );
+          throw new Error(result.error || "Unable to complete this request. Try again.");
         return result;
       }
 
@@ -873,8 +785,7 @@
         }
         busy = true;
         message("");
-        $("#save-state").textContent =
-          action === "move" ? "Moving…" : "Copying…";
+        $("#save-state").textContent = action === "move" ? "Moving…" : "Copying…";
         render();
         try {
           const result = await request(
@@ -892,8 +803,7 @@
           selected.clear();
           rememberList(destination, true);
           rememberList(id, subreddits.length > 0);
-          $("#save-state").textContent =
-            action === "move" ? "Moved." : "Copied.";
+          $("#save-state").textContent = action === "move" ? "Moved." : "Copied.";
         } catch (error) {
           message(error.message);
           $("#save-state").textContent = "Transfer not completed. Try again.";
@@ -906,9 +816,7 @@
       async function save(next, { suggestionIndex } = {}) {
         if (busy) return;
         const suggestionsTop =
-          suggestionIndex === undefined
-            ? undefined
-            : $("#suggestions").getBoundingClientRect().top;
+          suggestionIndex === undefined ? undefined : $("#suggestions").getBoundingClientRect().top;
         busy = true;
         message("");
         $("#save-state").textContent = "Saving…";
@@ -934,15 +842,12 @@
               ),
             );
             // The saved list grows above suggestions; keep the same place in the viewport.
-            const buttons = $("#suggested-communities").querySelectorAll(
-              "wa-button",
-            );
+            const buttons = $("#suggested-communities").querySelectorAll("wa-button");
             buttons[Math.min(suggestionIndex, buttons.length - 1)]?.focus({
               preventScroll: true,
             });
             window.scrollBy({
-              top:
-                $("#suggestions").getBoundingClientRect().top - suggestionsTop,
+              top: $("#suggestions").getBoundingClientRect().top - suggestionsTop,
               behavior: "instant",
             });
           }
@@ -959,12 +864,7 @@
         }
       }
 
-      for (const selector of [
-        "#list-name",
-        "#destination",
-        "#subreddits",
-        "#filter",
-      ]) {
+      for (const selector of ["#list-name", "#destination", "#subreddits", "#filter"]) {
         const input = $(selector);
         input.setAttribute("autocapitalize", "none");
         input.addEventListener("input", async (event) => {
@@ -978,34 +878,24 @@
             .find((element) => element instanceof HTMLInputElement);
           const start = native?.selectionStart;
           const end = native?.selectionEnd;
-          const removed = isName
-            ? original.length - original.trimStart().length
-            : 0;
+          const removed = isName ? original.length - original.trimStart().length : 0;
           input.value = value;
           await input.updateComplete;
           if (start !== null && start !== undefined)
-            native.setSelectionRange(
-              Math.max(0, start - removed),
-              Math.max(0, end - removed),
-            );
+            native.setSelectionRange(Math.max(0, start - removed), Math.max(0, end - removed));
         });
       }
       $("#open-list").addEventListener("submit", async (event) => {
         event.preventDefault();
         const name = ($("#list-name").value || "").trim();
         if (name.toLowerCase() === "health") {
-          $("#list-name").setCustomValidity(
-            "This name is reserved. Choose another list name.",
-          );
+          $("#list-name").setCustomValidity("This name is reserved. Choose another list name.");
           $("#list-name").reportValidity();
           return;
         }
         try {
-          const response = await fetch(
-            `/api/lists/${encodeURIComponent(name)}`,
-          );
-          if (!response.ok)
-            throw new Error("Unable to open this list. Try again.");
+          const response = await fetch(`/api/lists/${encodeURIComponent(name)}`);
+          if (!response.ok) throw new Error("Unable to open this list. Try again.");
           location.assign(`/${name.toLowerCase()}`);
         } catch (error) {
           message(error.message);
@@ -1030,8 +920,7 @@
         render();
       });
       $("#remove-selected").addEventListener("click", () => {
-        if (selected.size)
-          save(subreddits.filter((name) => !selected.has(name)));
+        if (selected.size) save(subreddits.filter((name) => !selected.has(name)));
       });
       $("#copy-selected").addEventListener("click", () => transfer("copy"));
       $("#move-selected").addEventListener("click", () => transfer("move"));
@@ -1040,8 +929,7 @@
         if (busy) return;
         try {
           const additions = normaliseSubreddits($("#subreddits").value || "");
-          if (!additions.length)
-            throw new Error("Enter at least one subreddit.");
+          if (!additions.length) throw new Error("Enter at least one subreddit.");
           const next = [...new Set([...subreddits, ...additions])].sort();
           if (next.length === subreddits.length) {
             message("Already in this list.", "neutral");
@@ -1056,26 +944,21 @@
       if (!id) {
         $("#welcome").hidden = false;
       } else if (!/^[a-zA-Z0-9_-]{1,128}$/.test(id)) {
-        message(
-          "Use a single path containing letters, numbers, underscores or hyphens.",
-        );
+        message("Use a single path containing letters, numbers, underscores or hyphens.");
       } else {
         $("#list-title").textContent = id;
         $("#editor").hidden = false;
         render();
         try {
           const configuration = await fetch("/api/config");
-          if (!configuration.ok)
-            throw new Error("Unable to load the feed configuration.");
+          if (!configuration.ok) throw new Error("Unable to load the feed configuration.");
           redlibUrl = (await configuration.json()).redlibUrl;
           const result = await request("GET");
           subreddits = result.subreddits;
           revision = result.revision;
           busy = false;
           rememberList(id, subreddits.length > 0);
-          $("#save-state").textContent = revision
-            ? "Saved."
-            : "Add a subreddit to save this list.";
+          $("#save-state").textContent = revision ? "Saved." : "Add a subreddit to save this list.";
         } catch (error) {
           message(error.message);
           $("#save-state").textContent = "Reload to try again.";
