@@ -14,4 +14,5 @@ generatorOptions:
 configurations:
   - name-reference.yaml
 components:
+  - ../../components/app
   - ../../components/routes

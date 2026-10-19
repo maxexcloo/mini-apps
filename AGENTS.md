@@ -7,10 +7,17 @@
   and minimal deployment config; avoid generators, build scripts, task wrappers
   and alternate packaging. Substantial services, such as Actual Up, belong in
   their own repositories.
+- Name the Namespace after the retained deployment name and include
+  `components/app`; it sets the shared app-template chart and derives the other
+  resources' namespaces, the HelmRelease name, release name and `nameOverride`,
+  and the NetworkPolicy name and pod selector. Generators run after components,
+  so each `configMapGenerator` keeps its own `namespace`. Write `app` as the
+  placeholder HelmRelease and NetworkPolicy name.
 - Set the Namespace's `app.excloo.dev/name` label once and include
-  `components/routes`; it derives `<name>.mini.excloo.com`. Mini apps use only
-  this hostname; cluster app aliases belong to Kubelab. Select apps in
-  `clusters/syd/kustomization.yaml`; Kubelab reconciles only `clusters/syd`.
+  `components/routes`; it owns the private gateway and mini app domain and
+  derives `<name>.mini.excloo.com`. Mini apps use only this hostname; cluster app
+  aliases belong to Kubelab. Select apps in `clusters/syd/kustomization.yaml`;
+  Kubelab reconciles only `clusters/syd`.
 - `clusters/syd` places every HelmRelease on `node.excloo.dev/network: external`
   nodes. A `local-path` PV is bound to the node that created it, so keep apps with
   storage on that external node and back up before changing placement.
@@ -26,9 +33,10 @@
   SYD's `public-direct` gateway, `websecuredirect` listener, public-access
   namespace and route labels, and unproxied ExternalDNS records. Review live route
   changes.
-- Enable Homepage discovery in the `Mini Apps` group, named `Mini: <App>`. Use
-  the safe landing URL, derived from the owning route; never publish editing
-  capabilities or list names.
+- `components/routes` enables Homepage discovery in the `Mini Apps` group,
+  prefixes each route's `gethomepage.dev/name` to `Mini: <App>` and links the
+  safe landing URL derived from the route; never publish editing capabilities or
+  list names.
   Probe a capability-free `/health` endpoint.
 - Keep storage, secrets and network access isolated. Credentials stay server-side
   through ExternalSecrets that reference 1Password items by title. Flux postBuild

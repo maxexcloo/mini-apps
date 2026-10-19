@@ -1,20 +1,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: mini-tool
-  namespace: mini-tool
+  name: app
 spec:
-  interval: 30m
-  releaseName: mini-tool
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
       app:
@@ -58,8 +46,6 @@ spec:
         runAsUser: 568
         seccompProfile:
           type: RuntimeDefault
-    global:
-      nameOverride: mini-tool
     persistence:
       static:
         name: mini-tool-static
@@ -79,19 +65,8 @@ spec:
       private:
         annotations:
           gethomepage.dev/description: Text Counter
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Mini Apps
-          gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: mdi-text-box-outline
-          gethomepage.dev/name: "Mini: Text Counter"
-        hostnames:
-          - app.mini.excloo.com
-        labels:
-          app.kubernetes.io/name: mini-tool
-        parentRefs:
-          - name: private
-            namespace: networking
-            sectionName: websecure
+          gethomepage.dev/name: Text Counter
     service:
       app:
         controller: app
@@ -114,12 +89,11 @@ metadata:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: mini-tool
-  namespace: mini-tool
+  name: app
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: mini-tool
+      app.kubernetes.io/name: app
   policyTypes:
     - Egress
     - Ingress

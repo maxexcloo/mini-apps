@@ -1,5 +1,30 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
+# Private mini app routes: <app.excloo.dev/name>.mini.excloo.com on the private
+# gateway, listed in Homepage's Mini Apps group as "Mini: <name>".
+patches:
+  # The target selects every HelmRelease; the patch's name is a placeholder.
+  - target:
+      kind: HelmRelease
+    patch: |-
+      apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      metadata:
+        name: application
+      spec:
+        values:
+          route:
+            private:
+              annotations:
+                gethomepage.dev/enabled: "true"
+                gethomepage.dev/group: Mini Apps
+                gethomepage.dev/href: https://app.invalid
+              hostnames:
+                - app.mini.excloo.com
+              parentRefs:
+                - name: private
+                  namespace: networking
+                  sectionName: websecure
 # Source directory identity is independent of retained release and namespace names.
 replacements:
   - source:
@@ -24,3 +49,28 @@ replacements:
         options:
           delimiter: /
           index: 2
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.route.private.labels.[app.kubernetes.io/name]
+        options:
+          create: true
+  # A negative index prefixes the group's first word: "Mini: <name>".
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.annotations.[gethomepage.dev/group]
+      options:
+        delimiter: " "
+        index: 0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.route.private.annotations.[gethomepage.dev/name]
+        options:
+          delimiter: ": "
+          index: -1
