@@ -1,18 +1,5 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+# Kubelab's Flux Kustomization places every HelmRelease on external nodes.
 resources:
   - ../../apps/redlib-multi
-patches:
-  # The target selects every HelmRelease; the patch's name is a placeholder.
-  - target:
-      kind: HelmRelease
-    patch: |-
-      apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      metadata:
-        name: application
-      spec:
-        values:
-          defaultPodOptions:
-            nodeSelector:
-              node.excloo.dev/network: external

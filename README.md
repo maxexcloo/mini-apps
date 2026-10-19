@@ -52,8 +52,8 @@ and route and `external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"`.
 Both gateways use the wildcard certificate. Reachability and app authentication
 are separate choices. Keep credentials in the existing secret integration.
 
-`components/routes` lists each app in Homepage's **Mini Apps** group as
-`Mini: <App>` and links the safe landing page; set the app's description, icon
+`components/routes` lists each app in Homepage's **Minilab** group as
+`Minilab: <App>` and links the safe landing page; set the app's description, icon
 and display name on its route. Its app listing refreshes
 automatically. A repository AI connection can submit PRs without cluster
 credentials; read `AGENTS.md` before editing.

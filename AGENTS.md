@@ -15,11 +15,11 @@
   placeholder HelmRelease and NetworkPolicy name.
 - Set the Namespace's `app.excloo.dev/name` label once and include
   `components/routes`; it owns the private gateway and mini app domain and
-  derives `<name>.mini.excloo.com`. Mini apps use only this hostname; cluster app
+  derives `<name>.${MINILAB_DOMAIN}` (`mini.excloo.com`). Mini apps use only this hostname; cluster app
   aliases belong to Kubelab. Select apps in `clusters/syd/kustomization.yaml`;
   Kubelab reconciles only `clusters/syd`.
-- `clusters/syd` places every HelmRelease on `node.excloo.dev/network: external`
-  nodes. A `local-path` PV is bound to the node that created it, so keep apps with
+- Kubelab's `minilab` Flux Kustomization places every HelmRelease on
+  `node.excloo.dev/network: external` nodes. A `local-path` PV is bound to the node that created it, so keep apps with
   storage on that external node and back up before changing placement.
 - Choose a backend and datastore for the app's behaviour; existing Node.js/SQLite
   apps are examples, not a required stack. A backend such as PocketBase can
@@ -33,8 +33,8 @@
   SYD's `public-direct` gateway, `websecuredirect` listener, public-access
   namespace and route labels, and unproxied ExternalDNS records. Review live route
   changes.
-- `components/routes` enables Homepage discovery in the `Mini Apps` group,
-  prefixes each route's `gethomepage.dev/name` to `Mini: <App>` and links the
+- `components/routes` enables Homepage discovery in the `Minilab` group,
+  prefixes each route's `gethomepage.dev/name` to `Minilab: <App>` and links the
   safe landing URL derived from the route; never publish editing capabilities or
   list names.
   Probe a capability-free `/health` endpoint.
@@ -42,8 +42,8 @@
   through ExternalSecrets that reference 1Password items by title. Flux postBuild
   substitution applies to ConfigMaps, so disable it on code ConfigMaps to keep
   JavaScript template literals such as `${name}` intact.
-- Kubelab's `apps/overlays/syd/mini-apps.yaml` sets the `mini-apps`
-  Kustomization's shared substitution variables: `REDLIB_URL` (Redlib's public
+- Kubelab's `apps/overlays/syd/minilab.yaml` sets the `minilab`
+  Kustomization's shared substitution variables: `MINILAB_DOMAIN`, `REDLIB_URL` (Redlib's public
   origin, replaced from its route in the overlay's `kustomization.yaml`) and
   `REDLIB_CHECK_URL` (its in-cluster service). Add shared variables there. Apps
   have no setting defaults or fallbacks: a missing or empty variable, which is
