@@ -14,8 +14,9 @@ risk because the app is private.
 
 Edit `apps/redlib-multi/index.html` for the interface. `server.mjs` handles its API and
 SQLite database; `subreddits.mjs` contains shared parsing and recommendation
-logic. Web Awesome 3.14.0 is served locally from `vendor/`, with third-party
-licences included. There is no npm install or frontend build step.
+logic. Web Awesome is served locally from `vendor/`, with third-party licences
+included; its version is in the `vendor/ui.mjs` banner. There is no npm install
+or frontend build step.
 
 To run it locally, use Node.js 26.12 or newer:
 
@@ -88,8 +89,7 @@ EOF
 
 This regenerates `ui.mjs` and `ui.css`. Review the dependency inputs in
 `$vendor_work/bundle.json` and refresh `vendor/third-party-licences.txt` from the
-included packages' licence files when dependencies change. Keep
-`webawesome_version` in sync with the version under Apps. Run `node --test`,
+included packages' licence files when dependencies change. Run `node --test`,
 render `clusters/syd`, and check the page in a browser for component loading and Content Security Policy errors before
 merging. Remove the temporary directory when finished.
 

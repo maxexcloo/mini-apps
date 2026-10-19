@@ -262,7 +262,12 @@
             <wa-button id="retry-suggestions" appearance="plain" hidden>Retry</wa-button>
             <p class="hint">
               Related communities from
-              <a href="https://anvaka.github.io/redsim/" target="_blank" rel="noreferrer">RedSim</a
+              <a
+                id="redsim"
+                href="https://anvaka.github.io/redsim/"
+                target="_blank"
+                rel="noreferrer"
+                >RedSim</a
               >.
             </p>
           </section>
@@ -326,6 +331,7 @@
       );
 
       const $ = (selector) => document.querySelector(selector);
+      const redsimUrl = $("#redsim").href;
       const id = location.pathname.slice(1).toLowerCase();
       let subreddits = [];
       let revision = 0;
@@ -494,7 +500,7 @@
           };
           const [labels, links] = await Promise.all(
             ["labels.json", "links.bin"].map(async (file) => {
-              const response = await fetch(`https://anvaka.github.io/redsim/data/${file}`, options);
+              const response = await fetch(new URL(`data/${file}`, redsimUrl), options);
               if (!response.ok) throw new Error("Suggestions unavailable.");
               return file.endsWith("json") ? response.json() : response.arrayBuffer();
             }),
@@ -719,7 +725,7 @@
             similar.size = "s";
             similar.textContent = "Similar";
             similar.appearance = "plain";
-            similar.href = `https://anvaka.github.io/redsim/#!?q=${encodeURIComponent(name)}`;
+            similar.href = `${redsimUrl}#!?q=${encodeURIComponent(name)}`;
             similar.target = "_blank";
             similar.rel = "noreferrer noopener";
             similar.append(hiddenLabel(` to r/${name}`));
