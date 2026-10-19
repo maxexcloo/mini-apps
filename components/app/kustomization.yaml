@@ -3,6 +3,11 @@ kind: Component
 # The Namespace name is the retained deployment name; other resources take their
 # namespace and names from it. Generators run after components, so each
 # configMapGenerator still sets its own namespace.
+# Kubelab's minilab Flux Kustomization may only grant helm-controller the
+# minilab-release ClusterRole, so each release runs as this namespace's
+# minilab ServiceAccount.
+resources:
+  - release.yaml
 patches:
   # The target selects every HelmRelease; the patch's name is a placeholder.
   - target:
@@ -23,6 +28,7 @@ patches:
               name: bjw-s
               namespace: flux-system
             version: 5.3.0
+        serviceAccountName: minilab
 replacements:
   - source:
       kind: Namespace
@@ -53,6 +59,19 @@ replacements:
           create: true
       - select:
           kind: PersistentVolumeClaim
+        fieldPaths:
+          - metadata.namespace
+        options:
+          create: true
+      - select:
+          kind: RoleBinding
+        fieldPaths:
+          - metadata.namespace
+          - subjects.0.namespace
+        options:
+          create: true
+      - select:
+          kind: ServiceAccount
         fieldPaths:
           - metadata.namespace
         options:
