@@ -56,8 +56,9 @@ following from the repository root; dependencies and the entrypoint stay in a
 temporary directory. Add or remove component imports to match the page.
 
 ```sh
+webawesome_version=3.14.0
 vendor_work=$(mktemp -d)
-npm install --no-package-lock --prefix "$vendor_work" @awesome.me/webawesome@3.14.0 esbuild@0.28.2
+npm install --no-package-lock --prefix "$vendor_work" "@awesome.me/webawesome@$webawesome_version" esbuild@0.28.2
 cat > "$vendor_work/entry.mjs" <<'EOF'
 import "@awesome.me/webawesome/dist/styles/webawesome.css";
 import "@awesome.me/webawesome/dist/components/badge/badge.js";
@@ -72,7 +73,7 @@ import "@awesome.me/webawesome/dist/components/option/option.js";
 import "@awesome.me/webawesome/dist/components/select/select.js";
 EOF
 "$vendor_work/node_modules/.bin/esbuild" "$vendor_work/entry.mjs" \
-  --banner:js="// Web Awesome 3.14.0. See third-party-licences.txt for licences." \
+  --banner:js="// Web Awesome $webawesome_version. See third-party-licences.txt for licences." \
   --bundle --format=esm --legal-comments=eof \
   --metafile="$vendor_work/bundle.json" --minify \
   --outfile=apps/reddit/vendor/ui.mjs --target=es2022
@@ -80,9 +81,9 @@ EOF
 
 This regenerates `ui.mjs` and `ui.css`. Review the dependency inputs in
 `$vendor_work/bundle.json` and refresh `vendor/third-party-licences.txt` from the
-included packages' licence files when dependencies change. Keep package versions
-and the banner in sync. Run `node --test`, render `clusters/syd`, and check the
-page in a browser for component loading and Content Security Policy errors before
+included packages' licence files when dependencies change. Keep
+`webawesome_version` in sync with the version under Apps. Run `node --test`,
+render `clusters/syd`, and check the page in a browser for component loading and Content Security Policy errors before
 merging. Remove the temporary directory when finished.
 
 ## Licence
