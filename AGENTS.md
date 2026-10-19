@@ -33,10 +33,10 @@
   through ExternalSecrets that reference 1Password items by UUID. Flux postBuild
   substitution applies to ConfigMaps, so disable it on code ConfigMaps to keep
   JavaScript template literals such as `${name}` intact.
-- Kubelab's `apps/overlays/syd/kustomization.yaml` substitutes shared variables
-  into the `mini-apps` Kustomization: `REDLIB_URL` (Redlib's public origin,
-  derived from its route) and `REDLIB_CHECK_URL` (its in-cluster service). Add
-  shared variables there.
+- Kubelab's `apps/overlays/syd/mini-apps.yaml` sets the `mini-apps`
+  Kustomization's shared substitution variables: `REDLIB_URL` (Redlib's public
+  origin, replaced from its route in the overlay's `kustomization.yaml`) and
+  `REDLIB_CHECK_URL` (its in-cluster service). Add shared variables there.
 - Preserve deployed namespaces, release names, PVCs and old URLs during source
   cleanups. SQLite apps use one replica with `Recreate` and keep live data off
   NFS. Take a consistent backup before changing storage or data ownership.
