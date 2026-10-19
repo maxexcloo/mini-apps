@@ -26,8 +26,9 @@
   SYD's `public-direct` gateway, `websecuredirect` listener, public-access
   namespace and route labels, and unproxied ExternalDNS records. Review live route
   changes.
-- Enable Homepage discovery in the `Mini Apps` group. Use the safe landing URL,
-  derived from the owning route; never publish editing capabilities or list names.
+- Enable Homepage discovery in the `Mini Apps` group, named `Mini: <App>`. Use
+  the safe landing URL, derived from the owning route; never publish editing
+  capabilities or list names.
   Probe a capability-free `/health` endpoint.
 - Keep storage, secrets and network access isolated. Credentials stay server-side
   through ExternalSecrets that reference 1Password items by UUID. Flux postBuild
@@ -40,11 +41,11 @@
 - Preserve deployed namespaces, release names, PVCs and old URLs during source
   cleanups. SQLite apps use one replica with `Recreate` and keep live data off
   NFS. Take a consistent backup before changing storage or data ownership.
-- Reddit keeps its secret-link model and retains its existing SQLite format,
+- Redlib Multi keeps its secret-link model and retains its existing SQLite format,
   SHA-256 keys and revisions; never discard unidentified saved lists. Mixed-case
   names fold into lowercase keys: opening or listing `Foo` merges its legacy
   record into `foo` (subreddit union, newer revision) and removes the old key.
-- Traefik's JSON access logs record request paths, including Reddit's editing
+- Traefik's JSON access logs record request paths, including Redlib Multi's editing
   URLs. This is accepted while the app is private; revisit it before publishing
   any secret-link app.
 - Open a PR and merge into `main`; Flux deploys it directly. Ordinary mini apps

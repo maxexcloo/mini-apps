@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - deploy.yaml
 configMapGenerator:
-  - name: reddit-source
+  - name: redlib-multi-source
     namespace: redlib-multi
     files:
       - index.html

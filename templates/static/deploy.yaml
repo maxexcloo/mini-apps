@@ -83,7 +83,7 @@ spec:
           gethomepage.dev/group: Mini Apps
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: mdi-text-box-outline
-          gethomepage.dev/name: Text Counter
+          gethomepage.dev/name: "Mini: Text Counter"
         hostnames:
           - app.mini.excloo.com
         labels:
