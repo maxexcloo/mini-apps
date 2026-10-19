@@ -6,12 +6,13 @@ Flux deploys the change to SYD. No GitHub Actions or deployment branch is needed
 
 ## Apps
 
-[Reddit](apps/reddit) manages combined subreddit feeds. Each list has its own
-editing URL and persistent SQLite data. Existing private links remain supported.
-Editing URLs are secret links that appear in Kubelab's Traefik access logs; this
-is an accepted risk because the app is private.
+[Redlib Multi](apps/redlib-multi) manages combined subreddit feeds. Each list has
+its own editing URL and persistent SQLite data. Lists saved under the former
+`reddit` hostname open at the same path on `redlib-multi`. Editing URLs are
+secret links that appear in Kubelab's Traefik access logs; this is an accepted
+risk because the app is private.
 
-Edit `apps/reddit/index.html` for the interface. `server.mjs` handles its API and
+Edit `apps/redlib-multi/index.html` for the interface. `server.mjs` handles its API and
 SQLite database; `subreddits.mjs` contains shared parsing and recommendation
 logic. Web Awesome 3.14.0 is served locally from `vendor/`, with third-party
 licences included. There is no npm install or frontend build step.
@@ -19,7 +20,7 @@ licences included. There is no npm install or frontend build step.
 To run it locally, use Node.js 26.12 or newer:
 
 ```sh
-REDLIB_URL=https://your-redlib.example node apps/reddit/server.mjs
+REDLIB_URL=https://your-redlib.example node apps/redlib-multi/server.mjs
 ```
 
 Set `REDLIB_URL` to your Redlib origin, including its scheme and any port.
@@ -44,9 +45,10 @@ and route and `external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"`.
 Both gateways use the wildcard certificate. Reachability and app authentication
 are separate choices. Keep credentials in the existing secret integration.
 
-Enable route annotations for Homepage's **Mini Apps** group and link the safe
-landing page. Its app listing refreshes automatically. A repository AI connection
-can submit PRs without cluster credentials; read `AGENTS.md` before editing.
+Enable route annotations for Homepage's **Mini Apps** group, name each entry
+`Mini: <App>` and link the safe landing page. Its app listing refreshes
+automatically. A repository AI connection can submit PRs without cluster
+credentials; read `AGENTS.md` before editing.
 Source is public; stored app data and credentials remain private.
 
 ## Update Web Awesome
@@ -76,7 +78,7 @@ EOF
   --banner:js="// Web Awesome $webawesome_version. See third-party-licences.txt for licences." \
   --bundle --format=esm --legal-comments=eof \
   --metafile="$vendor_work/bundle.json" --minify \
-  --outfile=apps/reddit/vendor/ui.mjs --target=es2022
+  --outfile=apps/redlib-multi/vendor/ui.mjs --target=es2022
 ```
 
 This regenerates `ui.mjs` and `ui.css`. Review the dependency inputs in

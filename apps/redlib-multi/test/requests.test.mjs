@@ -6,7 +6,7 @@ import { test } from "node:test";
 import { createApp } from "../server.mjs";
 
 test("rejects invalid JSON requests consistently while retaining endpoint limits and errors", async () => {
-  const directory = mkdtempSync(join(tmpdir(), "reddit-requests-"));
+  const directory = mkdtempSync(join(tmpdir(), "redlib-multi-requests-"));
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
@@ -72,7 +72,7 @@ test("rejects invalid JSON requests consistently while retaining endpoint limits
 });
 
 test("serves the page under a hash-only Content Security Policy", async () => {
-  const directory = mkdtempSync(join(tmpdir(), "reddit-page-csp-"));
+  const directory = mkdtempSync(join(tmpdir(), "redlib-multi-page-csp-"));
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",

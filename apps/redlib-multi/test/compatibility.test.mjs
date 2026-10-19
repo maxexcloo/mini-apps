@@ -75,7 +75,7 @@ test("opens an original database and merges its mixed-case identity into the low
 });
 
 test("starts normally through a Kubernetes-style source symlink", async () => {
-  const directory = mkdtempSync(join(tmpdir(), "reddit-source-"));
+  const directory = mkdtempSync(join(tmpdir(), "redlib-multi-source-"));
   const entry = join(directory, "server.mjs");
   symlinkSync(fileURLToPath(new URL("../server.mjs", import.meta.url)), entry);
   const reservation = createServer();

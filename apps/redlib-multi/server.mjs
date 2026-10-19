@@ -209,7 +209,7 @@ export function createApp({
         let status = "unknown";
         try {
           const upstream = await fetchStatus(`${checkOrigin.origin}/r/${name}?limit=1`, {
-            headers: { "User-Agent": "Reddit-Multi" },
+            headers: { "User-Agent": "Redlib-Multi" },
             redirect: "error",
             signal: AbortSignal.timeout(10000),
           });
