@@ -1,4 +1,4 @@
-# Mini Apps
+# Minilab
 
 Small self-hosted tools. Each app lives in `apps/<name>` and is published at
 `https://<name>.mini.excloo.com`. Open a PR, review it and merge into `main`;

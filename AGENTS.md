@@ -1,4 +1,4 @@
-# Mini Apps
+# Minilab
 
 - Keep each app in `apps/<name>`: a single-page `index.html`, a small `server.mjs`
   only when needed, and native Kubernetes resources beside it: `deploy.yaml` holds
@@ -31,7 +31,7 @@
   capabilities or list names.
   Probe a capability-free `/health` endpoint.
 - Keep storage, secrets and network access isolated. Credentials stay server-side
-  through ExternalSecrets that reference 1Password items by UUID. Flux postBuild
+  through ExternalSecrets that reference 1Password items by title. Flux postBuild
   substitution applies to ConfigMaps, so disable it on code ConfigMaps to keep
   JavaScript template literals such as `${name}` intact.
 - Kubelab's `apps/overlays/syd/mini-apps.yaml` sets the `mini-apps`
