@@ -8,16 +8,11 @@ import { createApp } from "../server.mjs";
 
 test("normalises names, links and multi links without retaining duplicates", () => {
   assert.deepEqual(
-    normaliseSubreddits(
-      "Sydney, australia r/SYDNEY\nhttps://feed.example/r/Australia+Melbourne/",
-    ),
+    normaliseSubreddits("Sydney, australia r/SYDNEY\nhttps://feed.example/r/Australia+Melbourne/"),
     ["australia", "melbourne", "sydney"],
   );
   assert.equal(
-    multiredditUrl(
-      normaliseSubreddits("Sydney+Australia"),
-      "https://feed.example",
-    ),
+    multiredditUrl(normaliseSubreddits("Sydney+Australia"), "https://feed.example"),
     "https://feed.example/r/australia+sydney",
   );
   assert.equal(multiredditUrl([]), null);
@@ -64,23 +59,17 @@ test("saves isolated lists, rejects stale edits and survives restarts", async ()
       revision: 1,
       subreddits: ["australia", "sydney"],
     });
-    assert.deepEqual(
-      await (await fetch(`${base}/api/lists/anothersecret`)).json(),
-      { revision: 0, subreddits: [] },
-    );
+    assert.deepEqual(await (await fetch(`${base}/api/lists/anothersecret`)).json(), {
+      revision: 0,
+      subreddits: [],
+    });
     response = await put("mysecret", {
       revision: 0,
       subreddits: ["melbourne"],
     });
     assert.equal(response.status, 409);
-    assert.deepEqual((await response.json()).subreddits, [
-      "australia",
-      "sydney",
-    ]);
-    assert.equal(
-      (await put("mysecret", { revision: 1, subreddits: ["bad/name"] })).status,
-      400,
-    );
+    assert.deepEqual((await response.json()).subreddits, ["australia", "sydney"]);
+    assert.equal((await put("mysecret", { revision: 1, subreddits: ["bad/name"] })).status, 400);
     assert.equal(
       (
         await put(
@@ -91,10 +80,7 @@ test("saves isolated lists, rejects stale edits and survives restarts", async ()
       ).status,
       403,
     );
-    assert.equal(
-      (await put("mysecret", { revision: 1, subreddits: ["sydney"] })).status,
-      200,
-    );
+    assert.equal((await put("mysecret", { revision: 1, subreddits: ["sydney"] })).status, 200);
     const page = await fetch(`${base}/mysecret`);
     assert.equal(page.status, 200);
     assert.equal(page.headers.get("referrer-policy"), "no-referrer");
@@ -107,10 +93,7 @@ test("saves isolated lists, rejects stale edits and survives restarts", async ()
       revision: 2,
       subreddits: ["sydney"],
     });
-    assert.equal(
-      (await put("mysecret", { revision: 2, subreddits: [] })).status,
-      200,
-    );
+    assert.equal((await put("mysecret", { revision: 2, subreddits: [] })).status, 200);
     assert.deepEqual(await (await fetch(`${base}/api/lists/mysecret`)).json(), {
       revision: 3,
       subreddits: [],

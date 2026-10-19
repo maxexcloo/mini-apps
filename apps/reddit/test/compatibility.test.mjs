@@ -26,11 +26,7 @@ test("opens an original database and merges its mixed-case identity into the low
   const id = "Fixture-Existing_List";
   database
     .prepare("INSERT INTO lists VALUES (?, ?, ?)")
-    .run(
-      createHash("sha256").update(id).digest("hex"),
-      JSON.stringify(["australia", "sydney"]),
-      7,
-    );
+    .run(createHash("sha256").update(id).digest("hex"), JSON.stringify(["australia", "sydney"]), 7);
   database.close();
   const server = createApp({
     dataDirectory: directory,
@@ -52,10 +48,10 @@ test("opens an original database and merges its mixed-case identity into the low
       multiredditUrl(first.subreddits, "https://feed.example"),
       "https://feed.example/r/australia+sydney",
     );
-    assert.deepEqual(
-      await (await fetch(`${base}/api/lists/fixture-existing_list`)).json(),
-      { subreddits: ["australia", "sydney"], revision: 8 },
-    );
+    assert.deepEqual(await (await fetch(`${base}/api/lists/fixture-existing_list`)).json(), {
+      subreddits: ["australia", "sydney"],
+      revision: 8,
+    });
     const update = await fetch(`${base}/api/lists/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -108,10 +104,7 @@ test("starts normally through a Kubernetes-style source symlink", async () => {
       } catch {}
       await setTimeout(100);
     }
-    assert.ok(
-      healthy,
-      `Symlinked server did not start (exit ${child.exitCode}).`,
-    );
+    assert.ok(healthy, `Symlinked server did not start (exit ${child.exitCode}).`);
   } finally {
     if (child.exitCode === null && child.signalCode === null) {
       child.kill();
