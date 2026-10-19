@@ -26,8 +26,7 @@ test("copies and moves selected entries atomically without overwriting either li
       headers: { "Content-Type": "application/json", ...headers },
       body: JSON.stringify(body),
     });
-  const transfer = (body, headers) =>
-    write("source/transfer", "POST", body, headers);
+  const transfer = (body, headers) => write("source/transfer", "POST", body, headers);
   await start();
   try {
     await write("source", "PUT", {
@@ -133,10 +132,7 @@ test("deletes empty lists while preserving stale-edit protection after recreatio
   try {
     assert.equal((await put(0, ["sydney"])).status, 200);
     assert.equal((await put(1, [])).status, 200);
-    assert.equal(
-      database.prepare("SELECT COUNT(*) AS count FROM lists").get().count,
-      0,
-    );
+    assert.equal(database.prepare("SELECT COUNT(*) AS count FROM lists").get().count, 0);
     assert.deepEqual(await (await fetch(url)).json(), {
       revision: 2,
       subreddits: [],

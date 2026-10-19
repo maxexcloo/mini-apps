@@ -15,36 +15,14 @@ test("rejects invalid JSON requests consistently while retaining endpoint limits
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
     const base = `http://127.0.0.1:${server.address().port}`;
     for (const [path, method, limit, tooLarge, action] of [
-      [
-        "/api/normalise-lists",
-        "POST",
-        150000,
-        "Too many list names.",
-        "writes",
-      ],
+      ["/api/normalise-lists", "POST", 150000, "Too many list names.", "writes"],
       ["/api/check", "POST", 1024, "Check one subreddit at a time.", "checks"],
       ["/api/lists/example", "PUT", 65536, "List is too large.", "writes"],
-      [
-        "/api/lists/example/transfer",
-        "POST",
-        65536,
-        "List is too large.",
-        "writes",
-      ],
+      ["/api/lists/example/transfer", "POST", 65536, "List is too large.", "writes"],
     ]) {
       for (const [body, headers, status, error] of [
-        [
-          "{}",
-          { "Sec-Fetch-Site": "cross-site" },
-          403,
-          `Cross-site ${action} are not allowed.`,
-        ],
-        [
-          "{}",
-          { "Sec-Fetch-Site": "same-site" },
-          403,
-          `Cross-site ${action} are not allowed.`,
-        ],
+        ["{}", { "Sec-Fetch-Site": "cross-site" }, 403, `Cross-site ${action} are not allowed.`],
+        ["{}", { "Sec-Fetch-Site": "same-site" }, 403, `Cross-site ${action} are not allowed.`],
         ["{}", { "Content-Type": "text/plain" }, 415, "Use application/json."],
         ["{", {}, 400, "Invalid JSON."],
         [JSON.stringify("a".repeat(limit)), {}, 413, tooLarge],

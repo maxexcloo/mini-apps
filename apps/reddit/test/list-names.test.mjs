@@ -12,12 +12,8 @@ const key = (name) => createHash("sha256").update(name).digest("hex");
 test("ordinary list reads need no writer lock and preserve existing aliases", async () => {
   const directory = mkdtempSync(join(tmpdir(), "redlib-read-only-"));
   const database = new DatabaseSync(join(directory, "lists.sqlite"));
-  database.exec(
-    "CREATE TABLE list_aliases (id TEXT PRIMARY KEY, canonical_id TEXT NOT NULL)",
-  );
-  database
-    .prepare("INSERT INTO list_aliases VALUES (?, ?)")
-    .run(key("Travel"), key("travel"));
+  database.exec("CREATE TABLE list_aliases (id TEXT PRIMARY KEY, canonical_id TEXT NOT NULL)");
+  database.prepare("INSERT INTO list_aliases VALUES (?, ?)").run(key("Travel"), key("travel"));
   const server = createApp({
     dataDirectory: directory,
     redlibUrl: "https://feed.example",
@@ -45,10 +41,7 @@ test("ordinary list reads need no writer lock and preserve existing aliases", as
       [{ id: key("Travel"), canonical_id: key("travel") }],
     );
     for (const table of ["lists", "deleted_lists"])
-      assert.equal(
-        database.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count,
-        0,
-      );
+      assert.equal(database.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count, 0);
   } finally {
     if (database.isTransaction) database.exec("ROLLBACK");
     await new Promise((resolve) => server.close(resolve));
@@ -92,13 +85,8 @@ test("atomically merges legacy case variants, retains unrecognised lists and rej
       subreddits: ["australia", "melbourne", "perth", "sydney"],
     });
     assert.deepEqual(await get("Travel"), merged);
-    assert.equal(
-      database.prepare("SELECT COUNT(*) AS count FROM lists").get().count,
-      2,
-    );
-    assert.ok(
-      database.prepare("SELECT 1 FROM lists WHERE id = ?").get(key("Unseen")),
-    );
+    assert.equal(database.prepare("SELECT COUNT(*) AS count FROM lists").get().count, 2);
+    assert.ok(database.prepare("SELECT 1 FROM lists WHERE id = ?").get(key("Unseen")));
     const redirect = await fetch(`${base}/TRAVEL`, { redirect: "manual" });
     assert.equal(redirect.status, 308);
     assert.equal(redirect.headers.get("location"), "/travel");
@@ -134,13 +122,8 @@ test("atomically merges legacy case variants, retains unrecognised lists and rej
       body: JSON.stringify({ names: ["First", "Blocked"] }),
     });
     assert.equal(failed.status, 500);
-    assert.ok(
-      database.prepare("SELECT 1 FROM lists WHERE id = ?").get(key("First")),
-    );
-    assert.equal(
-      database.prepare("SELECT 1 FROM lists WHERE id = ?").get(key("first")),
-      undefined,
-    );
+    assert.ok(database.prepare("SELECT 1 FROM lists WHERE id = ?").get(key("First")));
+    assert.equal(database.prepare("SELECT 1 FROM lists WHERE id = ?").get(key("first")), undefined);
     database.exec("DROP TRIGGER reject_merge");
   } finally {
     await new Promise((resolve) => server.close(resolve));
@@ -163,9 +146,7 @@ test("merging more than 1,000 entries preserves them and still allows removals",
       .prepare("INSERT INTO lists VALUES (?, ?, 1)")
       .run(
         key(name),
-        JSON.stringify(
-          Array.from({ length: 1000 }, (_, index) => `${prefix}_${index}`),
-        ),
+        JSON.stringify(Array.from({ length: 1000 }, (_, index) => `${prefix}_${index}`)),
       );
   const server = createApp({
     dataDirectory: directory,

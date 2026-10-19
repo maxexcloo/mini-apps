@@ -30,15 +30,11 @@
   <h1>Text Counter</h1>
   <label for="text">Text</label>
   <textarea id="text" placeholder="Paste text here"></textarea>
-  <output id="count" for="text" aria-live="polite"
-    >0 Words · 0 Characters</output
-  >
+  <output id="count" for="text" aria-live="polite">0 Words · 0 Characters</output>
   <script>
     const text = document.querySelector("#text");
     text.addEventListener("input", () => {
-      const words = text.value.trim()
-        ? text.value.trim().split(/\s+/).length
-        : 0;
+      const words = text.value.trim() ? text.value.trim().split(/\s+/).length : 0;
       document.querySelector("#count").textContent =
         `${words} Words · ${[...text.value].length} Characters`;
     });

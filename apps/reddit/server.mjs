@@ -50,22 +50,17 @@ function parseOrigin(value, variable) {
 
 // Redlib shows the canonical spelling, such as r/AskReddit for a lowercase request.
 export function subredditStatus(html, name) {
-  const error = /<div id="error">\s*<h1>([^<]*)<\/h1>/
-    .exec(html)?.[1]
-    ?.trim()
-    .toLowerCase();
+  const error = /<div id="error">\s*<h1>([^<]*)<\/h1>/.exec(html)?.[1]?.trim().toLowerCase();
   if (error === `r/${name} has been banned from reddit`) return "banned";
   if (error === `r/${name} is a private community`) return "private";
   if (new RegExp(`<h1>r/${name} is (?:quarantined|gated)</h1>`, "i").test(html))
     return "restricted";
-  if (!error && new RegExp(`<p id="sub_name">r/${name}</p>`, "i").test(html))
-    return "available";
+  if (!error && new RegExp(`<p id="sub_name">r/${name}</p>`, "i").test(html)) return "available";
   return "unknown";
 }
 
 export function createApp({
-  dataDirectory = process.env.DATA_DIRECTORY ||
-    fileURLToPath(new URL("./data", import.meta.url)),
+  dataDirectory = process.env.DATA_DIRECTORY || fileURLToPath(new URL("./data", import.meta.url)),
   redlibUrl = process.env.REDLIB_URL,
   checkUrl = process.env.REDLIB_CHECK_URL || redlibUrl,
   fetchStatus = fetch,
@@ -80,9 +75,7 @@ export function createApp({
   database.exec(
     "PRAGMA busy_timeout = 5000; PRAGMA journal_mode = WAL; CREATE TABLE IF NOT EXISTS lists (id TEXT PRIMARY KEY, subreddits TEXT NOT NULL, revision INTEGER NOT NULL)",
   );
-  const select = database.prepare(
-    "SELECT subreddits, revision FROM lists WHERE id = ?",
-  );
+  const select = database.prepare("SELECT subreddits, revision FROM lists WHERE id = ?");
   // Keep only revision metadata for deleted lists, so stale editors cannot revive old data.
   database.exec(
     "CREATE TABLE IF NOT EXISTS deleted_lists (id TEXT PRIMARY KEY, revision INTEGER NOT NULL)",
@@ -96,9 +89,8 @@ export function createApp({
       ? { revision: row.revision, subreddits: JSON.parse(row.subreddits) }
       : {
           revision:
-            database
-              .prepare("SELECT revision FROM deleted_lists WHERE id = ?")
-              .get(key)?.revision || 0,
+            database.prepare("SELECT revision FROM deleted_lists WHERE id = ?").get(key)
+              ?.revision || 0,
           subreddits: [],
         };
   }
@@ -138,9 +130,7 @@ export function createApp({
             );
             writeList(key, merged, Math.max(current.revision, old.revision));
             database.prepare("DELETE FROM lists WHERE id = ?").run(oldKey);
-            database
-              .prepare("DELETE FROM deleted_lists WHERE id = ?")
-              .run(oldKey);
+            database.prepare("DELETE FROM deleted_lists WHERE id = ?").run(oldKey);
           }
         }
         database.exec("COMMIT");
@@ -200,59 +190,42 @@ export function createApp({
       if (path === "/api/config" && request.method === "GET")
         return json(200, { redlibUrl: origin.origin });
       if (path === "/api/normalise-lists" && request.method === "POST") {
-        const names = (await readJson(request, 150000, "Too many list names."))
-          ?.names;
+        const names = (await readJson(request, 150000, "Too many list names."))?.names;
         if (
           !Array.isArray(names) ||
           names.length > 1000 ||
-          names.some(
-            (name) =>
-              typeof name !== "string" || !/^[a-zA-Z0-9_-]{1,128}$/.test(name),
-          )
+          names.some((name) => typeof name !== "string" || !/^[a-zA-Z0-9_-]{1,128}$/.test(name))
         )
           return json(400, { error: "Provide up to 1,000 valid list names." });
         return json(200, { names: normaliseLists(names) });
       }
       if (path === "/api/check" && request.method === "POST") {
-        const name = (
-          await readJson(
-            request,
-            1024,
-            "Check one subreddit at a time.",
-            "checks",
-          )
-        )?.subreddit;
+        const name = (await readJson(request, 1024, "Check one subreddit at a time.", "checks"))
+          ?.subreddit;
         if (typeof name !== "string" || !/^[a-z0-9_]{2,21}$/.test(name))
           return json(400, { error: "Provide a valid subreddit name." });
         const cached = statusCache.get(name);
-        if (cached && cached.expires > Date.now())
-          return json(200, { status: cached.status });
+        if (cached && cached.expires > Date.now()) return json(200, { status: cached.status });
         let status = "unknown";
         try {
-          const upstream = await fetchStatus(
-            `${checkOrigin.origin}/r/${name}?limit=1`,
-            {
-              headers: { "User-Agent": "Reddit-Multi" },
-              redirect: "error",
-              signal: AbortSignal.timeout(10000),
-            },
-          );
+          const upstream = await fetchStatus(`${checkOrigin.origin}/r/${name}?limit=1`, {
+            headers: { "User-Agent": "Reddit-Multi" },
+            redirect: "error",
+            signal: AbortSignal.timeout(10000),
+          });
           if (upstream.status !== 429 && upstream.status < 500)
             status = subredditStatus(await upstream.text(), name);
         } catch {
           // A timeout, network block or upstream failure cannot establish a ban.
         }
-        if (statusCache.size >= 1000)
-          statusCache.delete(statusCache.keys().next().value);
+        if (statusCache.size >= 1000) statusCache.delete(statusCache.keys().next().value);
         statusCache.set(name, {
           status,
           expires: Date.now() + (status === "unknown" ? 60000 : 900000),
         });
         return json(200, { status });
       }
-      const match = /^\/api\/lists\/([a-zA-Z0-9_-]{1,128})(\/transfer)?$/.exec(
-        path,
-      );
+      const match = /^\/api\/lists\/([a-zA-Z0-9_-]{1,128})(\/transfer)?$/.exec(path);
       if (match) {
         const name = match[1].toLowerCase();
         if (name === "health")
@@ -276,8 +249,7 @@ export function createApp({
           !Number.isSafeInteger(input.revision) ||
           input.revision < 0 ||
           !Array.isArray(input.subreddits) ||
-          input.subreddits.length >
-            Math.max(1000, current().subreddits.length) ||
+          input.subreddits.length > Math.max(1000, current().subreddits.length) ||
           input.subreddits.some((value) => typeof value !== "string")
         )
           return json(400, {
@@ -293,9 +265,7 @@ export function createApp({
           return json(400, { error: "Use up to 1,000 subreddits." });
         if (transfer) {
           const originalDestination =
-            typeof input.destination === "string"
-              ? input.destination.trim()
-              : "";
+            typeof input.destination === "string" ? input.destination.trim() : "";
           const destination = originalDestination.toLowerCase();
           if (
             !/^[a-zA-Z0-9_-]{1,128}$/.test(destination) ||
@@ -360,33 +330,26 @@ export function createApp({
           if (database.isTransaction) database.exec("ROLLBACK");
         }
       }
-      if (path.startsWith("/api/"))
-        return json(404, { error: "Unknown list path." });
+      if (path.startsWith("/api/")) return json(404, { error: "Unknown list path." });
       if (request.method !== "GET" && request.method !== "HEAD")
         return json(405, { error: "Method not allowed." });
       if (/^\/[a-zA-Z0-9_-]{1,128}$/.test(path) && !assets.has(path)) {
         normaliseLists([path.slice(1)]);
         if (path !== path.toLowerCase() && path.toLowerCase() !== "/health") {
           response.writeHead(308, {
-            Location:
-              path.toLowerCase() +
-              new URL(request.url, "http://localhost").search,
+            Location: path.toLowerCase() + new URL(request.url, "http://localhost").search,
           });
           return response.end();
         }
       }
       const asset =
-        assets.get(path) ||
-        (/^\/[a-zA-Z0-9_-]{1,128}$/.test(path) ? assets.get("/") : null);
+        assets.get(path) || (/^\/[a-zA-Z0-9_-]{1,128}$/.test(path) ? assets.get("/") : null);
       if (!asset) return json(404, { error: "Page not found." });
       response.writeHead(200, { "Content-Type": asset.type });
       response.end(request.method === "HEAD" ? undefined : asset.content);
     } catch (error) {
       json(error instanceof RequestError ? error.status : 500, {
-        error:
-          error instanceof RequestError
-            ? error.message
-            : "Unable to process this request.",
+        error: error instanceof RequestError ? error.message : "Unable to process this request.",
       });
     }
   });
@@ -394,15 +357,11 @@ export function createApp({
   return server;
 }
 
-if (
-  process.argv[1] &&
-  realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)
-) {
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   process.umask(0o077);
   const port = Number(process.env.PORT || 3000);
   const host = process.env.HOST || "127.0.0.1";
   const server = createApp();
   server.listen(port, host);
-  for (const signal of ["SIGINT", "SIGTERM"])
-    process.on(signal, () => server.close());
+  for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => server.close());
 }
