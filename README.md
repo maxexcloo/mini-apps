@@ -35,8 +35,8 @@ Deployed data stays on its existing volume, so never delete that volume when
 replacing the app. Run the data tests with `node --test`.
 
 With the [shared Mise configuration](https://github.com/maxexcloo/dotfiles#shared-tools--tasks)
-installed and `kubectl` available, `mise run check` runs the data tests, renders
-the deployed apps and static template, and checks repository formatting and
+installed, `mise run check` runs the data tests, renders the deployed apps and
+static template with the project `kubectl`, and checks repository formatting and
 configuration. It does not deploy anything.
 
 ## Add An App
