@@ -48,10 +48,11 @@
   Homepage name. Flux postBuild
   substitution applies to ConfigMaps, so disable it on code ConfigMaps to keep
   JavaScript template literals such as `${name}` intact.
-- Kubelab's `apps/overlays/syd/minilab.yaml` sets the `minilab`
-  Kustomization's shared substitution variables: `MINILAB_DOMAIN`, `REDLIB_URL` (Redlib's public
-  origin, replaced from its route in the overlay's `kustomization.yaml`) and
-  `REDLIB_CHECK_URL` (its in-cluster service). Add shared variables there. Apps
+- The `minilab` Kustomization gets `MINILAB_DOMAIN` from Kubelab's
+  `platform/settings` (`minilab_domain`). Kubelab's `apps/overlays/syd/minilab.yaml`
+  sets `REDLIB_URL` (Redlib's public origin, replaced from its route in the
+  overlay's `kustomization.yaml`) and `REDLIB_CHECK_URL` (its in-cluster service).
+  Add other shared variables to the overlay. Apps
   have no setting defaults or fallbacks: a missing or empty variable, which is
   how Flux leaves a missing substitution, must stop startup with its name. Derive
   setting values that duplicate a manifest field, such as a port, with an app
