@@ -1,0 +1,25 @@
+# Development
+[tasks.check]
+depends = [
+  "check:actions",
+  "check:manifests",
+  "check:mise",
+  "check:oxfmt",
+  "check:python",
+  "check:shell",
+  "check:updates",
+  "check:whitespace",
+  "test",
+]
+
+[tasks."check:manifests"]
+run = """
+kubectl kustomize clusters/syd > /dev/null
+kubectl kustomize templates/static > /dev/null
+"""
+
+[tasks.fmt]
+depends = ["fmt:mise", "fmt:oxfmt"]
+
+[tasks.test]
+run = "node --test"
