@@ -1,3 +1,6 @@
+[tools]
+kubectl = "latest"
+
 # Development
 [tasks.check]
 depends = [
