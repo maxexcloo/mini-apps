@@ -84,7 +84,7 @@ test("serves the page under a hash-only Content Security Policy", async () => {
     const base = `http://127.0.0.1:${server.address().port}`;
     for (const path of ["/", "/example"]) {
       const response = await fetch(base + path);
-      assert.ok((await response.text()).includes("<header>"));
+      assert.match(await response.text(), /<header\b[^>]*slot="header"/);
       const policy = response.headers.get("Content-Security-Policy");
       for (const directive of ["script-src ", "style-src "])
         assert.match(
