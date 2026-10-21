@@ -35,7 +35,12 @@ async function readJson(request, limit, tooLarge, action = "writes") {
 }
 
 function parseOrigin(value, variable) {
-  const origin = new URL(value);
+  let origin;
+  try {
+    origin = new URL(value);
+  } catch {
+    throw new Error(`${variable} must be an HTTP or HTTPS origin.`);
+  }
   if (
     !["http:", "https:"].includes(origin.protocol) ||
     origin.username ||
