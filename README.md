@@ -88,7 +88,9 @@ import "@awesome.me/webawesome/dist/components/divider/divider.js";
 import "@awesome.me/webawesome/dist/components/icon/icon.js";
 import "@awesome.me/webawesome/dist/components/input/input.js";
 import "@awesome.me/webawesome/dist/components/option/option.js";
+import "@awesome.me/webawesome/dist/components/page/page.js";
 import "@awesome.me/webawesome/dist/components/select/select.js";
+import "@awesome.me/webawesome/dist/components/spinner/spinner.js";
 EOF
 "$vendor_work/node_modules/.bin/esbuild" "$vendor_work/entry.mjs" \
   --banner:js="// Web Awesome $webawesome_version. See third-party-licences.txt for licences." \
