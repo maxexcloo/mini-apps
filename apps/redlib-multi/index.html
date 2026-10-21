@@ -636,15 +636,18 @@
       // Original spellings identify legacy hashed records before the browser history is folded.
       try {
         if (knownLists.length) {
-          const response = await fetch("/api/normalise-lists", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ names: knownLists }),
-          });
-          if (response.ok) {
-            knownLists = (await response.json()).names;
-            localStorage.setItem("lists", JSON.stringify(knownLists));
+          const normalised = [];
+          for (let offset = 0; offset < knownLists.length; offset += 1000) {
+            const response = await fetch("/api/normalise-lists", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ names: knownLists.slice(offset, offset + 1000) }),
+            });
+            if (!response.ok) throw new Error("Could not normalise saved lists.");
+            normalised.push(...(await response.json()).names);
           }
+          knownLists = [...new Set(normalised)].sort();
+          localStorage.setItem("lists", JSON.stringify(knownLists));
         }
       } catch {
         // Retain original spellings for a later migration attempt if a request fails.
