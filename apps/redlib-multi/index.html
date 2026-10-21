@@ -116,7 +116,7 @@
         <wa-card id="welcome" hidden>
           <div class="wa-stack wa-gap-l">
             <div class="wa-stack wa-gap-s intro">
-              <h1 class="wa-heading-xl">Your Communities, One Feed</h1>
+              <h1 class="wa-heading-xl">Your Subreddits, One Feed</h1>
               <p class="wa-font-size-s wa-color-text-quiet">
                 Open a saved list or start a new one. Add your favourite subreddits and read them
                 together.
@@ -250,7 +250,7 @@
           </wa-card>
           <wa-card id="suggestions" hidden>
             <section class="wa-stack wa-gap-s" aria-labelledby="suggestions-title">
-              <h2 id="suggestions-title" class="wa-heading-m">Suggested Communities</h2>
+              <h2 id="suggestions-title" class="wa-heading-m">Suggested Subreddits</h2>
               <p id="suggestions-state" class="wa-font-size-s wa-color-text-quiet"></p>
               <ul
                 id="suggested-communities"
@@ -259,7 +259,7 @@
               ></ul>
               <wa-button id="retry-suggestions" appearance="plain" hidden>Retry</wa-button>
               <p class="wa-font-size-s wa-color-text-quiet">
-                Related communities from
+                Related subreddits from
                 <a
                   id="redsim"
                   href="https://anvaka.github.io/redsim/"
@@ -415,7 +415,7 @@
             !subreddits.some(
               (name) => !subredditStatuses.has(name) || subredditStatuses.get(name) === "unknown",
             ));
-        $("#check-all").textContent = checkController ? "Stop Check" : "Check All";
+        $("#check-all").textContent = checkController ? "Stop Check" : "Check Availability";
       }
 
       $("#check-all").addEventListener("click", async () => {
@@ -537,14 +537,14 @@
           );
         }
         $("#suggestions-state").textContent = recommendationsLoading
-          ? "Finding related communities…"
+          ? "Finding related subreddits…"
           : suggestionsChecking
-            ? "Checking related communities…"
+            ? "Checking related subreddits…"
             : recommendationsError || suggestionChecksIncomplete
               ? "Some suggestions could not be checked. Try again."
               : suggestedNames.length
                 ? ""
-                : "No related communities found.";
+                : "No related subreddits found.";
         $("#retry-suggestions").hidden = !(recommendationsError || suggestionChecksIncomplete);
         const suggestions = $("#suggested-communities");
         // Reserve the previous height while checked replacements arrive, avoiding a
