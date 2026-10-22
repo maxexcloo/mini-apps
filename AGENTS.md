@@ -7,19 +7,18 @@
   and minimal deployment config; avoid generators, build scripts, task wrappers
   and alternate packaging. Substantial services, such as Actual Up, belong in
   their own repositories.
-- Name the Namespace after the retained deployment name and include
-  `components/app`; it sets the shared app-template chart and derives the other
-  resources' namespaces, the HelmRelease name, release name and `nameOverride`,
-  and the NetworkPolicy name and pod selector. It also supplies the `minilab`
+- Name the Namespace after the retained deployment name, set the same name as
+  the kustomization's `namespace` and include `components/app`. It sets the
+  shared app-template chart, derives the HelmRelease name, release name,
+  `nameOverride`, NetworkPolicy name and pod selector, and mounts the
+  `persistence.source` ConfigMap's hashed name. It also supplies the `minilab`
   ServiceAccount and its RoleBinding to ClusterRole `minilab-release`, and runs
-  every HelmRelease as that account. Generators run after components,
-  so each `configMapGenerator` keeps its own `namespace`. Write `app` as the
-  placeholder HelmRelease and NetworkPolicy name.
-- Set the Namespace's `app.excloo.dev/name` label once and include
-  `components/routes`; it owns the private gateway and mini app domain and
-  derives `<name>.${MINILAB_DOMAIN}` (`mini.excloo.com`). Mini apps use only this hostname; cluster app
-  aliases belong to Kubelab. Select apps in `clusters/syd/kustomization.yaml`;
-  Kubelab reconciles only `clusters/syd`.
+  every HelmRelease as that account. Write `app` as the placeholder HelmRelease
+  and NetworkPolicy name.
+- `components/app` also owns the private route at
+  `<namespace>.${MINILAB_DOMAIN}` (`mini.excloo.com`). Mini apps use only this
+  hostname; cluster app aliases belong to Kubelab. Select apps in
+  `clusters/syd/kustomization.yaml`; Kubelab reconciles only `clusters/syd`.
 - Kubelab's `minilab` Flux Kustomization confines Minilab to namespaces it
   creates, with restricted Pod Security, and to the resource kinds and release
   permissions it grants. It places every HelmRelease on
@@ -37,10 +36,10 @@
   SYD's `public-direct` gateway, `websecuredirect` listener, public-access
   namespace and route labels, and unproxied ExternalDNS records. Review live route
   changes.
-- `components/routes` enables Homepage discovery in the `Minilab` group,
-  prefixes each route's `gethomepage.dev/name` to `Minilab: <App>` and links the
-  safe landing URL derived from the route; never publish editing capabilities or
-  list names.
+- `components/app` enables Homepage discovery in the `Minilab` group and links
+  the safe landing URL derived from the route. Name each route
+  `gethomepage.dev/name: "Minilab: <App>"`; Kubelab's cluster groups show that
+  prefix. Never publish editing capabilities or list names.
   Probe a capability-free `/health` endpoint.
 - Apps listen on `0.0.0.0`, run as the image's actual non-root UID/GID, disable
   service-account token automount and use a read-only root filesystem with a
@@ -60,9 +59,8 @@
   overlay's `kustomization.yaml`) and `REDLIB_CHECK_URL` (its in-cluster service).
   Add other shared variables to the overlay. Apps
   have no setting defaults or fallbacks: a missing or empty variable, which is
-  how Flux leaves a missing substitution, must stop startup with its name. Derive
-  setting values that duplicate a manifest field, such as a port, with an app
-  replacement.
+  how Flux leaves a missing substitution, must stop startup with its name. Write
+  ports and paths directly; do not derive them with replacements.
 - Preserve deployed namespaces, release names, PVCs and old URLs during source
   cleanups. SQLite apps use one replica with `Recreate` and keep live data off
   NFS. A PVC is persistence, not a backup: before storing important data, have a

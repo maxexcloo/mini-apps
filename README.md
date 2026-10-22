@@ -42,11 +42,11 @@ configuration. It does not deploy anything.
 ## Add An App
 
 For a browser-only tool, copy `templates/static` into `apps/<name>`. Rename its
-Namespace, `app.excloo.dev/name` label, and the ConfigMap generator's name and
-namespace together with `persistence.static.name`, edit its HTML and
+Namespace together with the kustomization's `namespace`, and the ConfigMap
+generator's name together with `persistence.source.name`, edit its HTML and
 native deployment resources, then select the app in
 `clusters/syd/kustomization.yaml`. `components/app` derives the other Kubernetes
-names from the Namespace. Only add a backend if the app needs one. Flux and the
+names and the hostname from the Namespace. Only add a backend if the app needs one. Flux and the
 shared cluster integrations live in Kubelab, while app source and resources stay
 here.
 
@@ -61,9 +61,9 @@ Both gateways use the wildcard certificate. Who can reach an app and how it
 authenticates are separate choices. Keep credentials in the existing secret
 integration.
 
-`components/routes` lists each app in Homepage's **Minilab** group as
-`Minilab: <App>` and links its safe landing page. Set the app's description, icon
-and display name on its route, and the listing refreshes automatically. An AI
+`components/app` lists each app in Homepage's **Minilab** group and links its
+safe landing page. Set the app's description, icon and `Minilab: <App>` display
+name on its route, and the listing refreshes automatically. An AI
 connection to the repository can submit PRs without cluster credentials; read
 `AGENTS.md` before editing. The source is public, but stored app data and
 credentials stay private.
