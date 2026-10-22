@@ -21,7 +21,7 @@ test("requires a configured Redlib endpoint before opening storage", () => {
         dataDirectory: join(tmpdir(), "redlib-multi-unopened"),
         redlibUrl: "",
       }),
-    /REDLIB_URL is required/,
+    /REDLIB_URL must be an HTTP or HTTPS origin/,
   );
 });
 

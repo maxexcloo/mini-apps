@@ -93,14 +93,6 @@
         <wa-button href="/" appearance="plain" aria-label="Redlib Multi Home"
           ><strong class="wa-heading-xl">Redlib Multi</strong></wa-button
         >
-        <wa-button
-          appearance="plain"
-          data-theme-toggle
-          aria-label="Dark Mode"
-          title="Switch to Dark Mode"
-        >
-          Dark Mode
-        </wa-button>
       </header>
       <main class="wa-stack wa-gap-l">
         <wa-callout id="status" aria-live="polite" role="status" hidden>
@@ -275,39 +267,13 @@
     </wa-page>
     <script type="module">
       const systemTheme = matchMedia("(prefers-color-scheme: dark)");
-      let theme = "system";
-      try {
-        const saved = localStorage.getItem("theme");
-        if (saved === "light" || saved === "dark") theme = saved;
-      } catch {
-        // Follow the browser when storage is unavailable.
-      }
       function applyTheme() {
-        const dark = theme === "dark" || (theme === "system" && systemTheme.matches);
-        document.documentElement.classList.toggle("wa-dark", dark);
-        document.documentElement.classList.toggle("wa-light", !dark);
-        document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
-          button.textContent = `${dark ? "Light" : "Dark"} Mode`;
-          button.setAttribute("aria-label", `${dark ? "Light" : "Dark"} Mode`);
-          button.title = `Switch to ${dark ? "Light" : "Dark"} Mode${theme === "system" ? " · Following Browser" : ""}`;
-        });
+        document.documentElement.classList.toggle("wa-dark", systemTheme.matches);
+        document.documentElement.classList.toggle("wa-light", !systemTheme.matches);
       }
       systemTheme.addEventListener("change", applyTheme);
-      document.addEventListener("click", (event) => {
-        if (!event.target.closest("[data-theme-toggle]")) return;
-        const dark = !document.documentElement.classList.contains("wa-dark");
-        // Toggling back to the browser's preference restores automatic changes.
-        theme = dark === systemTheme.matches ? "system" : dark ? "dark" : "light";
-        try {
-          if (theme === "system") localStorage.removeItem("theme");
-          else localStorage.setItem("theme", theme);
-        } catch {
-          // Keep the choice for this visit.
-        }
-        applyTheme();
-      });
       applyTheme();
-      // Load components after the saved theme applies, avoiding a light flash.
+      // Load components after the theme applies, avoiding a light flash.
       await import("/vendor/ui.mjs");
 
       import { multiredditUrl, normaliseSubreddits, relatedSubreddits } from "/subreddits.mjs";
