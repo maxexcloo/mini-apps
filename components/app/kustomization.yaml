@@ -1,13 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-# The Namespace name is the retained deployment name; other resources take their
-# namespace and names from it. Generators run after components, so each
-# configMapGenerator still sets its own namespace.
-# Kubelab's minilab Flux Kustomization may only grant helm-controller the
-# minilab-release ClusterRole, so each release runs as this namespace's
-# minilab ServiceAccount.
+# The Namespace name is the retained deployment name; the release, route and
+# NetworkPolicy names derive from it. Kubelab's minilab Flux Kustomization may
+# only grant helm-controller the minilab-release ClusterRole, so each release
+# runs as this namespace's minilab ServiceAccount. Routes are private at
+# <namespace>.${MINILAB_DOMAIN}; Kubelab's Flux Kustomization substitutes
+# MINILAB_DOMAIN.
 resources:
   - release.yaml
+configurations:
+  - name-reference.yaml
 patches:
   # The target selects every HelmRelease; the patch's name is a placeholder.
   - target:
@@ -30,6 +32,19 @@ patches:
             # renovate: datasource=github-releases depName=bjw-s-labs/helm-charts extractVersion=^app-template-(?<version>.+)$
             version: 5.3.0
         serviceAccountName: minilab
+        values:
+          route:
+            private:
+              annotations:
+                gethomepage.dev/enabled: "true"
+                gethomepage.dev/group: Minilab
+                gethomepage.dev/href: https://app.invalid
+              hostnames:
+                - app.${MINILAB_DOMAIN}
+              parentRefs:
+                - name: private
+                  namespace: networking
+                  sectionName: websecure
 replacements:
   - source:
       kind: Namespace
@@ -39,11 +54,18 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - metadata.name
-          - metadata.namespace
           - spec.releaseName
           - spec.values.global.nameOverride
+          - spec.values.route.private.labels.[app.kubernetes.io/name]
         options:
           create: true
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.route.private.hostnames.0
+        options:
+          delimiter: .
+          index: 0
       - select:
           kind: Namespace
         fieldPaths:
@@ -54,26 +76,17 @@ replacements:
           kind: NetworkPolicy
         fieldPaths:
           - metadata.name
-          - metadata.namespace
           - spec.podSelector.matchLabels.[app.kubernetes.io/name]
         options:
           create: true
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
       - select:
-          kind: PersistentVolumeClaim
+          kind: HelmRelease
         fieldPaths:
-          - metadata.namespace
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
         options:
-          create: true
-      - select:
-          kind: RoleBinding
-        fieldPaths:
-          - metadata.namespace
-          - subjects.0.namespace
-        options:
-          create: true
-      - select:
-          kind: ServiceAccount
-        fieldPaths:
-          - metadata.namespace
-        options:
-          create: true
+          delimiter: /
+          index: 2

@@ -13,7 +13,7 @@ spec:
               - -g
               - daemon off;
             image:
-              repository: docker.io/library/nginx
+              repository: nginx
               tag: 1.31.7-alpine3.24
             probes:
               liveness:
@@ -41,14 +41,14 @@ spec:
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
-        runAsGroup: 568
+        runAsGroup: 101
         runAsNonRoot: true
-        runAsUser: 568
+        runAsUser: 101
         seccompProfile:
           type: RuntimeDefault
     persistence:
-      static:
-        name: mini-tool-static
+      source:
+        name: mini-tool-source
         type: configMap
         globalMounts:
           - path: /www/index.html
@@ -66,21 +66,19 @@ spec:
         annotations:
           gethomepage.dev/description: Text Counter
           gethomepage.dev/icon: mdi-text-box-outline
-          gethomepage.dev/name: Text Counter
+          gethomepage.dev/name: "Minilab: Text Counter"
     service:
       app:
         controller: app
         ports:
           http:
             port: 8080
-            protocol: HTTP
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: mini-tool
   labels:
-    app.excloo.dev/name: mini-tool
     gateway.excloo.dev/private-access: "true"
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/enforce: restricted

@@ -77,12 +77,6 @@ export function createApp({
   checkUrl = setting("REDLIB_CHECK_URL"),
   fetchStatus = fetch,
 } = {}) {
-  for (const [name, value] of Object.entries({
-    DATA_DIRECTORY: dataDirectory,
-    REDLIB_CHECK_URL: checkUrl,
-    REDLIB_URL: redlibUrl,
-  }))
-    if (!value) throw new Error(`${name} is required.`);
   const origin = parseOrigin(redlibUrl, "REDLIB_URL");
   const checkOrigin = parseOrigin(checkUrl, "REDLIB_CHECK_URL");
   const statusCache = new Map();
@@ -96,9 +90,6 @@ export function createApp({
   // Keep only revision metadata for deleted lists, so stale editors cannot revive old data.
   database.exec(
     "CREATE TABLE IF NOT EXISTS deleted_lists (id TEXT PRIMARY KEY, revision INTEGER NOT NULL)",
-  );
-  database.exec(
-    "BEGIN IMMEDIATE; INSERT OR REPLACE INTO deleted_lists SELECT id, revision FROM lists WHERE subreddits = '[]'; DELETE FROM lists WHERE subreddits = '[]'; COMMIT",
   );
   function readList(key) {
     const row = select.get(key);
