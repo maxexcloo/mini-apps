@@ -42,6 +42,12 @@
   safe landing URL derived from the route; never publish editing capabilities or
   list names.
   Probe a capability-free `/health` endpoint.
+- Apps listen on `0.0.0.0`, run as the image's actual non-root UID/GID, disable
+  service-account token automount and use a read-only root filesystem with a
+  separate writable `/tmp` where supported. Publish a custom image's exact
+  version before merging the change that uses it.
+- Gateways and ExternalDNS own DNS targets: never hard-code a target IP or add a
+  competing record. A wildcard certificate covers one label depth only.
 - Keep storage, secrets and network access isolated. Credentials stay server-side
   through ExternalSecrets that use the `onepassword` ClusterSecretStore and
   reference 1Password items titled `Minilab: <App>`, matching the route's
@@ -59,7 +65,11 @@
   replacement.
 - Preserve deployed namespaces, release names, PVCs and old URLs during source
   cleanups. SQLite apps use one replica with `Recreate` and keep live data off
-  NFS. Take a consistent backup before changing storage or data ownership.
+  NFS. A PVC is persistence, not a backup: before storing important data, have a
+  recovery path, and copy a database only with SQLite's backup API or with the
+  writer stopped. Take a consistent backup before changing storage, data
+  ownership or a destructive schema migration; an image rollback does not undo
+  a migration.
 - Redlib Multi keeps its secret-link model and retains its existing SQLite format,
   SHA-256 keys and revisions; never discard unidentified saved lists. Mixed-case
   names fold into lowercase keys: opening or listing `Foo` merges its legacy
