@@ -42,7 +42,8 @@ configuration. It does not deploy anything.
 ## Add An App
 
 For a browser-only tool, copy `templates/static` into `apps/<name>`. Rename its
-Namespace, `app.excloo.dev/name` label and ConfigMap generator, edit its HTML and
+Namespace, `app.excloo.dev/name` label, and the ConfigMap generator's name and
+namespace together with `persistence.static.name`, edit its HTML and
 native deployment resources, then select the app in
 `clusters/syd/kustomization.yaml`. `components/app` derives the other Kubernetes
 names from the Namespace. Only add a backend if the app needs one. Flux and the
