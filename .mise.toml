@@ -5,21 +5,51 @@ kubectl = "latest"
 [tasks.check]
 depends = [
   "check:actions",
+  "check:build",
   "check:manifests",
   "check:mise",
   "check:oxfmt",
+  "check:oxlint",
   "check:python",
   "check:shell",
+  "check:typescript",
   "check:updates",
   "check:whitespace",
   "test",
 ]
+
+[tasks.build]
+description = "Build Each App's Browser Bundle"
+run = """
+set -eu
+for web in apps/*/web templates/*/web; do
+  npx vite build --config vite.config.ts --logLevel warn "$web"
+done
+"""
+
+[tasks."check:build"]
+description = "Check Committed Bundles Match Their Source"
+run = """
+set -eu
+built=$(mktemp -d)
+trap 'rm -r "$built"' EXIT
+for web in apps/*/web templates/*/web; do
+  npx vite build --config vite.config.ts --logLevel warn --outDir "$built/$web" "$web"
+  diff -r "$built/$web" "${web%/web}/dist"
+done
+"""
 
 [tasks."check:manifests"]
 run = """
 kubectl kustomize clusters/syd > /dev/null
 kubectl kustomize templates/static > /dev/null
 """
+
+[tasks."check:oxlint"]
+run = "npx oxlint --deny-warnings apps/*/web templates/*/web ui vite.config.ts"
+
+[tasks."check:typescript"]
+run = "npx tsc --noEmit"
 
 [tasks.fmt]
 depends = ["fmt:mise", "fmt:oxfmt"]

@@ -87,7 +87,7 @@ test("saves isolated lists, rejects stale edits and survives restarts", async ()
     assert.equal(page.headers.get("referrer-policy"), "no-referrer");
     assert.match(await page.text(), /Redlib Multi/);
     assert.equal((await fetch(`${base}/api/lists/secret/other`)).status, 404);
-    assert.equal((await fetch(`${base}/vendor/ui.css`)).status, 200);
+    assert.equal((await fetch(`${base}/app.css`)).status, 200);
     await stop();
     base = await start();
     assert.deepEqual(await (await fetch(`${base}/api/lists/mysecret`)).json(), {

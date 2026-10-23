@@ -1,3 +1,3 @@
 {
-  "ignorePatterns": ["apps/*/vendor/**"]
+  "ignorePatterns": ["apps/*/dist/**", "templates/*/dist/**", "ui/vendor/**"]
 }

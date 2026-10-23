@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { mkdirSync, readFileSync, realpathSync } from "node:fs";
 import { createServer } from "node:http";
 import { resolve } from "node:path";
@@ -152,14 +152,10 @@ export function createApp({
   }
   const assets = new Map(
     [
-      ["/", ["index.html", "text/html; charset=utf-8"]],
-      ["/vendor/ui.mjs", ["vendor/ui.mjs", "text/javascript; charset=utf-8"]],
-      ["/vendor/ui.css", ["vendor/ui.css", "text/css; charset=utf-8"]],
-      [
-        "/third-party-licences.txt",
-        ["vendor/third-party-licences.txt", "text/plain; charset=utf-8"],
-      ],
-      ["/subreddits.mjs", ["subreddits.mjs", "text/javascript; charset=utf-8"]],
+      ["/", ["dist/index.html", "text/html; charset=utf-8"]],
+      ["/app.css", ["dist/app.css", "text/css; charset=utf-8"]],
+      ["/app.js", ["dist/app.js", "text/javascript; charset=utf-8"]],
+      ["/third-party-licences.txt", ["dist/third-party-licences.txt", "text/plain; charset=utf-8"]],
     ].map(([path, [file, type]]) => [
       path,
       {
@@ -168,19 +164,15 @@ export function createApp({
       },
     ]),
   );
-  const html = assets.get("/").content.toString();
-  const scriptHash = createHash("sha256")
-    .update(html.match(/<script type="module">([\s\S]*?)<\/script>/)[1])
-    .digest("base64");
-  const styleHash = createHash("sha256")
-    .update(html.match(/<style>([\s\S]*?)<\/style>/)[1])
-    .digest("base64");
+  const page = assets.get("/");
+  const html = page.content.toString();
   const server = createServer(async (request, response) => {
     response.setHeader("Cache-Control", "no-store");
-    // Web Awesome fetches its bundled checkbox SVGs from data URLs.
+    // Mantine's style elements carry this per-request nonce, written into the page's meta tag.
+    const nonce = randomBytes(16).toString("base64");
     response.setHeader(
       "Content-Security-Policy",
-      `default-src 'self'; script-src 'self' 'sha256-${scriptHash}'; style-src 'self' 'sha256-${styleHash}'; connect-src 'self' data: https://anvaka.github.io/redsim/data/; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
+      `default-src 'none'; connect-src 'self' https://anvaka.github.io/redsim/data/; font-src data:; img-src 'self' data:; script-src 'self'; style-src 'self' 'nonce-${nonce}'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`,
     );
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("X-Content-Type-Options", "nosniff");
@@ -350,11 +342,11 @@ export function createApp({
           return response.end();
         }
       }
-      const asset =
-        assets.get(path) || (/^\/[a-zA-Z0-9_-]{1,128}$/.test(path) ? assets.get("/") : null);
+      const asset = assets.get(path) || (/^\/[a-zA-Z0-9_-]{1,128}$/.test(path) ? page : null);
       if (!asset) return json(404, { error: "Page not found." });
       response.writeHead(200, { "Content-Type": asset.type });
-      response.end(request.method === "HEAD" ? undefined : asset.content);
+      const content = asset === page ? html.replace("%STYLE_NONCE%", nonce) : asset.content;
+      response.end(request.method === "HEAD" ? undefined : content);
     } catch (error) {
       json(error instanceof RequestError ? error.status : 500, {
         error: error instanceof RequestError ? error.message : "Unable to process this request.",

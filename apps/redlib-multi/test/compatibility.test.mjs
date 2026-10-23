@@ -124,8 +124,8 @@ test("opens an original database and merges its mixed-case identity into the low
       revision: 9,
     });
     const home = await (await fetch(base)).text();
-    assert.match(home, /List Name/);
-    assert.match(home, /Open List/);
+    assert.match(home, /<title>Redlib Multi<\/title>/);
+    assert.match(home, /src="\/app\.js"/);
     assert.equal((await fetch(`${base}/server.mjs`)).status, 404);
     assert.equal((await fetch(`${base}/lists.sqlite`)).status, 404);
     assert.equal((await fetch(`${base}/invalid/list`)).status, 404);

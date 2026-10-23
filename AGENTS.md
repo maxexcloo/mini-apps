@@ -1,19 +1,20 @@
 # Minilab
 
-- Keep each app in `apps/<name>`: a single-page `index.html`, a small `server.mjs`
-  only when needed, and native Kubernetes resources beside it: `deploy.yaml` holds
-  the resources and `kustomization.yaml` mounts the assets. Static apps need no
-  npm package, Docker build or app Mise task. Prefer standard upstream runtimes
-  and minimal deployment config; avoid generators, build scripts, task wrappers
-  and alternate packaging. Substantial services, such as Actual Up, belong in
-  their own repositories.
+- Keep each app in `apps/<name>`: its browser source in `web/` with the built
+  bundle committed in `dist/`, a small `server.mjs` only when needed, and native
+  Kubernetes resources beside it: `deploy.yaml` holds the resources and
+  `kustomization.yaml` mounts the assets. Apps share the root npm package,
+  `vite.config.ts` and `ui/`; add no per-app package, Docker build or Mise task.
+  Prefer standard upstream runtimes and minimal deployment config; avoid
+  generators, task wrappers and alternate packaging. Substantial services, such
+  as Actual Up, belong in their own repositories.
 - Name the Namespace after the retained deployment name, set the same name as
   the kustomization's `namespace` and include `components/app`. It sets the
   shared app-template chart, derives the HelmRelease name, release name,
-  `nameOverride`, NetworkPolicy name and pod selector, and mounts the
-  `persistence.source` ConfigMap's hashed name. It also supplies the `minilab`
-  ServiceAccount and its RoleBinding to ClusterRole `minilab-release`, and runs
-  every HelmRelease as that account. Write `app` as the placeholder HelmRelease
+  `nameOverride`, NetworkPolicy name and pod selector, and mounts the hashed
+  names of the `persistence.script` and `persistence.source` ConfigMaps. It
+  also supplies the `minilab` ServiceAccount and its RoleBinding to ClusterRole
+  `minilab-release`, and runs every HelmRelease as that account. Write `app` as the placeholder HelmRelease
   and NetworkPolicy name.
 - `components/app` also owns the private route at
   `<namespace>.${MINILAB_DOMAIN}` (`mini.excloo.com`). Mini apps use only this
@@ -28,10 +29,19 @@
   apps are examples, not a required stack. A backend such as PocketBase can
   replace custom auth, data APIs and file handling when that reduces the app's
   code and operational burden. Keep reusable recipes in the build skill.
-- Web Awesome is the default UI: serve it locally and keep its default appearance.
-  Allow native controls or another UI approach when requested or when they
-  materially simplify the app; keep CSS focused on layout and operational
-  feedback. The dependency-free static starter is an allowed exception.
+- Build every UI from Mantine components with the shared MantineHub shadcn
+  theme, through `ui/mount.tsx` and `ui/Shell.tsx`. Add no CSS, raw HTML
+  elements, `className` or `style` (oxlint enforces this), and use palette
+  colour names (green, red, amber, gray) rather than semantic aliases.
+  `ui/vendor/mantinehub/` is an unmodified upstream copy; override it in
+  `ui/theme.ts`.
+- Run `mise run build` after changing `web/`, `ui/` or dependencies and commit
+  `dist/`; `mise run check` fails when a bundle is stale. A ConfigMap holds at
+  most 1 MiB, so `app.js` goes in the `<app>-script` ConfigMap and the other
+  built files in `<app>-source`, each mounted by `subPath`. The build refuses a
+  file over 900 KiB. Pages carry a `%STYLE_NONCE%` placeholder that the server
+  replaces per request, with the same nonce in the CSP's `style-src`, because
+  Mantine injects style elements.
 - Private apps use the private gateway and shared wildcard DNS. Public apps use
   SYD's `public-direct` gateway, `websecuredirect` listener, public-access
   namespace and route labels, and unproxied ExternalDNS records. Review live route

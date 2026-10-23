@@ -13,11 +13,9 @@ its own editing URL and persistent SQLite data. Lists saved under the old
 secret links, and they show up in Kubelab's Traefik access logs. I accept that
 because the app is private.
 
-Edit `apps/redlib-multi/index.html` for the interface. `server.mjs` handles the
-API and SQLite database, and `subreddits.mjs` has the shared parsing and
-recommendation logic. Web Awesome is served locally from `vendor/` with its
-third-party licences, and its version is in the `vendor/ui.mjs` banner. There's no
-npm install or frontend build step.
+The interface is in `apps/redlib-multi/web` and its built bundle is in `dist/`.
+`server.mjs` handles the API and SQLite database, and `subreddits.mjs` has the
+shared parsing and recommendation logic.
 
 To run it locally, use Node.js 26.12 or newer:
 
@@ -35,16 +33,18 @@ Deployed data stays on its existing volume, so never delete that volume when
 replacing the app. Run the data tests with `node --test`.
 
 With the [shared Mise configuration](https://github.com/maxexcloo/dotfiles#shared-tools--tasks)
-installed, `mise run check` runs the data tests, renders the deployed apps and
-static template with the project `kubectl`, and checks repository formatting and
-configuration. It does not deploy anything.
+installed and `npm ci` run, `mise run check` runs the data tests, checks that
+each committed bundle matches its source, lints and type-checks the interfaces,
+renders the deployed apps and static template with the project `kubectl`, and
+checks repository formatting and configuration. It does not deploy anything.
 
 ## Add An App
 
 For a browser-only tool, copy `templates/static` into `apps/<name>`. Rename its
 Namespace together with the kustomization's `namespace`, and the ConfigMap
-generator's name together with `persistence.source.name`, edit its HTML and
-native deployment resources, then select the app in
+generators' names together with `persistence.script.name` and
+`persistence.source.name`. Edit the page in `web/` and the native deployment
+resources, run `mise run build`, then select the app in
 `clusters/syd/kustomization.yaml`. `components/app` derives the other Kubernetes
 names and the hostname from the Namespace. Only add a backend if the app needs one. Flux and the
 shared cluster integrations live in Kubelab, while app source and resources stay
@@ -68,44 +68,22 @@ connection to the repository can submit PRs without cluster credentials; read
 `AGENTS.md` before editing. The source is public, but stored app data and
 credentials stay private.
 
-## Update Web Awesome
+## Build The Interfaces
 
-The checked-in bundle doesn't need a build step at runtime. To regenerate it, run
-the following from the repository root. Dependencies and the entrypoint stay in a
-temporary directory. Add or remove component imports to match the page.
+Every app's page is React with [Mantine](https://mantine.dev) and the
+MantineHub shadcn theme, in light and dark mode. `ui/` holds the shared theme
+and page frame, and the root `package.json` holds the only dependencies. Vite
+builds each `web/` directory into `dist/`, with fixed file names, fonts inlined
+and the bundled packages' licences in `third-party-licences.txt`:
 
 ```sh
-webawesome_version=3.14.0
-vendor_work=$(mktemp -d)
-npm install --no-package-lock --prefix "$vendor_work" "@awesome.me/webawesome@$webawesome_version" esbuild@0.28.2
-cat > "$vendor_work/entry.mjs" <<'EOF'
-import "@awesome.me/webawesome/dist/styles/webawesome.css";
-import "@awesome.me/webawesome/dist/components/badge/badge.js";
-import "@awesome.me/webawesome/dist/components/button/button.js";
-import "@awesome.me/webawesome/dist/components/callout/callout.js";
-import "@awesome.me/webawesome/dist/components/card/card.js";
-import "@awesome.me/webawesome/dist/components/checkbox/checkbox.js";
-import "@awesome.me/webawesome/dist/components/divider/divider.js";
-import "@awesome.me/webawesome/dist/components/icon/icon.js";
-import "@awesome.me/webawesome/dist/components/input/input.js";
-import "@awesome.me/webawesome/dist/components/option/option.js";
-import "@awesome.me/webawesome/dist/components/page/page.js";
-import "@awesome.me/webawesome/dist/components/select/select.js";
-import "@awesome.me/webawesome/dist/components/spinner/spinner.js";
-EOF
-"$vendor_work/node_modules/.bin/esbuild" "$vendor_work/entry.mjs" \
-  --banner:js="// Web Awesome $webawesome_version. See third-party-licences.txt for licences." \
-  --bundle --format=esm --legal-comments=eof \
-  --metafile="$vendor_work/bundle.json" --minify \
-  --outfile=apps/redlib-multi/vendor/ui.mjs --target=es2022
+npm ci
+mise run build
 ```
 
-This regenerates `ui.mjs` and `ui.css`. Review the dependency inputs in
-`$vendor_work/bundle.json`, and when dependencies change, refresh
-`vendor/third-party-licences.txt` from the included packages' licence files.
-Before merging, run `node --test`, render `clusters/syd` and check the page in a
-browser for component loading and Content Security Policy errors. Remove the
-temporary directory when you're done.
+Commit the rebuilt `dist/` with its source. Renovate updates the dependencies;
+rebuild when it does. Before merging, run `mise run check` and check the page in
+a browser for Content Security Policy errors.
 
 ## Licence
 

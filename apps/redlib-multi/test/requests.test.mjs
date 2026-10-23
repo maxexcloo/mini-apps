@@ -72,7 +72,7 @@ test("rejects invalid JSON requests consistently while retaining endpoint limits
   }
 });
 
-test("serves the page under a hash-only Content Security Policy", async () => {
+test("serves the page with a fresh style nonce and no inline scripts", async () => {
   const directory = mkdtempSync(join(tmpdir(), "redlib-multi-page-csp-"));
   const server = createApp({
     dataDirectory: directory,
@@ -82,18 +82,18 @@ test("serves the page under a hash-only Content Security Policy", async () => {
   try {
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
     const base = `http://127.0.0.1:${server.address().port}`;
+    const nonces = new Set();
     for (const path of ["/", "/example"]) {
       const response = await fetch(base + path);
-      assert.match(await response.text(), /<header\b[^>]*slot="header"/);
       const policy = response.headers.get("Content-Security-Policy");
-      for (const directive of ["script-src ", "style-src "])
-        assert.match(
-          policy.split(";").find((part) => part.trim().startsWith(directive)),
-          /^ ?\S+ 'self' 'sha256-[A-Za-z0-9+/=]+'$/,
-        );
-      assert.ok(!policy.includes("nonce-"));
+      const nonce = /'nonce-([A-Za-z0-9+/=]+)'/.exec(policy)?.[1];
+      assert.ok(nonce);
+      assert.ok((await response.text()).includes(`name="style-nonce" content="${nonce}"`));
+      assert.match(policy, /script-src 'self';/);
       assert.ok(!policy.includes("unsafe-inline"));
+      nonces.add(nonce);
     }
+    assert.equal(nonces.size, 2);
   } finally {
     await new Promise((resolve) => server.close(resolve));
     rmSync(directory, { force: true, recursive: true });
