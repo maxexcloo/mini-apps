@@ -202,23 +202,23 @@
   }
 }
 
-[data-mantine-color-scheme="light"] {
+[data-mantine-color-scheme='light']{
   .mantine-SegmentedControl-root {
     .mantine-SegmentedControl-label {
       &:where(:not([data-disabled], [data-active], [data-read-only])) {
         &:hover {
-          color: var(--mantine-color-black);
+            color: var(--mantine-color-black);
         }
       }
     }
   }
 }
-[data-mantine-color-scheme="dark"] {
+[data-mantine-color-scheme='dark']{
   .mantine-SegmentedControl-root {
     .mantine-SegmentedControl-label {
       &:where(:not([data-disabled], [data-active], [data-read-only])) {
         &:hover {
-          color: var(--mantine-color-white);
+            color: var(--mantine-color-white);
         }
       }
     }
@@ -324,14 +324,14 @@
 /* Pagination */
 .mantine-Pagination-root {
   .mantine-Pagination-control {
-    border-color: var(--mantine-color-default-border);
-    background-color: var(--mantine-color-body);
+      border-color: var(--mantine-color-default-border);
+      background-color: var(--mantine-color-body);
 
-    &:hover {
-      &:where(:not(:disabled, [data-disabled])) {
-        background-color: var(--mantine-color-default-hover);
+      &:hover {
+        &:where(:not(:disabled, [data-disabled])) {
+          background-color: var(--mantine-color-default-hover);
+        }
       }
-    }
     &:where([data-active]) {
       background-color: var(--pagination-active-bg);
       border-color: var(--pagination-active-bg);
@@ -347,10 +347,10 @@
 /* Stepper */
 .mantine-Stepper-root {
   .mantine-Stepper-stepIcon {
-    background-color: var(--mantine-color-body);
-    border-color: var(--mantine-color-default-border);
-    color: var(--mantine-color-text);
-
+      background-color: var(--mantine-color-body);
+      border-color: var(--mantine-color-default-border);
+      color: var(--mantine-color-text);
+  
     &:where([data-progress]) {
       border-color: var(--step-color);
     }
@@ -411,6 +411,7 @@
     }
   }
 }
+
 
 /* Notification */
 .mantine-Notification-root {
