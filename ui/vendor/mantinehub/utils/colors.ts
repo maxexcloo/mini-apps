@@ -14,7 +14,7 @@ export const zincColors: MantineColorsTuple = [
   "#27272a", // [7] -> shade 800
   "#18181b", // [8] -> shade 900
   "#09090b", // [9] -> shade 950
-  "#71717A", // [10] -> zinc base
+  "#71717A"  // [10] -> zinc base
 ];
 
 export const slateColors: MantineColorsTuple = [
@@ -28,7 +28,7 @@ export const slateColors: MantineColorsTuple = [
   "#1e293b", // [7] -> shade 800
   "#0f172a", // [8] -> shade 900
   "#020817", // [9] -> shade 950 (original tailwind color was #020617)
-  "#64748B", // [10] -> slate base
+  "#64748B"  // [10] -> slate base
 ];
 
 export const stoneColors: MantineColorsTuple = [
@@ -42,7 +42,7 @@ export const stoneColors: MantineColorsTuple = [
   "#292524", // [7] -> shade 800
   "#1c1917", // [8] -> shade 900
   "#0c0a09", // [9] -> shade 950
-  "#78716C", // [10] -> stone base
+  "#78716C"  // [10] -> stone base
 ];
 
 export const grayColors: MantineColorsTuple = [
@@ -56,7 +56,7 @@ export const grayColors: MantineColorsTuple = [
   "#1f2937", // [7] -> shade 800
   "#111827", // [8] -> shade 900
   "#030712", // [9] -> shade 950
-  "#6B7280", // [10] -> gray base
+  "#6B7280"  // [10] -> gray base
 ];
 
 export const neutralColors: MantineColorsTuple = [
@@ -70,7 +70,7 @@ export const neutralColors: MantineColorsTuple = [
   "#262626", // [7] -> shade 800
   "#171717", // [8] -> shade 900
   "#0a0a0a", // [9] -> shade 950
-  "#737373", // [10] -> neutral base
+  "#737373"  // [10] -> neutral base
 ];
 
 export const redColors: MantineColorsTuple = [
@@ -84,7 +84,7 @@ export const redColors: MantineColorsTuple = [
   "#991B1B", // [7] -> shade 800
   "#7F1D1D", // [8] -> shade 900
   "#450A0A", // [9] -> shade 950
-  "#EF4444", // [10] -> red base
+  "#EF4444"  // [10] -> red base
 ];
 
 export const roseColors: MantineColorsTuple = [
@@ -98,7 +98,7 @@ export const roseColors: MantineColorsTuple = [
   "#9f1239", // [7] -> shade 800
   "#881337", // [8] -> shade 900
   "#4c0519", // [9] -> shade 950
-  "#F43F5E", // [10] -> base color as rose[10]
+  "#F43F5E"  // [10] -> base color as rose[10]
 ];
 
 export const orangeColors: MantineColorsTuple = [
@@ -107,7 +107,7 @@ export const orangeColors: MantineColorsTuple = [
   "#fed7aa", // [2] -> shade 200
   "#fdba74", // [3] -> shade 300
   "#fb923c", // [4] -> shade 400
-  "#f97316", // [5] -> shade 500
+  "#f97316", // [5] -> shade 500 
   "#ea580c", // [6] -> shade 600
   "#9a3412", // [7] -> shade 800
   "#7c2d12", // [8] -> shade 900
@@ -196,7 +196,7 @@ export const limeColors: MantineColorsTuple = [
   "#365314", // [7] -> shade 800
   "#1a2e05", // [8] -> shade 900
   "#0f1903", // [9] -> shade 950
-  "#84CC16", // [10] -> lime base
+  "#84CC16"  // [10] -> lime base
 ];
 
 export const emeraldColors: MantineColorsTuple = [
@@ -210,7 +210,7 @@ export const emeraldColors: MantineColorsTuple = [
   "#065f46", // [7] -> shade 800
   "#064e3b", // [8] -> shade 900
   "#022c22", // [9] -> shade 950
-  "#10B981", // [10] -> emerald base
+  "#10B981"  // [10] -> emerald base
 ];
 
 export const tealColors: MantineColorsTuple = [
@@ -224,7 +224,7 @@ export const tealColors: MantineColorsTuple = [
   "#115e59", // [7] -> shade 800
   "#134e4a", // [8] -> shade 900
   "#042f2e", // [9] -> shade 950
-  "#14B8A6", // [10] -> teal base
+  "#14B8A6"  // [10] -> teal base
 ];
 
 export const cyanColors: MantineColorsTuple = [
@@ -238,7 +238,7 @@ export const cyanColors: MantineColorsTuple = [
   "#155e75", // [7] -> shade 800
   "#164e63", // [8] -> shade 900
   "#083344", // [9] -> shade 950
-  "#06B6D4", // [10] -> cyan base
+  "#06B6D4"  // [10] -> cyan base
 ];
 
 export const skyColors: MantineColorsTuple = [
@@ -252,7 +252,7 @@ export const skyColors: MantineColorsTuple = [
   "#075985", // [7] -> shade 800
   "#0c4a6e", // [8] -> shade 900
   "#082f49", // [9] -> shade 950
-  "#0EA5E9", // [10] -> sky base
+  "#0EA5E9"  // [10] -> sky base
 ];
 
 export const indigoColors: MantineColorsTuple = [
@@ -266,7 +266,7 @@ export const indigoColors: MantineColorsTuple = [
   "#3730a3", // [7] -> shade 800
   "#312e81", // [8] -> shade 900
   "#1e1b4b", // [9] -> shade 950
-  "#6366F1", // [10] -> indigo base
+  "#6366F1"  // [10] -> indigo base
 ];
 
 export const purpleColors: MantineColorsTuple = [
@@ -280,7 +280,7 @@ export const purpleColors: MantineColorsTuple = [
   "#6b21a8", // [7] -> shade 800
   "#581c87", // [8] -> shade 900
   "#2e1065", // [9] -> shade 950
-  "#A855F7", // [10] -> purple base
+  "#A855F7"  // [10] -> purple base
 ];
 
 export const fuchsiaColors: MantineColorsTuple = [
@@ -294,7 +294,7 @@ export const fuchsiaColors: MantineColorsTuple = [
   "#86198f", // [7] -> shade 800
   "#701a75", // [8] -> shade 900
   "#4a044e", // [9] -> shade 950
-  "#D946EF", // [10] -> fuchsia base
+  "#D946EF"  // [10] -> fuchsia base
 ];
 
 export const pinkColors: MantineColorsTuple = [
@@ -308,7 +308,7 @@ export const pinkColors: MantineColorsTuple = [
   "#9d174d", // [7] -> shade 800
   "#831843", // [8] -> shade 900
   "#500724", // [9] -> shade 950
-  "#EC4899", // [10] -> pink base
+  "#EC4899"  // [10] -> pink base
 ];
 
 // export const SHADCN_DEFAULT_COLORS = [
@@ -327,300 +327,46 @@ export const pinkColors: MantineColorsTuple = [
 // ];
 
 export const MANTINE_DEFAULT_COLORS = [
-  {
-    id: "blue",
-    name: "Blue",
-    color: "#3B82F6",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "gray",
-    name: "Gray",
-    color: "#6B7280",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "red",
-    name: "Red",
-    color: "#EF4444",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "pink",
-    name: "Pink",
-    color: "#F43F5E",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "grape",
-    name: "Grape",
-    color: "#8B5CF6",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "violet",
-    name: "Violet",
-    color: "#8B5CF6",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "indigo",
-    name: "Indigo",
-    color: "#6366F1",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "cyan",
-    name: "Cyan",
-    color: "#22D3EE",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "teal",
-    name: "Teal",
-    color: "#14B8A6",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "green",
-    name: "Green",
-    color: "#10B981",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "lime",
-    name: "Lime",
-    color: "#65A30D",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "yellow",
-    name: "Yellow",
-    color: "#F59E0B",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
-  {
-    id: "orange",
-    name: "Orange",
-    color: "#F97316",
-    primaryPalette: [],
-    primaryShade: { light: 6, dark: 6 },
-  },
+  { id: "blue", name: "Blue", color: "#3B82F6", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "gray", name: "Gray", color: "#6B7280", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "red", name: "Red", color: "#EF4444", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "pink", name: "Pink", color: "#F43F5E", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "grape", name: "Grape", color: "#8B5CF6", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "violet", name: "Violet", color: "#8B5CF6", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "indigo", name: "Indigo", color: "#6366F1", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "cyan", name: "Cyan", color: "#22D3EE", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "teal", name: "Teal", color: "#14B8A6", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "green", name: "Green", color: "#10B981", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "lime", name: "Lime", color: "#65A30D", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "yellow", name: "Yellow", color: "#F59E0B", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
+  { id: "orange", name: "Orange", color: "#F97316", primaryPalette: [], primaryShade: { light: 6, dark: 6 } },
 ];
 
 export const SHADCN_DEFAULT_COLORS = [
-  {
-    id: "zinc",
-    name: "Zinc",
-    color: "#71717A",
-    primaryPalette: zincColors,
-    primaryShade: { light: 8, dark: 0 },
-    secondary: "zinc",
-    secondaryPalette: zincColors,
-  },
-  {
-    id: "slate",
-    name: "Slate",
-    color: "#64748B",
-    primaryPalette: slateColors,
-    primaryShade: { light: 8, dark: 0 },
-    secondary: "slate",
-    secondaryPalette: slateColors,
-  },
-  {
-    id: "gray",
-    name: "Gray",
-    color: "#6B7280",
-    primaryPalette: grayColors,
-    primaryShade: { light: 8, dark: 0 },
-    secondary: "gray",
-    secondaryPalette: grayColors,
-  },
-  {
-    id: "neutral",
-    name: "Neutral",
-    color: "#737373",
-    primaryPalette: neutralColors,
-    primaryShade: { light: 8, dark: 0 },
-    secondary: "neutral",
-    secondaryPalette: neutralColors,
-  },
-  {
-    id: "stone",
-    name: "Stone",
-    color: "#78716C",
-    primaryPalette: stoneColors,
-    primaryShade: { light: 8, dark: 0 },
-    secondary: "stone",
-    secondaryPalette: stoneColors,
-  },
-
-  {
-    id: "red",
-    name: "Red",
-    color: "#EF4444",
-    primaryPalette: redColors,
-    primaryShade: { light: 5, dark: 5 },
-    secondary: "neutral",
-    secondaryPalette: neutralColors,
-  },
-  {
-    id: "rose",
-    name: "Rose",
-    color: "#F43F5E",
-    primaryPalette: roseColors,
-    primaryShade: { light: 5, dark: 5 },
-    secondary: "stone",
-    secondaryPalette: stoneColors,
-  },
-  {
-    id: "orange",
-    name: "Orange",
-    color: "#F97316",
-    primaryPalette: orangeColors,
-    primaryShade: { light: 5, dark: 6 },
-    secondary: "stone",
-    secondaryPalette: stoneColors,
-  },
-  {
-    id: "amber",
-    name: "Amber",
-    color: "#F59E0B",
-    primaryPalette: amberColors,
-    primaryShade: { light: 5, dark: 5 },
-    secondary: "stone",
-    secondaryPalette: stoneColors,
-  },
-  {
-    id: "yellow",
-    name: "Yellow",
-    color: "#EAB308",
-    primaryPalette: yellowColors,
-    primaryShade: { light: 4, dark: 4 },
-    secondary: "stone",
-    secondaryPalette: stoneColors,
-  },
-
-  {
-    id: "lime",
-    name: "Lime",
-    color: "#84CC16",
-    primaryPalette: limeColors,
-    primaryShade: { light: 5, dark: 4 },
-    secondary: "stone",
-    secondaryPalette: stoneColors,
-  },
-  {
-    id: "green",
-    name: "Green",
-    color: "#22C55E",
-    primaryPalette: greenColors,
-    primaryShade: { light: 6, dark: 5 },
-    secondary: "stone",
-    secondaryPalette: stoneColors,
-  },
-  {
-    id: "emerald",
-    name: "Emerald",
-    color: "#10B981",
-    primaryPalette: emeraldColors,
-    primaryShade: { light: 5, dark: 5 },
-    secondary: "stone",
-    secondaryPalette: stoneColors,
-  },
-
-  {
-    id: "teal",
-    name: "Teal",
-    color: "#14B8A6",
-    primaryPalette: tealColors,
-    primaryShade: { light: 5, dark: 4 },
-    secondary: "slate",
-    secondaryPalette: slateColors,
-  },
-  {
-    id: "cyan",
-    name: "Cyan",
-    color: "#06B6D4",
-    primaryPalette: cyanColors,
-    primaryShade: { light: 5, dark: 4 },
-    secondary: "slate",
-    secondaryPalette: slateColors,
-  },
-  {
-    id: "sky",
-    name: "Sky",
-    color: "#0EA5E9",
-    primaryPalette: skyColors,
-    primaryShade: { light: 5, dark: 4 },
-    secondary: "slate",
-    secondaryPalette: slateColors,
-  },
-  {
-    id: "blue",
-    name: "Blue",
-    color: "#3B82F6",
-    primaryPalette: blueColors,
-    primaryShade: { light: 6, dark: 5 },
-    secondary: "slate",
-    secondaryPalette: slateColors,
-  },
-
-  {
-    id: "indigo",
-    name: "Indigo",
-    color: "#6366F1",
-    primaryPalette: indigoColors,
-    primaryShade: { light: 5, dark: 6 },
-    secondary: "gray",
-    secondaryPalette: grayColors,
-  },
-  {
-    id: "violet",
-    name: "Violet",
-    color: "#8B5CF6",
-    primaryPalette: violetColors,
-    primaryShade: { light: 5, dark: 6 },
-    secondary: "gray",
-    secondaryPalette: grayColors,
-  },
-  {
-    id: "purple",
-    name: "Purple",
-    color: "#A855F7",
-    primaryPalette: purpleColors,
-    primaryShade: { light: 5, dark: 6 },
-    secondary: "gray",
-    secondaryPalette: grayColors,
-  },
-  {
-    id: "fuchsia",
-    name: "Fuchsia",
-    color: "#D946EF",
-    primaryPalette: fuchsiaColors,
-    primaryShade: { light: 5, dark: 7 },
-    secondary: "gray",
-    secondaryPalette: grayColors,
-  },
-  {
-    id: "pink",
-    name: "Pink",
-    color: "#EC4899",
-    primaryPalette: pinkColors,
-    primaryShade: { light: 5, dark: 6 },
-    secondary: "gray",
-    secondaryPalette: grayColors,
-  },
+  { id: "zinc", name: "Zinc", color: "#71717A", primaryPalette: zincColors, primaryShade: { light: 8, dark: 0 }, secondary: "zinc", secondaryPalette: zincColors },
+  { id: "slate", name: "Slate", color: "#64748B", primaryPalette: slateColors, primaryShade: { light: 8, dark: 0 }, secondary: "slate", secondaryPalette: slateColors },
+  { id: "gray", name: "Gray", color: "#6B7280", primaryPalette: grayColors, primaryShade: { light: 8, dark: 0 }, secondary: "gray", secondaryPalette: grayColors },
+  { id: "neutral", name: "Neutral", color: "#737373", primaryPalette: neutralColors, primaryShade: { light: 8, dark: 0 }, secondary: "neutral", secondaryPalette: neutralColors },
+  { id: "stone", name: "Stone", color: "#78716C", primaryPalette: stoneColors, primaryShade: { light: 8, dark: 0 }, secondary: "stone", secondaryPalette: stoneColors },
+  
+  { id: "red", name: "Red", color: "#EF4444", primaryPalette: redColors, primaryShade: { light: 5, dark: 5 }, secondary: "neutral", secondaryPalette: neutralColors },
+  { id: "rose", name: "Rose", color: "#F43F5E", primaryPalette: roseColors, primaryShade: { light: 5, dark: 5 }, secondary: "stone", secondaryPalette: stoneColors },
+  { id: "orange", name: "Orange", color: "#F97316", primaryPalette: orangeColors, primaryShade: { light: 5, dark: 6 }, secondary: "stone", secondaryPalette: stoneColors },
+  { id: "amber", name: "Amber", color: "#F59E0B", primaryPalette: amberColors, primaryShade: { light: 5, dark: 5 }, secondary: "stone", secondaryPalette: stoneColors },
+  { id: "yellow", name: "Yellow", color: "#EAB308", primaryPalette: yellowColors, primaryShade: { light: 4, dark: 4 }, secondary: "stone", secondaryPalette: stoneColors },
+  
+  { id: "lime", name: "Lime", color: "#84CC16", primaryPalette: limeColors, primaryShade: { light: 5, dark: 4 }, secondary: "stone", secondaryPalette: stoneColors },
+  { id: "green", name: "Green", color: "#22C55E", primaryPalette: greenColors, primaryShade: { light: 6, dark: 5 }, secondary: "stone", secondaryPalette: stoneColors },
+  { id: "emerald", name: "Emerald", color: "#10B981", primaryPalette: emeraldColors, primaryShade: { light: 5, dark: 5 }, secondary: "stone", secondaryPalette: stoneColors },
+  
+  { id: "teal", name: "Teal", color: "#14B8A6", primaryPalette: tealColors, primaryShade: { light: 5, dark: 4 }, secondary: "slate", secondaryPalette: slateColors },
+  { id: "cyan", name: "Cyan", color: "#06B6D4", primaryPalette: cyanColors, primaryShade: { light: 5, dark: 4 }, secondary: "slate", secondaryPalette: slateColors },
+  { id: "sky", name: "Sky", color: "#0EA5E9", primaryPalette: skyColors, primaryShade: { light: 5, dark: 4 }, secondary: "slate", secondaryPalette: slateColors },
+  { id: "blue", name: "Blue", color: "#3B82F6", primaryPalette: blueColors, primaryShade: { light: 6, dark: 5 }, secondary: "slate", secondaryPalette: slateColors },
+  
+  { id: "indigo", name: "Indigo", color: "#6366F1", primaryPalette: indigoColors, primaryShade: { light: 5, dark: 6 }, secondary: "gray", secondaryPalette: grayColors },
+  { id: "violet", name: "Violet", color: "#8B5CF6", primaryPalette: violetColors, primaryShade: { light: 5, dark: 6 }, secondary: "gray", secondaryPalette: grayColors },
+  { id: "purple", name: "Purple", color: "#A855F7", primaryPalette: purpleColors, primaryShade: { light: 5, dark: 6 }, secondary: "gray", secondaryPalette: grayColors },
+  { id: "fuchsia", name: "Fuchsia", color: "#D946EF", primaryPalette: fuchsiaColors, primaryShade: { light: 5, dark: 7 }, secondary: "gray", secondaryPalette: grayColors },
+  { id: "pink", name: "Pink", color: "#EC4899", primaryPalette: pinkColors, primaryShade: { light: 5, dark: 6 }, secondary: "gray", secondaryPalette: grayColors },
 ];

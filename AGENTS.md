@@ -33,8 +33,8 @@
   theme, through `ui/mount.tsx` and `ui/Shell.tsx`. Add no CSS, raw HTML
   elements, `className` or `style` (oxlint enforces this), and use palette
   colour names (green, red, amber, gray) rather than semantic aliases.
-  `ui/vendor/mantinehub/` is an unmodified upstream copy; override it in
-  `ui/theme.ts`.
+  `ui/vendor/mantinehub/` is an unmodified upstream copy, kept because upstream
+  publishes no package; override it in `ui/theme.ts`.
 - Run `mise run build` after changing `web/`, `ui/` or dependencies and commit
   `dist/`; `mise run check` fails when a bundle is stale. A ConfigMap holds at
   most 1 MiB, so `app.js` goes in the `<app>-script` ConfigMap and the other

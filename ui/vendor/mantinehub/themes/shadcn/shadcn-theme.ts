@@ -27,32 +27,9 @@ import {
   Switch,
   ThemeIcon,
   Timeline,
-  Tooltip,
+  Tooltip
 } from "@mantine/core";
-import {
-  amberColors,
-  blueColors,
-  cyanColors,
-  emeraldColors,
-  fuchsiaColors,
-  grayColors,
-  greenColors,
-  indigoColors,
-  limeColors,
-  neutralColors,
-  orangeColors,
-  pinkColors,
-  purpleColors,
-  redColors,
-  roseColors,
-  skyColors,
-  slateColors,
-  stoneColors,
-  tealColors,
-  violetColors,
-  yellowColors,
-  zincColors,
-} from "../../utils/colors";
+import { amberColors, blueColors, cyanColors, emeraldColors, fuchsiaColors, grayColors, greenColors, indigoColors, limeColors, neutralColors, orangeColors, pinkColors, purpleColors, redColors, roseColors, skyColors, slateColors, stoneColors, tealColors, violetColors, yellowColors, zincColors } from "../../utils/colors";
 
 const CONTAINER_SIZES: Record<string, string> = {
   xxs: rem("200px"),
@@ -200,25 +177,19 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     Checkbox: Checkbox.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
         return {
           root: {
-            "--checkbox-color": colorKey
-              ? `var(--mantine-color-${colorKey}-filled)`
-              : "var(--mantine-primary-color-filled)",
+            "--checkbox-color": colorKey ? `var(--mantine-color-${colorKey}-filled)` : 'var(--mantine-primary-color-filled)',
 
-            "--checkbox-icon-color": colorKey
-              ? `var(--mantine-color-${colorKey}-contrast)`
-              : "var(--mantine-primary-color-contrast)",
+            "--checkbox-icon-color": colorKey ? `var(--mantine-color-${colorKey}-contrast)` : 'var(--mantine-primary-color-contrast)',
           },
         };
       },
     }),
     Chip: Chip.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
         const variant = props.variant ?? "filled";
         return {
           root: {
@@ -286,12 +257,9 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     ActionIcon: ActionIcon.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
-        const isNeutralColor =
-          colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
-        const isNeutralPrimaryColor =
-          !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const isNeutralColor = colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
+        const isNeutralPrimaryColor = !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
         const variant = props.variant ?? "filled";
 
         return {
@@ -313,20 +281,17 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
             })(),
           },
         };
-      },
+      }
     }),
     Button: Button.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
-        const isNeutralColor =
-          colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
-        const isNeutralPrimaryColor =
-          !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const isNeutralColor = colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
+        const isNeutralPrimaryColor = !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
         const variant = props.variant ?? "filled";
         return {
           root: {
-            "--button-color": (() => {
+            "--button-color":(() => {
               if (variant === "filled") {
                 if (colorKey) {
                   return `var(--mantine-color-${colorKey}-contrast)`;
@@ -352,17 +317,12 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     NavLink: NavLink.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
         const variant = props.variant ?? "light";
         return {
           root: {
             "--nl-color":
-              variant === "filled"
-                ? colorKey
-                  ? `var(--mantine-color-${colorKey}-contrast)`
-                  : "var(--mantine-primary-color-contrast)"
-                : undefined,
+              variant === "filled" ? colorKey ? `var(--mantine-color-${colorKey}-contrast)` : 'var(--mantine-primary-color-contrast)' : undefined,
           },
           children: {},
         };
@@ -370,8 +330,7 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     Pagination: Pagination.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
         return {
           root: {
             "--pagination-active-color": colorKey
@@ -383,8 +342,7 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     Stepper: Stepper.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
         return {
           root: {
             "--stepper-icon-color": colorKey
@@ -394,14 +352,11 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
         };
       },
     }),
-    Alert: Alert.extend({
+    Alert: Alert.extend({   
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
-        const isNeutralColor =
-          colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
-        const isNeutralPrimaryColor =
-          !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const isNeutralColor = colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey)
+        const isNeutralPrimaryColor = !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
         const variant = props.variant ?? "light";
         return {
           root: {
@@ -411,13 +366,13 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
                   ? `var(--mantine-color-${colorKey}-contrast)`
                   : "var(--mantine-primary-color-contrast)"
                 : variant === "white"
-                  ? isNeutralColor || isNeutralPrimaryColor
-                    ? `var(--mantine-color-black)`
-                    : undefined
-                  : undefined,
+                ? (isNeutralColor || isNeutralPrimaryColor
+                  ? `var(--mantine-color-black)`
+                  : undefined)
+                : undefined,
           },
         };
-      },
+      }
     }),
     Dialog: Dialog.extend({
       defaultProps: {
@@ -434,12 +389,9 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     Avatar: Avatar.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
-        const isNeutralColor =
-          colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
-        const isNeutralPrimaryColor =
-          !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const isNeutralColor = colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
+        const isNeutralPrimaryColor = !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
         const variant = props.variant ?? "light";
         return {
           root: {
@@ -487,28 +439,20 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     Badge: Badge.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
-        const isNeutralColor =
-          colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
-        const isNeutralPrimaryColor =
-          !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const isNeutralColor = colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
+        const isNeutralPrimaryColor = !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
         const variant = props.variant ?? "filled";
         return {
           root: {
-            "--badge-bg":
-              variant === "filled" && colorKey
-                ? `var(--mantine-color-${colorKey}-filled)`
-                : undefined,
+            "--badge-bg": variant === "filled" && colorKey ? `var(--mantine-color-${colorKey}-filled)` : undefined,
             "--badge-color":
               variant === "filled"
-                ? colorKey
-                  ? `var(--mantine-color-${colorKey}-contrast)`
-                  : "var(--mantine-primary-color-contrast)"
+                ? (colorKey ? `var(--mantine-color-${colorKey}-contrast)` : 'var(--mantine-primary-color-contrast)')
                 : variant === "white"
-                  ? isNeutralColor || isNeutralPrimaryColor
+                  ? (isNeutralColor || isNeutralPrimaryColor
                     ? `var(--mantine-color-black)`
-                    : undefined
+                    : undefined)
                   : undefined,
           },
         };
@@ -533,8 +477,7 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     Indicator: Indicator.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
         return {
           root: {
             "--indicator-text-color": colorKey
@@ -546,25 +489,21 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     ThemeIcon: ThemeIcon.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
-        const isNeutralColor =
-          colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
-        const isNeutralPrimaryColor =
-          !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const isNeutralColor = colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey)
+        const isNeutralPrimaryColor = !colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(theme.primaryColor);
 
         const variant = props.variant ?? "filled";
         return {
           root: {
-            "--ti-color":
-              variant === "filled"
-                ? colorKey
+              "--ti-color": variant === "filled"
+                ? (colorKey
                   ? `var(--mantine-color-${colorKey}-contrast)`
-                  : "var(--mantine-primary-color-contrast)"
+                  : "var(--mantine-primary-color-contrast)")
                 : variant === "white"
-                  ? isNeutralColor || isNeutralPrimaryColor
+                  ? (isNeutralColor || isNeutralPrimaryColor
                     ? `var(--mantine-color-black)`
-                    : undefined
+                    : undefined)
                   : undefined,
           },
         };
@@ -572,43 +511,33 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     }),
     Timeline: Timeline.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
         return {
           root: {
-            "--tl-icon-color": colorKey
-              ? `var(--mantine-color-${colorKey}-contrast)`
-              : "var(--mantine-primary-color-contrast)",
+            "--tl-icon-color": colorKey ? `var(--mantine-color-${colorKey}-contrast)` : 'var(--mantine-primary-color-contrast)',
           },
         };
       },
     }),
     Blockquote: Blockquote.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : undefined;
         return {
           root: {
-            "--bq-bg-dark": colorKey
-              ? `var(--mantine-color-${colorKey}-light)`
-              : "var(--mantine-primary-color-light)",
-            "--bq-bg-light": colorKey
-              ? `var(--mantine-color-${colorKey}-light)`
-              : "var(--mantine-primary-color-light)",
+            "--bq-bg-dark": colorKey ? `var(--mantine-color-${colorKey}-light)` : 'var(--mantine-primary-color-light)',
+            "--bq-bg-light": colorKey ? `var(--mantine-color-${colorKey}-light)` : 'var(--mantine-primary-color-light)',
           },
         };
       },
     }),
     Mark: Mark.extend({
       vars: (theme, props) => {
-        const colorKey =
-          props.color && Object.keys(theme.colors).includes(props.color) ? props.color : "yellow";
-        const isNeutralColor =
-          colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
+        const colorKey = props.color && Object.keys(theme.colors).includes(props.color) ? props.color : 'yellow';
+        const isNeutralColor = colorKey && ["zinc", "slate", "gray", "neutral", "stone"].includes(colorKey);
         return {
           root: {
-            "--mark-bg-light": `var(--mantine-color-${colorKey}-${isNeutralColor ? "3" : "filled-hover"})`,
-            "--mark-bg-dark": `var(--mantine-color-${colorKey}-filled)`,
+            "--mark-bg-light": `var(--mantine-color-${colorKey}-${isNeutralColor ? '3' : 'filled-hover'})`,
+            "--mark-bg-dark": `var(--mantine-color-${colorKey}-filled)`
           },
         };
       },
