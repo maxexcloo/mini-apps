@@ -7,14 +7,11 @@ kubectl = "latest"
 # Development
 [tasks.check]
 depends = [
-  "check:actions",
   "check:build",
   "check:manifests",
   "check:mise",
   "check:oxfmt",
   "check:oxlint",
-  "check:python",
-  "check:shell",
   "check:typescript",
   "check:updates",
   "check:whitespace",

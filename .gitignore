@@ -1,2 +1,2 @@
-data/
+apps/*/data/
 node_modules/
