@@ -47,16 +47,29 @@ spec:
         seccompProfile:
           type: RuntimeDefault
     persistence:
+      script:
+        name: mini-tool-script
+        type: configMap
+        globalMounts:
+          - path: /www/app.js
+            readOnly: true
+            subPath: app.js
       source:
         name: mini-tool-source
         type: configMap
         globalMounts:
-          - path: /www/index.html
-            readOnly: true
-            subPath: index.html
           - path: /etc/nginx/nginx.conf
             readOnly: true
             subPath: nginx.conf
+          - path: /www/app.css
+            readOnly: true
+            subPath: app.css
+          - path: /www/index.html
+            readOnly: true
+            subPath: index.html
+          - path: /www/third-party-licences.txt
+            readOnly: true
+            subPath: third-party-licences.txt
       temporary:
         type: emptyDir
         globalMounts:
